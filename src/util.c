@@ -90,7 +90,6 @@ int open_lib(const struct dc_env *env, void **lib, const char *lib_name, struct 
     return 0;
 }
 
-
 static int get_test_functions(const struct dc_env *env, void *lib, struct test_functions *test_functions)
 {
     DC_TRACE(env);
@@ -265,7 +264,7 @@ int close_lib(const struct dc_env *env, void *lib, const char *lib_name)
     
     if (dlclose(lib) == -1)
     {
-        (void) fprintf(stderr, "Fatal: could not open API library %s: %s\n", lib_name, dlerror());
+        (void) fprintf(stderr, "Fatal: could not close library %s: %s\n", lib_name, dlerror());
     }
     return 0;
 }

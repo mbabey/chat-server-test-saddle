@@ -33,6 +33,8 @@ int main(int argc, char **argv)
             }
             case ERROR:
             {
+                // NOLINTNEXTLINE() : No threads here
+                
                 GET_ERROR(state.err);
                 next_state = EXIT;
                 break;

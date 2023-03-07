@@ -5,6 +5,8 @@
 #include <string.h>
 #include <sys/types.h>
 
+#define PRINT_STACK_TRACE(tracer) tracer(__FILE__, __func__, __LINE__)
+
 #define SET_ERROR(err) \
     err.file = __FILE__; \
     err.func = __func__; \

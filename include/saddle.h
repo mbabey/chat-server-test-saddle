@@ -18,6 +18,6 @@ int setup_saddle(struct state *state, int argc, char **argv);
 
 int run_saddle(struct state *state);
 
-
+int exit_saddle(struct state *state);
 
 #endif //CHAT_TEST_SADDLE_SADDLE_H
