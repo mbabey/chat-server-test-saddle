@@ -40,7 +40,7 @@ int main(int argc, char **argv)
             }
             case EXIT:
             {
-                // TODO(): do cleanup.
+                exit_saddle(&state);
                 run = 0;
                 break;
             }
