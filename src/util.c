@@ -19,7 +19,7 @@
  * @param test_functions struct to store function pointers
  * @return
  */
-static int get_test_functions(const struct dc_env *env, void *lib, struct test_functions *test_functions);
+static int get_test_functions(void *lib, struct test_functions *test_functions, TRACER_FUNCTION_AS(tracer));
 
 /**
  * get_create_tests
@@ -31,7 +31,7 @@ static int get_test_functions(const struct dc_env *env, void *lib, struct test_f
  * @param test_functions struct to store function pointers
  * @return 0 on success, -1 and set errno on failure.
  */
-static int get_create_tests(const struct dc_env *env, void *lib, struct test_functions *test_functions);
+static int get_create_tests(void *lib, struct test_functions *test_functions, TRACER_FUNCTION_AS(tracer));
 
 /**
  * get_read_tests
@@ -43,7 +43,7 @@ static int get_create_tests(const struct dc_env *env, void *lib, struct test_fun
  * @param test_functions struct to store function pointers
  * @return 0 on success, -1 and set errno on failure.
  */
-static int get_read_tests(const struct dc_env *env, void *lib, struct test_functions *test_functions);
+static int get_read_tests(void *lib, struct test_functions *test_functions, TRACER_FUNCTION_AS(tracer));
 
 /**
  * get_update_tests
@@ -55,7 +55,7 @@ static int get_read_tests(const struct dc_env *env, void *lib, struct test_funct
  * @param test_functions struct to store function pointers
  * @return 0 on success, -1 and set errno on failure.
  */
-static int get_update_tests(const struct dc_env *env, void *lib, struct test_functions *test_functions);
+static int get_update_tests(void *lib, struct test_functions *test_functions, TRACER_FUNCTION_AS(tracer));
 
 /**
  * get_destroy_tests
@@ -67,11 +67,11 @@ static int get_update_tests(const struct dc_env *env, void *lib, struct test_fun
  * @param test_functions struct to store function pointers
  * @return 0 on success, -1 and set errno on failure.
  */
-static int get_destroy_tests(const struct dc_env *env, void *lib, struct test_functions *test_functions);
+static int get_destroy_tests(void *lib, struct test_functions *test_functions, TRACER_FUNCTION_AS(tracer));
 
-int open_lib(const struct dc_env *env, void **lib, const char *lib_name, struct test_functions *test_functions)
+int open_lib(void **lib, const char *lib_name, struct test_functions *test_functions, TRACER_FUNCTION_AS(tracer))
 {
-    DC_TRACE(env);
+    PRINT_STACK_TRACE(tracer);
     
     *lib = dlopen(lib_name, RTLD_LAZY);
     if (!*lib)
@@ -81,41 +81,41 @@ int open_lib(const struct dc_env *env, void **lib, const char *lib_name, struct 
         return -1;
     }
     
-    if (get_test_functions(env, *lib, test_functions) == -1)
+    if (get_test_functions(*lib, test_functions, tracer) == -1)
     {
-        close_lib(env, lib, lib_name);
+        close_lib(lib, lib_name, 0);
         return -1;
     }
     
     return 0;
 }
 
-static int get_test_functions(const struct dc_env *env, void *lib, struct test_functions *test_functions)
+static int get_test_functions(void *lib, struct test_functions *test_functions, TRACER_FUNCTION_AS(tracer))
 {
-    DC_TRACE(env);
+    PRINT_STACK_TRACE(tracer);
     
-    if (get_create_tests(env, lib, test_functions) == -1)
+    if (get_create_tests(lib, test_functions, tracer) == -1)
     {
         return -1;
     }
-    if (get_read_tests(env, lib, test_functions) == -1)
+    if (get_read_tests(lib, test_functions, tracer) == -1)
     {
         return -1;
     }
-    if (get_update_tests(env, lib, test_functions) == -1)
+    if (get_update_tests(lib, test_functions, tracer) == -1)
     {
         return -1;
     }
-    if (get_destroy_tests(env, lib, test_functions) == -1)
+    if (get_destroy_tests(lib, test_functions, tracer) == -1)
     {
         return -1;
     }
     return 0;
 }
 
-static int get_create_tests(const struct dc_env *env, void *lib, struct test_functions *test_functions)
+static int get_create_tests(void *lib, struct test_functions *test_functions, TRACER_FUNCTION_AS(tracer))
 {
-    DC_TRACE(env);
+    PRINT_STACK_TRACE(tracer);
     
     // NOLINTBEGIN(concurrency-mt-unsafe) : No threads here
     test_functions->create_user_test = TEST_FUNCTION dlsym(lib, TEST_FUNCTION_CREATE_USER);
@@ -151,9 +151,9 @@ static int get_create_tests(const struct dc_env *env, void *lib, struct test_fun
     return 0;
 }
 
-static int get_read_tests(const struct dc_env *env, void *lib, struct test_functions *test_functions)
+static int get_read_tests(void *lib, struct test_functions *test_functions, TRACER_FUNCTION_AS(tracer))
 {
-    DC_TRACE(env);
+    PRINT_STACK_TRACE(tracer);
     
     // NOLINTBEGIN(concurrency-mt-unsafe) : No threads here
     test_functions->read_user_test = TEST_FUNCTION dlsym(lib, TEST_FUNCTION_READ_USER);
@@ -182,9 +182,9 @@ static int get_read_tests(const struct dc_env *env, void *lib, struct test_funct
     return 0;
 }
 
-static int get_update_tests(const struct dc_env *env, void *lib, struct test_functions *test_functions)
+static int get_update_tests(void *lib, struct test_functions *test_functions, TRACER_FUNCTION_AS(tracer))
 {
-    DC_TRACE(env);
+    PRINT_STACK_TRACE(tracer);
     
     // NOLINTBEGIN(concurrency-mt-unsafe) : No threads here
     test_functions->update_user_test = TEST_FUNCTION dlsym(lib, TEST_FUNCTION_UPDATE_USER);
@@ -220,9 +220,9 @@ static int get_update_tests(const struct dc_env *env, void *lib, struct test_fun
     return 0;
 }
 
-static int get_destroy_tests(const struct dc_env *env, void *lib, struct test_functions *test_functions)
+static int get_destroy_tests(void *lib, struct test_functions *test_functions, TRACER_FUNCTION_AS(tracer))
 {
-    DC_TRACE(env);
+    PRINT_STACK_TRACE(tracer);
     
     // NOLINTBEGIN(concurrency-mt-unsafe) : No threads here
     test_functions->destroy_user_test = TEST_FUNCTION dlsym(lib, TEST_FUNCTION_DESTROY_USER);
@@ -258,9 +258,9 @@ static int get_destroy_tests(const struct dc_env *env, void *lib, struct test_fu
     return 0;
 }
 
-int close_lib(const struct dc_env *env, void *lib, const char *lib_name)
+int close_lib(void *lib, const char *lib_name, TRACER_FUNCTION_AS(tracer))
 {
-    DC_TRACE(env);
+    PRINT_STACK_TRACE(tracer);
     
     if (dlclose(lib) == -1)
     {

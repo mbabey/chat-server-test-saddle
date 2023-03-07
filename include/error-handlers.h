@@ -7,7 +7,7 @@
 
 #define TRACER_FUNCTION_AS(name) void (*name)(const char *, const char *, size_t)
 
-#define PRINT_STACK_TRACE(tracer) tracer(__FILE__, __func__, __LINE__)
+#define PRINT_STACK_TRACE(tracer) if (tracer) tracer(__FILE__, __func__, __LINE__)
 
 #define SET_ERROR(err) \
     err.file = __FILE__; \
