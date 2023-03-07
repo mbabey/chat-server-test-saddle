@@ -1,11 +1,11 @@
 #include "../include/saddle.h"
 #include "../include/util.h"
 
+#include <arpa/inet.h>
+#include <ctype.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <arpa/inet.h>
-#include <stdlib.h>
-#include <ctype.h>
 
 #define OPTS_LIST "l:i:p:t"
 #define USAGE_MESSAGE                                                                           \
@@ -97,7 +97,7 @@ int setup_saddle(struct state *state, int argc, char **argv)
     state->mm = init_mem_manager();
     if (!state->mm)
     {
-        SET_ERROR(state->err)
+        SET_ERROR(state->err);
         return -1;
     }
     
@@ -174,7 +174,7 @@ static int parse_args(struct state *state, int argc, char **argv)
     int addr_err;
     int lib_err;
     
-    lib_err = parse_lib(state->lib_name, state->tracer);
+    lib_err  = parse_lib(state->lib_name, state->tracer);
     addr_err = parse_ip_and_port(&state->addr, port_num_str, ip_addr_str, state->tracer);
     
     if (addr_err || lib_err)
@@ -191,14 +191,14 @@ static int parse_lib(const char *lib_type, TRACER_FUNCTION_AS(tracer))
 {
     PRINT_STACK_TRACE(tracer);
     
-    if (!lib_type || strcmp("server", lib_type) != 0 || strcmp("client", lib_type) != 0)
+    if (lib_type && (strcmp("server", lib_type) == 0 || strcmp("client", lib_type) == 0))
     {
-        // NOLINTNEXTLINE(concurrency-mt-unsafe) : No threads here
-        (void) fprintf(stderr, "%s is not a valid test type\n", lib_type);
-        return -1;
+        return 0;
     }
     
-    return 0;
+    // NOLINTNEXTLINE(concurrency-mt-unsafe) : No threads here
+    (void) fprintf(stderr, "%s is not a valid test type\n", lib_type);
+    return -1;
 }
 
 static int parse_ip_and_port(struct sockaddr_in *addr, const char *port_num_str, const char *ip_addr_str,
@@ -231,14 +231,18 @@ static int validate_port(in_port_t *port_num, const char *port_num_str, TRACER_F
 {
     PRINT_STACK_TRACE(tracer);
     
-    *port_num = (in_port_t) strtol(port_num_str, NULL, 10);
+    long parsed_port_num;
     
-    if (*port_num > UINT16_MAX)
+    parsed_port_num = strtol(port_num_str, NULL, 10);
+    
+    if (parsed_port_num > UINT16_MAX)
     {
         // NOLINTNEXTLINE(concurrency-mt-unsafe) : No threads here
         (void) fprintf(stderr, "%s is not a valid port number\n", port_num_str);
         return -1;
     }
+    
+    *port_num = (in_port_t) parsed_port_num;
     
     return 0;
 }

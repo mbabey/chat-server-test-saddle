@@ -10,13 +10,10 @@
 #define PRINT_STACK_TRACE(tracer) if (tracer) tracer(__FILE__, __func__, __LINE__)
 
 #define SET_ERROR(err) \
-    err.file = __FILE__; \
-    err.func = __func__; \
-    err.line = __LINE__; \
-    err.error_number = errno;
+    err.file = __FILE__; err.func = __func__; err.line = __LINE__; err.error_number = errno
 
 #define GET_ERROR(err) \
-    (void) fprintf(stderr, "Error: %d - \"%s\" in %s:%s @ %lu", err.error_number, strerror(err.error_number), err.file, err.func, err.line);
+    (void) fprintf(stderr, "Error: %d - \"%s\" in %s:%s @ %lu\n", err.error_number, strerror(err.error_number), err.file, err.func, err.line)
 
 struct error_saver {
     const char *file;
