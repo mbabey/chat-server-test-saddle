@@ -13,6 +13,7 @@ int main(int argc, char **argv)
 {
     int run;
     int next_state;
+    struct state state;
     
     run = 1;
     next_state = SETUP;
@@ -22,20 +23,23 @@ int main(int argc, char **argv)
         {
             case SETUP:
             {
-                if (setup_state)
+                next_state = (setup_saddle(&state, argc, argv) == -1) ? ERROR : RUN;
                 break;
             }
             case RUN:
             {
+                next_state = (run_saddle(&state) == -1) ? ERROR : EXIT;
                 break;
             }
             case ERROR:
             {
+                GET_ERROR(state.err);
                 next_state = EXIT;
                 break;
             }
             case EXIT:
             {
+                // TODO(): do cleanup.
                 run = 0;
                 break;
             }
