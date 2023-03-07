@@ -2,7 +2,7 @@
 
 #include <stdlib.h>
 
-int run_saddle(int argc, char **argv)
+int run_saddle(struct state *state);
 {
     return EXIT_SUCCESS;
 }

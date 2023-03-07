@@ -69,12 +69,11 @@ static int get_update_tests(const struct dc_env *env, void *lib, struct test_fun
  */
 static int get_destroy_tests(const struct dc_env *env, void *lib, struct test_functions *test_functions);
 
-int open_lib(const struct dc_env *env, void **lib, const char *lib_name, int mode,
-             struct test_functions *test_functions)
+int open_lib(const struct dc_env *env, void **lib, const char *lib_name, struct test_functions *test_functions)
 {
     DC_TRACE(env);
     
-    *lib = dlopen(lib_name, mode);
+    *lib = dlopen(lib_name, RTLD_LAZY);
     if (!*lib)
     {
         // NOLINTNEXTLINE(concurrency-mt-unsafe) : No threads here

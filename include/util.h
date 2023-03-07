@@ -16,8 +16,7 @@
  * @param test_functions struct containing test functions.
  * @return 0 on success, -1 and set errno on failure
  */
-int
-open_lib(const struct dc_env *env, void *lib, const char *lib_name, mode_t mode, struct test_functions *test_functions);
+int open_lib(const struct dc_env *env, void **lib, const char *lib_name, struct test_functions *test_functions);
 
 /**
  * close_lib
