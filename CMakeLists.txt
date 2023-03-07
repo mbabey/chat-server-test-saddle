@@ -11,10 +11,12 @@ set(SOURCE_DIR src)
 set(INCLUDE_DIR include)
 set(SOURCE_LIST
         ${SOURCE_DIR}/main.c
+        ${SOURCE_DIR}/util.c
         #=vvvv= SOURCE FOR DUMMY MAIN =vvvv=#
         )
 set(HEADER_LIST
-#        ${INCLUDE_DIR}/objects.h
+        ${INCLUDE_DIR}/util.h
+        test_functions.h
         #=vvvv= INCLUDES FOR DUMMY MAIN =vvvv=#
         )
 

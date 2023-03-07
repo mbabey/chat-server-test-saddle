@@ -14,7 +14,7 @@ set(SOURCE_LIST
         #=vvvv= SOURCE FOR DUMMY MAIN =vvvv=#
         )
 set(HEADER_LIST
-#        ${INCLUDE_DIR}/objects.h
+        ../test_functions.h
         #=vvvv= INCLUDES FOR DUMMY MAIN =vvvv=#
         )
 
