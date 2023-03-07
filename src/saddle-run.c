@@ -39,6 +39,7 @@ int run_saddle(struct state *state)
 {
     // Run all the tests.
     // Running tests should be atomic: if one fails, it should not affect the result of the rest of the program.
+    // Solution: processes?
     
     run_create_tests(state);
     

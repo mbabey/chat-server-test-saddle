@@ -1,4 +1,4 @@
-#include "../include/util.h"
+#include "../include/library-util.h"
 
 #include <dlfcn.h>
 #include <stdio.h>

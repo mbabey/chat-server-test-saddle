@@ -1,6 +1,9 @@
 #include "../include/saddle.h"
 
 #include <stdlib.h>
+#include <pthread.h>
+#include <sys/semaphore.h>
+#include <sys/fcntl.h>
 
 enum States {
     SETUP,
@@ -14,7 +17,7 @@ int main(int argc, char **argv)
     int run;
     int next_state;
     struct state state;
-    
+
     run = 1;
     next_state = SETUP;
     while (run)
