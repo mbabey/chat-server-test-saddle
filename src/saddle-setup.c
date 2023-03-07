@@ -15,7 +15,7 @@
     "\tif client selected for -l, will connect to a server at this ip address.\n"               \
     "-p <port number>, if server selected for -l, will run the server at this port number.\n"   \
     "\tif client selected for -l, will connect to a server at this port number.\n"              \
-    "[-t], optionally trace the execution of the program."
+    "[-t], optionally trace the execution of the program.\n"
 
 /**
  * trace_reporter
@@ -125,6 +125,7 @@ static int parse_args(struct state *state, int argc, char **argv)
             }
         }
     }
+    
     int addr_err;
     int lib_err;
     
@@ -135,6 +136,7 @@ static int parse_args(struct state *state, int argc, char **argv)
     {
         // NOLINTNEXTLINE(concurrency-mt-unsafe) : No threads here
         (void) fprintf(stdout, USAGE_MESSAGE);
+        return -1;
     }
     
     return 0;
@@ -144,7 +146,7 @@ static int parse_lib(const char *lib_type, TRACER_FUNCTION_AS(tracer))
 {
     PRINT_STACK_TRACE(tracer);
     
-    if (strcmp("server", lib_type) != 0 || strcmp("client", lib_type) != 0)
+    if (!lib_type || strcmp("server", lib_type) != 0 || strcmp("client", lib_type) != 0)
     {
         // NOLINTNEXTLINE(concurrency-mt-unsafe) : No threads here
         (void) fprintf(stderr, "%s is not a valid test type\n", lib_type);
