@@ -1,6 +1,22 @@
 #ifndef CHAT_TEST_SADDLE_TEST_FUNCTIONS_H
 #define CHAT_TEST_SADDLE_TEST_FUNCTIONS_H
 
+#define TEST_FUNCTION_CREATE_USER "create_user_test"
+#define TEST_FUNCTION_CREATE_CHANNEL "create_channel_test"
+#define TEST_FUNCTION_CREATE_MESSAGE "create_message_test"
+#define TEST_FUNCTION_CREATE_AUTH "create_auth_test"
+#define TEST_FUNCTION_READ_USER "read_user_test"
+#define TEST_FUNCTION_READ_CHANNEL "read_channel_test"
+#define TEST_FUNCTION_READ_MESSAGE "read_message_test"
+#define TEST_FUNCTION_UPDATE_USER "update_user_test"
+#define TEST_FUNCTION_UPDATE_CHANNEL "update_channel_test"
+#define TEST_FUNCTION_UPDATE_MESSAGE "update_message_test"
+#define TEST_FUNCTION_UPDATE_AUTH "update_auth_test"
+#define TEST_FUNCTION_DESTROY_USER "destroy_user_test"
+#define TEST_FUNCTION_DESTROY_CHANNEL "destroy_channel_test"
+#define TEST_FUNCTION_DESTROY_MESSAGE "destroy_message_test"
+#define TEST_FUNCTION_DESTROY_AUTH "destroy_auth_test"
+
 /**
  * Contains function pointers for all tests.
  */
