@@ -81,26 +81,28 @@ static void trace_reporter(const char *file, const char *func, size_t line)
 static int parse_args(struct state *state, int argc, char **argv)
 {
     int c;
+    const char *lib_type;
+    const char *port_num_str;
+    const char *ip_addr_str;
     
     memset(state, 0, sizeof(*state));
-    while ((c = getopt(argc, argv, OPTS_LIST)) != -1)
+    while ((c = getopt(argc, argv, OPTS_LIST)) != -1) // NOLINT(concurrency-mt-unsafe) : No threads here
     {
         switch (c)
         {
             case 'l':
             {
-                // if "server", load server tests
-                // if "client", load client tests
+                // get lib name
                 break;
             }
             case 'i':
             {
-                // parse IP address
+                // get IP address
                 break;
             }
             case 'p':
             {
-                // parse port number
+                // get port number
                 break;
             }
             case '?':
@@ -114,6 +116,8 @@ static int parse_args(struct state *state, int argc, char **argv)
             }
         }
     }
+    
+    parse_ip_and_port(&state->addr, port_num_str, ip_addr_str, state->tracer);
     
     return 0;
 }
@@ -163,6 +167,7 @@ static int validate_ip(struct sockaddr_in *addr, const char *ip_addr_str, TRACER
         }
         case 0: // Not a valid IP address
         {
+            // NOLINTNEXTLINE(concurrency-mt-unsafe) : No threads here
             (void) fprintf(stderr, "%s is not a valid ip address\n", ip_addr_str);
             return -1;
             break;
@@ -182,6 +187,12 @@ validate_port(in_port_t *port_num, const char *port_num_str, void (*tracer)(cons
     
     *port_num = (in_port_t) strtol(port_num_str, NULL, 10);
     
+    if (*port_num > UINT16_MAX)
+    {
+        // NOLINTNEXTLINE(concurrency-mt-unsafe) : No threads here
+        (void) fprintf(stderr, "%s is not a valid port number\n", port_num_str);
+        return -1;
+    }
     
     return 0;
 }
