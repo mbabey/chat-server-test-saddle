@@ -33,8 +33,7 @@ int main(int argc, char **argv)
             }
             case ERROR:
             {
-                // NOLINTNEXTLINE() : No threads here
-                
+                // NOLINTNEXTLINE(concurrency-mt-unsafe) : No threads here
                 GET_ERROR(state.err);
                 next_state = EXIT;
                 break;
@@ -52,9 +51,6 @@ int main(int argc, char **argv)
             }
         }
     }
-    
-    
-    run_saddle();
     
     return EXIT_SUCCESS;
 }

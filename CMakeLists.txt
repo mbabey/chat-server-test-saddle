@@ -11,15 +11,17 @@ set(SOURCE_DIR src)
 set(INCLUDE_DIR include)
 set(SOURCE_LIST
         ${SOURCE_DIR}/main.c
-        ${SOURCE_DIR}/saddle.c
+        ${SOURCE_DIR}/saddle-exit.c
+        ${SOURCE_DIR}/saddle-run.c
+        ${SOURCE_DIR}/saddle-setup.c
         ${SOURCE_DIR}/util.c
-        ${SOURCE_DIR}/setup.c
         #=vvvv= SOURCE FOR DUMMY MAIN =vvvv=#
         )
 set(HEADER_LIST
         ${INCLUDE_DIR}/saddle.h
         ${INCLUDE_DIR}/util.h
-        ${INCLUDE_DIR}/setup.h
+        ${INCLUDE_DIR}/objects.h
+        ${INCLUDE_DIR}/error-handlers.h
         test_functions.h
         #=vvvv= INCLUDES FOR DUMMY MAIN =vvvv=#
         )

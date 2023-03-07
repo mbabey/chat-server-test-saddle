@@ -2,7 +2,7 @@
 
 #include <stdlib.h>
 
-int run_saddle(struct state *state);
+int run_saddle(struct state *state)
 {
     return EXIT_SUCCESS;
 }
