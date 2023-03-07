@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 #define OPTS_LIST "l:i:p:t"
 #define USAGE_MESSAGE                                                                           \
@@ -80,7 +81,8 @@ static void trace_reporter(const char *file, const char *func, size_t line)
 
 static int parse_args(struct state *state, int argc, char **argv)
 {
-    int c;
+    int        ret_val;
+    int        c;
     const char *lib_type;
     const char *port_num_str;
     const char *ip_addr_str;
@@ -107,7 +109,15 @@ static int parse_args(struct state *state, int argc, char **argv)
             }
             case '?':
             {
-                
+                if (isprint(optopt))
+                {
+                    // NOLINTNEXTLINE(concurrency-mt-unsafe) : No threads here
+                    (void) fprintf(stderr, "Unknown option \'-%c\'.\n", optopt);
+                } else
+                {
+                    // NOLINTNEXTLINE(concurrency-mt-unsafe) : No threads here
+                    (void) fprintf(stderr, "Unknown option character \'\\x%x\'.\n", optopt);
+                }
                 break;
             }
             default:
@@ -117,7 +127,13 @@ static int parse_args(struct state *state, int argc, char **argv)
         }
     }
     
-    parse_ip_and_port(&state->addr, port_num_str, ip_addr_str, state->tracer);
+    ret_val = parse_ip_and_port(&state->addr, port_num_str, ip_addr_str, state->tracer);
+    
+    if (ret_val)
+    {
+        // NOLINTNEXTLINE(concurrency-mt-unsafe) : No threads here
+        (void) fprintf(stdout, USAGE_MESSAGE);
+    }
     
     return 0;
 }
