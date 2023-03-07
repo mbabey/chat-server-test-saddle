@@ -44,11 +44,7 @@ int main(int argc, char **argv)
                 run = 0;
                 break;
             }
-            default:
-            {
-                // Should not get here.
-                break;
-            }
+            default:; // Should not get here.
         }
     }
     
