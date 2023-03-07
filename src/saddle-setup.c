@@ -146,6 +146,11 @@ static int parse_args(struct state *state, int argc, char **argv)
                 port_num_str = optarg;
                 break;
             }
+            case 't':
+            {
+                state->tracer = trace_reporter;
+                break;
+            }
             case '?':
             {
                 if (isprint(optopt))
