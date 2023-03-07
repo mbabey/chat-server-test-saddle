@@ -49,7 +49,7 @@ static int parse_args(struct state *state, int argc, char **argv);
  * @param tracer tracing function
  * @return 0 on success, -1 on failure
  */
-static int parse_lib(const char *lib_type, TRACER_FUNCTION_AS(tracer));
+static int parse_lib(struct state *state, const char *lib_type, void (*tracer)(const char *, const char *, size_t));
 
 /**
  * parse_ip_and_port
@@ -126,9 +126,10 @@ static int parse_args(struct state *state, int argc, char **argv)
     int        c;
     const char *port_num_str;
     const char *ip_addr_str;
+    const char *lib_type;
     
     port_num_str = NULL;
-    ip_addr_str = NULL;
+    ip_addr_str  = NULL;
     
     while ((c = getopt(argc, argv, OPTS_LIST)) != -1) // NOLINT(concurrency-mt-unsafe) : No threads here
     {
@@ -136,7 +137,7 @@ static int parse_args(struct state *state, int argc, char **argv)
         {
             case 'l':
             {
-                state->lib_name = optarg;
+                lib_type = optarg;
                 break;
             }
             case 'i':
@@ -177,7 +178,7 @@ static int parse_args(struct state *state, int argc, char **argv)
     int addr_err;
     int lib_err;
     
-    lib_err  = parse_lib(state->lib_name, state->tracer);
+    lib_err  = parse_lib(state, lib_type, state->tracer);
     addr_err = parse_ip_and_port(&state->addr, port_num_str, ip_addr_str, state->tracer);
     
     if (addr_err || lib_err)
@@ -190,12 +191,23 @@ static int parse_args(struct state *state, int argc, char **argv)
     return 0;
 }
 
-static int parse_lib(const char *lib_type, TRACER_FUNCTION_AS(tracer))
+static int parse_lib(struct state *state, const char *lib_type, void (*tracer)(const char *, const char *, size_t))
 {
     PRINT_STACK_TRACE(tracer);
-    
-    if (lib_type && (strcmp("server", lib_type) == 0 || strcmp("client", lib_type) == 0))
+    if (!lib_type)
     {
+        return -1;
+    }
+    
+    if (strcmp("server", lib_type) == 0)
+    {
+        state->lib_name = strdup("../server-test-saddle-source/build/libserver-test-saddle");
+        state->mm->mm_add(state->mm, state->lib_name);
+        return 0;
+    } else if (strcmp("client", lib_type) == 0)
+    {
+        state->lib_name = strdup("../client-test-saddle-source/build/libclient-test-saddle");
+        state->mm->mm_add(state->mm, state->lib_name);
         return 0;
     }
     
@@ -257,7 +269,6 @@ static int validate_port(in_port_t *port_num, const char *port_num_str, TRACER_F
 static int validate_ip(struct sockaddr_in *addr, const char *ip_addr_str, TRACER_FUNCTION_AS(tracer))
 {
     PRINT_STACK_TRACE(tracer);
-    
     if (!ip_addr_str)
     {
         return -1;
