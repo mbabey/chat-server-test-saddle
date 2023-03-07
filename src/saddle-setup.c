@@ -127,6 +127,9 @@ static int parse_args(struct state *state, int argc, char **argv)
     const char *port_num_str;
     const char *ip_addr_str;
     
+    port_num_str = NULL;
+    ip_addr_str = NULL;
+    
     while ((c = getopt(argc, argv, OPTS_LIST)) != -1) // NOLINT(concurrency-mt-unsafe) : No threads here
     {
         switch (c)
@@ -230,6 +233,10 @@ static int parse_ip_and_port(struct sockaddr_in *addr, const char *port_num_str,
 static int validate_port(in_port_t *port_num, const char *port_num_str, TRACER_FUNCTION_AS(tracer))
 {
     PRINT_STACK_TRACE(tracer);
+    if (!port_num_str)
+    {
+        return -1;
+    }
     
     long parsed_port_num;
     
@@ -250,6 +257,11 @@ static int validate_port(in_port_t *port_num, const char *port_num_str, TRACER_F
 static int validate_ip(struct sockaddr_in *addr, const char *ip_addr_str, TRACER_FUNCTION_AS(tracer))
 {
     PRINT_STACK_TRACE(tracer);
+    
+    if (!ip_addr_str)
+    {
+        return -1;
+    }
     
     switch (inet_pton(AF_INET, ip_addr_str, &addr->sin_addr.s_addr))
     {

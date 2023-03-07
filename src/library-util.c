@@ -77,7 +77,7 @@ int open_lib(void **lib, const char *lib_name, struct test_functions *test_funct
     if (!*lib)
     {
         // NOLINTNEXTLINE(concurrency-mt-unsafe) : No threads here
-        (void) fprintf(stderr, "Fatal: could not open API library %s: %s\n", lib_name, dlerror());
+        (void) fprintf(stderr, "Fatal: Could not open test library %s: %s\n", lib_name, dlerror());
         return -1;
     }
     
@@ -104,25 +104,25 @@ static void get_create_tests(void *lib, struct test_functions *test_functions, T
     test_functions->create_user_test = TEST_FUNCTION dlsym(lib, TEST_FUNCTION_CREATE_USER);
     if (test_functions->create_user_test == NULL)
     {
-        (void) fprintf(stderr, "Fatal: could not load function %s: %s\n", TEST_FUNCTION_CREATE_USER, dlerror());
+        (void) fprintf(stdout, "Could not load function %s: %s\n", TEST_FUNCTION_CREATE_USER, dlerror());
     }
     
     test_functions->create_channel_test = TEST_FUNCTION dlsym(lib, TEST_FUNCTION_CREATE_CHANNEL);
     if (test_functions->create_channel_test == NULL)
     {
-        (void) fprintf(stderr, "Fatal: could not load function %s: %s\n", TEST_FUNCTION_CREATE_CHANNEL, dlerror());
+        (void) fprintf(stdout, "Could not load function %s: %s\n", TEST_FUNCTION_CREATE_CHANNEL, dlerror());
     }
     
     test_functions->create_message_test = TEST_FUNCTION dlsym(lib, TEST_FUNCTION_CREATE_MESSAGE);
     if (test_functions->create_message_test == NULL)
     {
-        (void) fprintf(stderr, "Fatal: could not load function %s: %s\n", TEST_FUNCTION_CREATE_MESSAGE, dlerror());
+        (void) fprintf(stdout, "Could not load function %s: %s\n", TEST_FUNCTION_CREATE_MESSAGE, dlerror());
     }
     
     test_functions->create_auth_test = TEST_FUNCTION dlsym(lib, TEST_FUNCTION_CREATE_AUTH);
     if (test_functions->create_auth_test == NULL)
     {
-        (void) fprintf(stderr, "Fatal: could not load function %s: %s\n", TEST_FUNCTION_CREATE_AUTH, dlerror());
+        (void) fprintf(stdout, "Could not load function %s: %s\n", TEST_FUNCTION_CREATE_AUTH, dlerror());
     }
     // NOLINTEND(concurrency-mt-unsafe)
 }
@@ -136,19 +136,19 @@ static void get_read_tests(void *lib, struct test_functions *test_functions, TRA
     test_functions->read_user_test = TEST_FUNCTION dlsym(lib, TEST_FUNCTION_READ_USER);
     if (test_functions->read_user_test == NULL)
     {
-        (void) fprintf(stderr, "Fatal: could not load function %s: %s\n", TEST_FUNCTION_READ_USER, dlerror());
+        (void) fprintf(stdout, "Could not load function %s: %s\n", TEST_FUNCTION_READ_USER, dlerror());
     }
     
     test_functions->read_channel_test = TEST_FUNCTION dlsym(lib, TEST_FUNCTION_READ_CHANNEL);
     if (test_functions->read_channel_test == NULL)
     {
-        (void) fprintf(stderr, "Fatal: could not load function %s: %s\n", TEST_FUNCTION_READ_CHANNEL, dlerror());
+        (void) fprintf(stdout, "Could not load function %s: %s\n", TEST_FUNCTION_READ_CHANNEL, dlerror());
     }
     
     test_functions->read_message_test = TEST_FUNCTION dlsym(lib, TEST_FUNCTION_READ_MESSAGE);
     if (test_functions->read_message_test == NULL)
     {
-        (void) fprintf(stderr, "Fatal: could not load function %s: %s\n", TEST_FUNCTION_READ_MESSAGE, dlerror());
+        (void) fprintf(stdout, "Could not load function %s: %s\n", TEST_FUNCTION_READ_MESSAGE, dlerror());
     }
     // NOLINTEND(concurrency-mt-unsafe)
 }
@@ -162,25 +162,25 @@ static void get_update_tests(void *lib, struct test_functions *test_functions, T
     test_functions->update_user_test = TEST_FUNCTION dlsym(lib, TEST_FUNCTION_UPDATE_USER);
     if (test_functions->update_user_test == NULL)
     {
-        (void) fprintf(stderr, "Fatal: could not load function %s: %s\n", TEST_FUNCTION_UPDATE_USER, dlerror());
+        (void) fprintf(stdout, "Could not load function %s: %s\n", TEST_FUNCTION_UPDATE_USER, dlerror());
     }
     
     test_functions->update_channel_test = TEST_FUNCTION dlsym(lib, TEST_FUNCTION_UPDATE_CHANNEL);
     if (test_functions->update_channel_test == NULL)
     {
-        (void) fprintf(stderr, "Fatal: could not load function %s: %s\n", TEST_FUNCTION_UPDATE_CHANNEL, dlerror());
+        (void) fprintf(stdout, "Could not load function %s: %s\n", TEST_FUNCTION_UPDATE_CHANNEL, dlerror());
     }
     
     test_functions->update_message_test = TEST_FUNCTION dlsym(lib, TEST_FUNCTION_UPDATE_MESSAGE);
     if (test_functions->update_message_test == NULL)
     {
-        (void) fprintf(stderr, "Fatal: could not load function %s: %s\n", TEST_FUNCTION_UPDATE_MESSAGE, dlerror());
+        (void) fprintf(stdout, "Could not load function %s: %s\n", TEST_FUNCTION_UPDATE_MESSAGE, dlerror());
     }
     
     test_functions->update_auth_test = TEST_FUNCTION dlsym(lib, TEST_FUNCTION_UPDATE_AUTH);
     if (test_functions->update_auth_test == NULL)
     {
-        (void) fprintf(stderr, "Fatal: could not load function %s: %s\n", TEST_FUNCTION_UPDATE_AUTH, dlerror());
+        (void) fprintf(stdout, "Could not load function %s: %s\n", TEST_FUNCTION_UPDATE_AUTH, dlerror());
     }
     // NOLINTEND(concurrency-mt-unsafe)
 }
@@ -194,25 +194,25 @@ static void get_destroy_tests(void *lib, struct test_functions *test_functions, 
     test_functions->destroy_user_test = TEST_FUNCTION dlsym(lib, TEST_FUNCTION_DESTROY_USER);
     if (test_functions->destroy_user_test == NULL)
     {
-        (void) fprintf(stderr, "Fatal: could not load function %s: %s\n", TEST_FUNCTION_DESTROY_USER, dlerror());
+        (void) fprintf(stdout, "Could not load function %s: %s\n", TEST_FUNCTION_DESTROY_USER, dlerror());
     }
     
     test_functions->destroy_channel_test = TEST_FUNCTION dlsym(lib, TEST_FUNCTION_DESTROY_CHANNEL);
     if (test_functions->destroy_channel_test == NULL)
     {
-        (void) fprintf(stderr, "Fatal: could not load function %s: %s\n", TEST_FUNCTION_DESTROY_CHANNEL, dlerror());
+        (void) fprintf(stdout, "Could not load function %s: %s\n", TEST_FUNCTION_DESTROY_CHANNEL, dlerror());
     }
     
     test_functions->destroy_message_test = TEST_FUNCTION dlsym(lib, TEST_FUNCTION_DESTROY_MESSAGE);
     if (test_functions->destroy_message_test == NULL)
     {
-        (void) fprintf(stderr, "Fatal: could not load function %s: %s\n", TEST_FUNCTION_DESTROY_MESSAGE, dlerror());
+        (void) fprintf(stdout, "Could not load function %s: %s\n", TEST_FUNCTION_DESTROY_MESSAGE, dlerror());
     }
     
     test_functions->destroy_auth_test = TEST_FUNCTION dlsym(lib, TEST_FUNCTION_DESTROY_AUTH);
     if (test_functions->destroy_auth_test == NULL)
     {
-        (void) fprintf(stderr, "Fatal: could not load function %s: %s\n", TEST_FUNCTION_DESTROY_AUTH, dlerror());
+        (void) fprintf(stdout, "Could not load function %s: %s\n", TEST_FUNCTION_DESTROY_AUTH, dlerror());
     }
     // NOLINTEND(concurrency-mt-unsafe)
 }
@@ -224,7 +224,7 @@ int close_lib(void *lib, const char *lib_name, TRACER_FUNCTION_AS(tracer))
     if (dlclose(lib) == -1)
     {
         // NOLINTNEXTLINE(concurrency-mt-unsafe) : No threads here
-        (void) fprintf(stderr, "Fatal: could not close library %s: %s\n", lib_name, dlerror());
+        (void) fprintf(stderr, "Could not close library %s: %s\n", lib_name, dlerror());
     }
     return 0;
 }

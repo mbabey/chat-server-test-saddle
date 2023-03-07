@@ -14,12 +14,12 @@ set(SOURCE_LIST
         ${SOURCE_DIR}/saddle-exit.c
         ${SOURCE_DIR}/saddle-run.c
         ${SOURCE_DIR}/saddle-setup.c
-        ${SOURCE_DIR}/util.c
+        ${SOURCE_DIR}/library-util.c
         #=vvvv= SOURCE FOR DUMMY MAIN =vvvv=#
         )
 set(HEADER_LIST
         ${INCLUDE_DIR}/saddle.h
-        ${INCLUDE_DIR}/util.h
+        ${INCLUDE_DIR}/library-util.h
         ${INCLUDE_DIR}/objects.h
         ${INCLUDE_DIR}/error-handlers.h
         test_functions.h

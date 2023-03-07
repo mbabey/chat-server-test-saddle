@@ -1,9 +1,6 @@
 #include "../include/saddle.h"
 
 #include <stdlib.h>
-#include <pthread.h>
-#include <sys/semaphore.h>
-#include <sys/fcntl.h>
 
 enum States {
     SETUP,
