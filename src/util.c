@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <string.h>
 
+/**
+ * Function signature type for test functions.
+ */
 #define TEST_FUNCTION (int (*)(void))
 
 /**
