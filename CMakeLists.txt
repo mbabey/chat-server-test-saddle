@@ -13,11 +13,13 @@ set(SOURCE_LIST
         ${SOURCE_DIR}/main.c
         ${SOURCE_DIR}/saddle.c
         ${SOURCE_DIR}/util.c
+        ${SOURCE_DIR}/setup.c
         #=vvvv= SOURCE FOR DUMMY MAIN =vvvv=#
         )
 set(HEADER_LIST
         ${INCLUDE_DIR}/saddle.h
         ${INCLUDE_DIR}/util.h
+        ${INCLUDE_DIR}/setup.h
         test_functions.h
         #=vvvv= INCLUDES FOR DUMMY MAIN =vvvv=#
         )
