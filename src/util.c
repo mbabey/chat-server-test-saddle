@@ -115,7 +115,7 @@ static int get_test_functions(const struct dc_env *env, void *lib, struct test_f
 static int get_create_tests(const struct dc_env *env, void *lib, struct test_functions *test_functions)
 {
     DC_TRACE(env);
-
+    
     // NOLINTBEGIN(concurrency-mt-unsafe) : No threads here
     test_functions->create_user_test = TEST_FUNCTION dlsym(lib, TEST_FUNCTION_CREATE_USER);
     if (test_functions->create_user_test == NULL)
@@ -261,5 +261,9 @@ int close_lib(const struct dc_env *env, void *lib, const char *lib_name)
 {
     DC_TRACE(env);
     
+    if (dlclose(lib) == -1)
+    {
+        (void) fprintf(stderr, "Fatal: could not open API library %s: %s\n", lib_name, dlerror());
+    }
     return 0;
 }
