@@ -40,15 +40,55 @@ static void trace_reporter(const char *file, const char *func, size_t line);
  */
 static int parse_args(struct state *state, int argc, char **argv);
 
-static int parse_lib(const char *lib_name, TRACER_FUNCTION_AS(tracer));
+/**
+ * parse_lib
+ * <p>
+ * Parse and validate a library (-l) argument.
+ * </p>
+ * @param lib_type the -l argument
+ * @param tracer tracing function
+ * @return 0 on success, -1 on failure
+ */
+static int parse_lib(const char *lib_type, TRACER_FUNCTION_AS(tracer));
 
+/**
+ * parse_ip_and_port
+ * <p>
+ * Parse and validate the IP (-i) argument and port (-p) argument. If either of the IP or port are invalid,
+ * print an error message. If both are valid, fill the sockaddr_in object.
+ * </p>
+ * @param addr the sockaddr_in object
+ * @param port_num_str the port number argument
+ * @param ip_addr_str the ip addr argument
+ * @param tracer tracing function
+ * @return 0 on success, -1 on failure
+ */
 static int parse_ip_and_port(struct sockaddr_in *addr, const char *port_num_str, const char *ip_addr_str,
                              TRACER_FUNCTION_AS(tracer));
 
-static int validate_ip(struct sockaddr_in *addr, const char *ip_addr_str, TRACER_FUNCTION_AS(tracer));
+/**
+ * validate_port
+ * <p>
+ * Validate a port number. Store it in an unsigned short if valid.
+ * </p>
+ * @param port_num the unsigned short
+ * @param port_num_str the port number argument
+ * @param tracer tracing function
+ * @return 0 on success, -1 on failure
+ */
+static int validate_port(in_port_t *port_num, const char *port_num_str, TRACER_FUNCTION_AS(tracer));
 
-static int
-validate_port(in_port_t *port_num, const char *port_num_str, void (*tracer)(const char *, const char *, size_t));
+/**
+ * validate_ip
+ * <p>
+ * Validate an IP address. Assign the sockaddr_in object if the address is valid.
+ * </p>
+ * @param addr the sockaddr_in object
+ * @param ip_addr_str the ip addr argument
+ * @param tracer tracing function
+ * @return 0 on success, -1 on failure
+ */
+static int validate_ip(struct sockaddr_in *addr, const char *ip_addr_str, TRACER_FUNCTION_AS(tracer));
 
 int setup_saddle(struct state *state, int argc, char **argv)
 {
@@ -182,6 +222,22 @@ static int parse_ip_and_port(struct sockaddr_in *addr, const char *port_num_str,
     return 0;
 }
 
+static int validate_port(in_port_t *port_num, const char *port_num_str, TRACER_FUNCTION_AS(tracer))
+{
+    PRINT_STACK_TRACE(tracer);
+    
+    *port_num = (in_port_t) strtol(port_num_str, NULL, 10);
+    
+    if (*port_num > UINT16_MAX)
+    {
+        // NOLINTNEXTLINE(concurrency-mt-unsafe) : No threads here
+        (void) fprintf(stderr, "%s is not a valid port number\n", port_num_str);
+        return -1;
+    }
+    
+    return 0;
+}
+
 static int validate_ip(struct sockaddr_in *addr, const char *ip_addr_str, TRACER_FUNCTION_AS(tracer))
 {
     PRINT_STACK_TRACE(tracer);
@@ -203,21 +259,4 @@ static int validate_ip(struct sockaddr_in *addr, const char *ip_addr_str, TRACER
             return -1;
         }
     }
-}
-
-static int
-validate_port(in_port_t *port_num, const char *port_num_str, void (*tracer)(const char *, const char *, size_t))
-{
-    PRINT_STACK_TRACE(tracer);
-    
-    *port_num = (in_port_t) strtol(port_num_str, NULL, 10);
-    
-    if (*port_num > UINT16_MAX)
-    {
-        // NOLINTNEXTLINE(concurrency-mt-unsafe) : No threads here
-        (void) fprintf(stderr, "%s is not a valid port number\n", port_num_str);
-        return -1;
-    }
-    
-    return 0;
 }
