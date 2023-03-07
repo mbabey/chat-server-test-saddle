@@ -1,9 +1,11 @@
-#ifndef CHAT_TEST_SADDLE_ERROR_H
-#define CHAT_TEST_SADDLE_ERROR_H
+#ifndef CHAT_TEST_SADDLE_ERROR_HANDLERS_H
+#define CHAT_TEST_SADDLE_ERROR_HANDLERS_H
 
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
+
+#define TRACER_FUNCTION_AS(name) void (*name)(const char *, const char *, size_t)
 
 #define PRINT_STACK_TRACE(tracer) tracer(__FILE__, __func__, __LINE__)
 
@@ -16,11 +18,11 @@
 #define GET_ERROR(err) \
     (void) fprintf(stderr, "Error: %d - \"%s\" in %s:%s @ %lu", err.error_number, strerror(err.error_number), err.file, err.func, err.line);
 
-typedef struct {
+struct error_saver {
     const char *file;
     const char *func;
     size_t line;
     int error_number;
-} Error;
+};
 
-#endif //CHAT_TEST_SADDLE_ERROR_H
+#endif //CHAT_TEST_SADDLE_ERROR_HANDLERS_H

@@ -1,8 +1,8 @@
 #include "../include/saddle.h"
 #include "../include/util.h"
 
-#include <string.h>
 #include <dlfcn.h>
+#include <string.h>
 
 static int create_state(struct state *state);
 
