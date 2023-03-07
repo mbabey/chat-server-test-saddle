@@ -1,13 +1,15 @@
-#include "../include/util.h"
+#include "../include/saddle.h"
 
-#include <stdio.h>
 #include <stdlib.h>
+
+
 
 int main(int argc, char **argv)
 {
-    // check args and port
+    // parse args
+    // put arg stuff in an object
     
-    
+    run_saddle();
     
     return EXIT_SUCCESS;
 }

@@ -31,8 +31,4 @@ open_lib(const struct dc_env *env, void *lib, const char *lib_name, mode_t mode,
  */
 int close_lib(const struct dc_env *env, void *lib, const char *lib_name);
 
-
-// Close library
-
-
 #endif //CHAT_SERVER_TEST_SADDLE_UTIL_H
