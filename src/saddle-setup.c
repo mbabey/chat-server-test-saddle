@@ -52,6 +52,8 @@ validate_port(in_port_t *port_num, const char *port_num_str, void (*tracer)(cons
 
 int setup_saddle(struct state *state, int argc, char **argv)
 {
+    memset(state, 0, sizeof(*state));
+    
     state->mm = init_mem_manager();
     if (!state->mm)
     {
@@ -81,30 +83,27 @@ static void trace_reporter(const char *file, const char *func, size_t line)
 
 static int parse_args(struct state *state, int argc, char **argv)
 {
-    int        ret_val;
     int        c;
-    const char *lib_type;
     const char *port_num_str;
     const char *ip_addr_str;
     
-    memset(state, 0, sizeof(*state));
     while ((c = getopt(argc, argv, OPTS_LIST)) != -1) // NOLINT(concurrency-mt-unsafe) : No threads here
     {
         switch (c)
         {
             case 'l':
             {
-                // get lib name
+                state->lib_name = optarg;
                 break;
             }
             case 'i':
             {
-                // get IP address
+                ip_addr_str = optarg;
                 break;
             }
             case 'p':
             {
-                // get port number
+                port_num_str = optarg;
                 break;
             }
             case '?':
@@ -126,10 +125,13 @@ static int parse_args(struct state *state, int argc, char **argv)
             }
         }
     }
+    int addr_err;
+    int lib_err;
     
-    ret_val = parse_ip_and_port(&state->addr, port_num_str, ip_addr_str, state->tracer);
+    lib_err = parse_lib(state->lib_name, state->tracer);
+    addr_err = parse_ip_and_port(&state->addr, port_num_str, ip_addr_str, state->tracer);
     
-    if (ret_val)
+    if (addr_err || lib_err)
     {
         // NOLINTNEXTLINE(concurrency-mt-unsafe) : No threads here
         (void) fprintf(stdout, USAGE_MESSAGE);
@@ -140,6 +142,14 @@ static int parse_args(struct state *state, int argc, char **argv)
 
 static int parse_lib(const char *lib_type, TRACER_FUNCTION_AS(tracer))
 {
+    PRINT_STACK_TRACE(tracer);
+    
+    if (strcmp("server", lib_type) != 0 || strcmp("client", lib_type) != 0)
+    {
+        // NOLINTNEXTLINE(concurrency-mt-unsafe) : No threads here
+        (void) fprintf(stderr, "%s is not a valid test type\n", lib_type);
+        return -1;
+    }
     
     return 0;
 }
@@ -179,19 +189,16 @@ static int validate_ip(struct sockaddr_in *addr, const char *ip_addr_str, TRACER
         case 1: // Valid
         {
             return 0;
-            break;
         }
         case 0: // Not a valid IP address
         {
             // NOLINTNEXTLINE(concurrency-mt-unsafe) : No threads here
             (void) fprintf(stderr, "%s is not a valid ip address\n", ip_addr_str);
             return -1;
-            break;
         }
         default: // Some other error
         {
             return -1;
-            break;
         }
     }
 }
