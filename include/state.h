@@ -21,7 +21,7 @@ struct state {
     
     void *lib;
     char *lib_name;
-    int (*lib_start)(void *);
+    int (*lib_main)(void *);
 };
 
 #endif //CHAT_TEST_SADDLE_STATE_H

@@ -41,8 +41,8 @@ static int get_saddle_lib(void *lib, struct state *state, TRACER_FUNCTION_AS(tra
     PRINT_STACK_TRACE(tracer);
     
     // NOLINTBEGIN(concurrency-mt-unsafe) : No threads here
-    state->lib_start = SADDLE_FUNCTION dlsym(lib, SADDLE_FUNCTION_NAME);
-    if (state->lib_start == NULL)
+    state->lib_main = SADDLE_FUNCTION dlsym(lib, SADDLE_FUNCTION_NAME);
+    if (state->lib_main == NULL)
     {
         (void) fprintf(stdout, "Could not load function %s: %s\n", SADDLE_FUNCTION_NAME, dlerror());
         return -1;

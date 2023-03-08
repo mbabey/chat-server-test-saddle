@@ -9,16 +9,16 @@
 /**
  * Saddle library function name.
  */
-#define SADDLE_FUNCTION_NAME "lib_start"
+#define SADDLE_FUNCTION_NAME "lib_main"
 
 /**
- * lib_start
+ * lib_main
  * <p>
  * Start function to be defined by library.
  * </p>
  * @param args the args object
  * @return 0 on success, -1 on failure
  */
-int lib_start(void *args);
+int lib_main(void *args);
 
 #endif //CHAT_TEST_SADDLE_SADDLE_FUNCTIONS_H
