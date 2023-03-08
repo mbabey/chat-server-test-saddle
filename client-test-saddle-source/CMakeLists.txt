@@ -12,6 +12,7 @@ set(INCLUDE_DIR include)
 set(SOURCE_LIST
         ${SOURCE_DIR}/lib-main.c
         ${SOURCE_DIR}/lib-run.c
+        ${SOURCE_DIR}/ui.c
         #=vvvv= SOURCE FOR DUMMY MAIN =vvvv=#
 #        ${SOURCE_DIR}/test-main.c
         )
