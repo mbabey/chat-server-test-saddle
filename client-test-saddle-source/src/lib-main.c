@@ -15,6 +15,7 @@ static int open_socket_connect(struct state_minor *state, struct client *client)
 int lib_main(void *args)
 {
     struct state_minor *state = (struct state_minor *) args;
+    PRINT_STACK_TRACE(state->tracer);
     struct client client;
     
     if (open_socket_connect(state, &client) == -1)
@@ -27,6 +28,8 @@ int lib_main(void *args)
 
 static int open_socket_connect(struct state_minor *state, struct client *client)
 {
+    PRINT_STACK_TRACE(state->tracer);
+    
     int fd;
     socklen_t socklen;
     
