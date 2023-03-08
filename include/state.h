@@ -8,16 +8,20 @@
 #include <netinet/in.h>
 #include <sys/types.h>
 
+/**
+ * State struct containing information necessary for the execution of the program.
+ * MUST not alter order of fields unless similar order is kept in client-test-saddle-source/include/state.h and
+ * client-test-saddle-source/include/state.h.
+ */
 struct state {
-    char *lib_name;
-    void *lib;
-    struct saddle_lib saddle_lib;
-    
     struct sockaddr_in addr;
-    
-    struct memory_manager *mm;
     struct error_saver err;
     TRACER_FUNCTION_AS(tracer);
+    struct memory_manager *mm;
+    
+    struct saddle_lib saddle_lib;
+    void *lib;
+    char *lib_name;
 };
 
 #endif //CHAT_TEST_SADDLE_STATE_H
