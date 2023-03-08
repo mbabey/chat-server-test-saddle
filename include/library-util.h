@@ -5,6 +5,7 @@
 
 #include <dc_env/env.h>
 
+// TODO: define for linux and for mac and for freebsd
 #define SERVER_SADDLE "../server-test-saddle-source/build/libserver-test-saddle.dylib"
 #define CLIENT_SADDLE "../client-test-saddle-source/build/libclient-test-saddle.dylib"
 

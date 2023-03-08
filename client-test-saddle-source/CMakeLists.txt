@@ -18,6 +18,7 @@ set(SOURCE_LIST
 set(HEADER_LIST
         ../include/saddle-function.h
         ${INCLUDE_DIR}/test-functions.h
+        ${INCLUDE_DIR}/saddle-client.h
         ${INCLUDE_DIR}/state.h
         #=vvvv= INCLUDES FOR DUMMY MAIN =vvvv=#
         )

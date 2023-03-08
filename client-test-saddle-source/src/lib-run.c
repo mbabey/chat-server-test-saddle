@@ -1,5 +1,6 @@
 #include "../../include/saddle-function.h"
 #include "../include/test-functions.h"
+#include "../include/saddle-client.h"
 
 #include <stdlib.h>
 
@@ -10,7 +11,7 @@
  * </p>
  * @param state
  */
-static void run_create_tests(struct state *state);
+static void run_create_tests(struct state_minor *state, struct client *client);
 
 /**
  * run_read_tests
@@ -18,7 +19,7 @@ static void run_create_tests(struct state *state);
  * Run tests for READ type dispatches on all objects.
  * </p>
  */
-static void run_read_tests(struct state *state);
+static void run_read_tests(struct state_minor *state, struct client *client);
 
 /**
  * run_update_tests
@@ -26,7 +27,7 @@ static void run_read_tests(struct state *state);
  * Run tests for UPDATE type dispatches on all objects.
  * </p>
  */
-static void run_update_tests(struct state *state);
+static void run_update_tests(struct state_minor *state, struct client *client);
 
 /**
  * run_destroy_tests
@@ -34,9 +35,9 @@ static void run_update_tests(struct state *state);
  * Run tests for DESTROY type dispatches on all objects.
  * </p>
  */
-static void run_destroy_tests(struct state *state);
+static void run_destroy_tests(struct state_minor *state, struct client *client);
 
-int run_client_saddle(struct state *state)
+int run_client_saddle(struct state_minor *state, struct client *client)
 {
     // Run all the tests.
     // Running tests should be atomic: if one fails, it should not affect the result of the rest of the program.
@@ -44,18 +45,18 @@ int run_client_saddle(struct state *state)
     // Wait for user input on dispatch type
     // wait for user input on dispatch object
     
-    run_create_tests(state);
+    run_create_tests(state, client);
     
-    run_read_tests(state);
+    run_read_tests(state, client);
     
-    run_update_tests(state);
+    run_update_tests(state, client);
     
-    run_destroy_tests(state);
+    run_destroy_tests(state, client);
     
     return EXIT_SUCCESS;
 }
 
-static void run_create_tests(struct state *state)
+static void run_create_tests(struct state_minor *state, struct client *client)
 {
     PRINT_STACK_TRACE(state->tracer);
     
@@ -77,7 +78,7 @@ static void run_create_tests(struct state *state)
     }
 }
 
-static void run_read_tests(struct state *state)
+static void run_read_tests(struct state_minor *state, struct client *client)
 {
     if (/* Appropriate Condition */)
     {
@@ -93,7 +94,7 @@ static void run_read_tests(struct state *state)
     }
 }
 
-static void run_update_tests(struct state *state)
+static void run_update_tests(struct state_minor *state, struct client *client)
 {
     if (/* Appropriate Condition */)
     {
@@ -113,7 +114,7 @@ static void run_update_tests(struct state *state)
     }
 }
 
-static void run_destroy_tests(struct state *state)
+static void run_destroy_tests(struct state_minor *state, struct client *client)
 {
     if (/* Appropriate Condition */)
     {
