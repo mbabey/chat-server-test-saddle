@@ -19,6 +19,7 @@ struct state_minor
 struct client
 {
     int socket_fd;
+    int test_number;
 };
 
 #endif //CLIENT_TEST_SADDLE_STATE_H

@@ -5,13 +5,13 @@
 #include <stdlib.h>
 
 /**
- * run_create_tests
+ * run_create_test
  * <p>
  * Run tests for CREATE type dispatches on all objects.
  * </p>
  * @param state
  */
-static void run_create_tests(struct state_minor *state, struct client *client);
+static int run_create_test(struct state_minor *state, struct client *client);
 
 /**
  * run_read_tests
@@ -45,37 +45,97 @@ int run_client_saddle(struct state_minor *state, struct client *client)
     // Wait for user input on dispatch type
     // wait for user input on dispatch object
     
-    run_create_tests(state, client);
+    // TODO: Loop on this switch
+    switch(client->test_number)
+    {
+        case INVALID:
+        {
+            //
+            (void) fprintf(stdout, "Invalid test, try again\n");
+            break;
+        }
+        case CREATE_USER:
+        case CREATE_CHANNEL:
+        case CREATE_MESSAGE:
+        case CREATE_AUTH:
+        {
+            if (run_create_test(state, client) == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case READ_USER:
+        case READ_CHANNEL:
+        case READ_MESSAGE:
+        {
+            if (run_read_tests(state, client) == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case UPDATE_USER:
+        case UPDATE_CHANNEL:
+        case UPDATE_MESSAGE:
+        case UPDATE_AUTH:
+        {
+            if (run_update_tests(state, client) == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case DESTROY_USER:
+        case DESTROY_CHANNEL:
+        case DESTROY_MESSAGE:
+        case DESTROY_AUTH:
+        {
+            if (run_destroy_tests(state, client) == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case STOP:
+        {
+            // TODO: Stop looping.
+            break;
+        }
+    }
     
-    run_read_tests(state, client);
-    
-    run_update_tests(state, client);
-    
-    run_destroy_tests(state, client);
-    
-    return EXIT_SUCCESS;
+    return 0;
 }
 
-static void run_create_tests(struct state_minor *state, struct client *client)
+static int run_create_test(struct state_minor *state, struct client *client)
 {
     PRINT_STACK_TRACE(state->tracer);
     
-    if (/* Appropriate Condition */)
+    switch(client->test_number)
     {
-        create_user_test();
+        case CREATE_USER:
+        {
+            create_user_test();
+            break;
+        }
+        case CREATE_CHANNEL:
+        {
+            create_channel_test();
+            break;
+        }
+        case CREATE_MESSAGE:
+        {
+            create_message_test();
+            break;
+        }
+        case CREATE_AUTH:
+        {
+            create_auth_test();
+            break;
+        }
     }
-    if (/* Appropriate Condition */)
-    {
-        create_channel_test();
-    }
-    if (/* Appropriate Condition */)
-    {
-        create_message_test();
-    }
-    if (/* Appropriate Condition */)
-    {
-        create_auth_test();
-    }
+    
+    return 0;
 }
 
 static void run_read_tests(struct state_minor *state, struct client *client)
