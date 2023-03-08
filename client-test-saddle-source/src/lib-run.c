@@ -1,4 +1,4 @@
-#include "../../include/saddle-functions.h"
+#include "../../include/saddle-function.h"
 #include "../include/test-functions.h"
 
 #include <stdlib.h>
@@ -36,7 +36,7 @@ static void run_update_tests(struct state *state);
  */
 static void run_destroy_tests(struct state *state);
 
-int run_saddle(struct state *state)
+int run_client_saddle(struct state *state)
 {
     // Run all the tests.
     // Running tests should be atomic: if one fails, it should not affect the result of the rest of the program.
