@@ -10,18 +10,17 @@ set(CMAKE_C_STANDARD 17)
 set(SOURCE_DIR src)
 set(INCLUDE_DIR include)
 set(SOURCE_LIST
-        ${SOURCE_DIR}/lib-start.c
+        ${SOURCE_DIR}/lib-main.c
         ${SOURCE_DIR}/lib-run.c
         ${SOURCE_DIR}/lib-end.c
         #=vvvv= SOURCE FOR DUMMY MAIN =vvvv=#
-        ${SOURCE_DIR}/lib-main.c
+        ${SOURCE_DIR}/test-main.c
         )
 set(HEADER_LIST
         ../include/saddle-functions.h
         ${INCLUDE_DIR}/test-functions.h
         ${INCLUDE_DIR}/state.h
         #=vvvv= INCLUDES FOR DUMMY MAIN =vvvv=#
-
         )
 
 set(SANITIZE TRUE)
