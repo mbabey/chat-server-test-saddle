@@ -1,4 +1,5 @@
 #include "../../saddle_functions.h"
+#include "../include/test_functions.h"
 
 #include <stdlib.h>
 
@@ -9,7 +10,7 @@
  * </p>
  * @param state
  */
-static void run_create_tests(struct state *state, struct test_functions *test_functions);
+static void run_create_tests(struct state *state);
 
 /**
  * run_read_tests
@@ -17,7 +18,7 @@ static void run_create_tests(struct state *state, struct test_functions *test_fu
  * Run tests for READ type dispatches on all objects.
  * </p>
  */
-static void run_read_tests(struct state *state, struct test_functions *test_functions);
+static void run_read_tests(struct state *state);
 
 /**
  * run_update_tests
@@ -25,7 +26,7 @@ static void run_read_tests(struct state *state, struct test_functions *test_func
  * Run tests for UPDATE type dispatches on all objects.
  * </p>
  */
-static void run_update_tests(struct state *state, struct test_functions *test_functions);
+static void run_update_tests(struct state *state);
 
 /**
  * run_destroy_tests
@@ -33,98 +34,101 @@ static void run_update_tests(struct state *state, struct test_functions *test_fu
  * Run tests for DESTROY type dispatches on all objects.
  * </p>
  */
-static void run_destroy_tests(struct state *state, struct test_functions *test_functions);
+static void run_destroy_tests(struct state *state);
 
 int run_saddle(struct state *state)
 {
     // Run all the tests.
     // Running tests should be atomic: if one fails, it should not affect the result of the rest of the program.
     
-    run_create_tests(state, &state->test_functions);
+    // Wait for user input on dispatch type
+    // wait for user input on dispatch object
     
-    run_read_tests(state, &state->test_functions);
+    run_create_tests(state);
     
-    run_update_tests(state, &state->test_functions);
+    run_read_tests(state);
     
-    run_destroy_tests(state, &state->test_functions);
+    run_update_tests(state);
+    
+    run_destroy_tests(state);
     
     return EXIT_SUCCESS;
 }
 
-static void run_create_tests(struct state *state, struct test_functions *test_functions)
+static void run_create_tests(struct state *state)
 {
     PRINT_STACK_TRACE(state->tracer);
     
-    if (test_functions->create_user_test)
+    if (/* Appropriate Condition */)
     {
-        test_functions->create_user_test();
+        create_user_test();
     }
-    if (test_functions->create_channel_test)
+    if (/* Appropriate Condition */)
     {
-        test_functions->create_channel_test();
+        create_channel_test();
     }
-    if (test_functions->create_message_test)
+    if (/* Appropriate Condition */)
     {
-        test_functions->create_message_test();
+        create_message_test();
     }
-    if (test_functions->create_auth_test)
+    if (/* Appropriate Condition */)
     {
-        test_functions->create_auth_test();
-    }
-}
-
-static void run_read_tests(struct state *state, struct test_functions *test_functions)
-{
-    if (test_functions->read_user_test)
-    {
-        test_functions->read_user_test();
-    }
-    if (test_functions->read_channel_test)
-    {
-        test_functions->read_channel_test();
-    }
-    if (test_functions->read_message_test)
-    {
-        test_functions->read_message_test();
+        create_auth_test();
     }
 }
 
-static void run_update_tests(struct state *state, struct test_functions *test_functions)
+static void run_read_tests(struct state *state)
 {
-    if (test_functions->update_user_test)
+    if (/* Appropriate Condition */)
     {
-        test_functions->update_user_test();
+        read_user_test();
     }
-    if (test_functions->update_channel_test)
+    if (/* Appropriate Condition */)
     {
-        test_functions->update_channel_test();
+        read_channel_test();
     }
-    if (test_functions->update_message_test)
+    if (/* Appropriate Condition */)
     {
-        test_functions->update_message_test();
-    }
-    if (test_functions->update_auth_test)
-    {
-        test_functions->update_auth_test();
+        read_message_test();
     }
 }
 
-static void run_destroy_tests(struct state *state, struct test_functions *test_functions)
+static void run_update_tests(struct state *state)
 {
-    if (test_functions->destroy_user_test)
+    if (/* Appropriate Condition */)
     {
-        test_functions->destroy_user_test();
+        update_user_test();
     }
-    if (test_functions->destroy_channel_test)
+    if (/* Appropriate Condition */)
     {
-        test_functions->destroy_channel_test();
+        update_channel_test();
     }
-    if (test_functions->destroy_message_test)
+    if (/* Appropriate Condition */)
     {
-        test_functions->destroy_message_test();
+        update_message_test();
     }
-    if (test_functions->destroy_auth_test)
+    if (/* Appropriate Condition */)
     {
-        test_functions->destroy_auth_test();
+        update_auth_test();
+    }
+}
+
+static void run_destroy_tests(struct state *state)
+{
+    if (/* Appropriate Condition */)
+    {
+        destroy_user_test();
+    }
+    if (/* Appropriate Condition */)
+    {
+        destroy_channel_test();
+    }
+    if (/* Appropriate Condition */)
+    {
+        destroy_message_test();
+    }
+    if (/* Appropriate Condition */)
+    {
+        destroy_auth_test();
     }
 }
