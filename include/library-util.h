@@ -1,8 +1,7 @@
 #ifndef CHAT_SERVER_TEST_SADDLE_UTIL_H
 #define CHAT_SERVER_TEST_SADDLE_UTIL_H
 
-#include "saddle-functions.h"
-#include "error-handlers.h"
+#include "state.h"
 
 #include <dc_env/env.h>
 
@@ -17,7 +16,7 @@
  * @param tracer tracer function
  * @return 0 on success, -1 and set errno on failure
  */
-int open_lib(void **lib, const char *lib_name, struct saddle_lib *saddle_lib, TRACER_FUNCTION_AS(tracer));
+int open_lib(void **lib, const char *lib_name, struct state *state, TRACER_FUNCTION_AS(tracer));
 
 /**
  * close_lib

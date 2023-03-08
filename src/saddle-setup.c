@@ -107,7 +107,7 @@ int setup_saddle(struct state *state, int argc, char **argv)
     }
     
     memset(&state->saddle_lib, 0, sizeof(state->saddle_lib));
-    if (open_lib(&state->lib, state->lib_name, &state->saddle_lib, state->tracer) == -1)
+    if (open_lib(&state->lib, state->lib_name, NULL, state->tracer) == -1)
     {
         SET_ERROR(state->err);
         return -1;

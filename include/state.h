@@ -19,9 +19,9 @@ struct state {
     TRACER_FUNCTION_AS(tracer);
     struct memory_manager *mm;
     
-    struct saddle_lib saddle_lib;
     void *lib;
     char *lib_name;
+    int (*lib_start)(void *);
 };
 
 #endif //CHAT_TEST_SADDLE_STATE_H
