@@ -17,8 +17,8 @@ set(SOURCE_LIST
         ${SOURCE_DIR}/lib-main.c
         )
 set(HEADER_LIST
-        ../include/saddle_functions.h
-        ${INCLUDE_DIR}/test_functions.h
+        ../include/saddle-functions.h
+        ${INCLUDE_DIR}/test-functions.h
         #=vvvv= INCLUDES FOR DUMMY MAIN =vvvv=#
 
         )

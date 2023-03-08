@@ -14,7 +14,7 @@ set(SOURCE_LIST
         #=vvvv= SOURCE FOR DUMMY MAIN =vvvv=#
         )
 set(HEADER_LIST
-        ../client-test-saddle-source/include/test_functions.h
+        ../client-test-saddle-source/include/test-functions.h
         #=vvvv= INCLUDES FOR DUMMY MAIN =vvvv=#
         )
 

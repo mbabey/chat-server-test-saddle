@@ -1,5 +1,5 @@
-#include "../../include/saddle_functions.h"
-#include "../include/test_functions.h"
+#include "../../include/saddle-functions.h"
+#include "../include/test-functions.h"
 
 #include <stdlib.h>
 
