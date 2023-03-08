@@ -39,68 +39,71 @@ static int run_destroy_test(struct state_minor *state, struct client *client);
 
 int run_client_saddle(struct state_minor *state, struct client *client)
 {
-    // Run all the tests.
-    // Running tests should be atomic: if one fails, it should not affect the result of the rest of the program.
+    PRINT_STACK_TRACE(state->tracer);
     
-    // Wait for user input on dispatch type
-    // wait for user input on dispatch object
+    int run;
     
-    // TODO: Loop on this switch
-    switch(client->test_number)
+    run = 1;
+    while (run)
     {
-        case INVALID:
+        run_ui(state, client);
+        
+        switch (client->test_number)
         {
-            //
-            (void) fprintf(stdout, "Invalid test, try again\n");
-            break;
-        }
-        case CREATE_USER:
-        case CREATE_CHANNEL:
-        case CREATE_MESSAGE:
-        case CREATE_AUTH:
-        {
-            if (run_create_test(state, client) == -1)
+            case INVALID:
             {
-                return -1;
+                //
+                (void) fprintf(stdout, "Invalid test, try again\n");
+                break;
             }
-            break;
-        }
-        case READ_USER:
-        case READ_CHANNEL:
-        case READ_MESSAGE:
-        {
-            if (run_read_test(state, client) == -1)
+            case CREATE_USER:
+            case CREATE_CHANNEL:
+            case CREATE_MESSAGE:
+            case CREATE_AUTH:
             {
-                return -1;
+                if (run_create_test(state, client) == -1)
+                {
+                    return -1;
+                }
+                break;
             }
-            break;
-        }
-        case UPDATE_USER:
-        case UPDATE_CHANNEL:
-        case UPDATE_MESSAGE:
-        case UPDATE_AUTH:
-        {
-            if (run_update_test(state, client) == -1)
+            case READ_USER:
+            case READ_CHANNEL:
+            case READ_MESSAGE:
             {
-                return -1;
+                if (run_read_test(state, client) == -1)
+                {
+                    return -1;
+                }
+                break;
             }
-            break;
-        }
-        case DESTROY_USER:
-        case DESTROY_CHANNEL:
-        case DESTROY_MESSAGE:
-        case DESTROY_AUTH:
-        {
-            if (run_destroy_test(state, client) == -1)
+            case UPDATE_USER:
+            case UPDATE_CHANNEL:
+            case UPDATE_MESSAGE:
+            case UPDATE_AUTH:
             {
-                return -1;
+                if (run_update_test(state, client) == -1)
+                {
+                    return -1;
+                }
+                break;
             }
-            break;
-        }
-        case STOP:
-        {
-            // TODO: Stop looping.
-            break;
+            case DESTROY_USER:
+            case DESTROY_CHANNEL:
+            case DESTROY_MESSAGE:
+            case DESTROY_AUTH:
+            {
+                if (run_destroy_test(state, client) == -1)
+                {
+                    return -1;
+                }
+                break;
+            }
+            case STOP:
+            {
+                run = 0;
+                break;
+            }
         }
     }
     
@@ -111,7 +114,7 @@ static int run_create_test(struct state_minor *state, struct client *client)
 {
     PRINT_STACK_TRACE(state->tracer);
     
-    switch(client->test_number)
+    switch (client->test_number)
     {
         case CREATE_USER:
         {
@@ -154,7 +157,7 @@ static int run_read_test(struct state_minor *state, struct client *client)
 {
     PRINT_STACK_TRACE(state->tracer);
     
-    switch(client->test_number)
+    switch (client->test_number)
     {
         case READ_USER:
         {
@@ -189,7 +192,7 @@ static int run_update_test(struct state_minor *state, struct client *client)
 {
     PRINT_STACK_TRACE(state->tracer);
     
-    switch(client->test_number)
+    switch (client->test_number)
     {
         case UPDATE_USER:
         {
@@ -232,7 +235,7 @@ static int run_destroy_test(struct state_minor *state, struct client *client)
 {
     PRINT_STACK_TRACE(state->tracer);
     
-    switch(client->test_number)
+    switch (client->test_number)
     {
         case DESTROY_USER:
         {

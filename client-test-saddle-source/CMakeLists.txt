@@ -20,6 +20,7 @@ set(HEADER_LIST
         ${INCLUDE_DIR}/test-functions.h
         ${INCLUDE_DIR}/saddle-client.h
         ${INCLUDE_DIR}/state.h
+        ${INCLUDE_DIR}/ui.h
         #=vvvv= INCLUDES FOR DUMMY MAIN =vvvv=#
         )
 
