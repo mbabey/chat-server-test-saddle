@@ -1,6 +1,7 @@
 #ifndef CHAT_TEST_SADDLE_ERROR_HANDLERS_H
 #define CHAT_TEST_SADDLE_ERROR_HANDLERS_H
 
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
