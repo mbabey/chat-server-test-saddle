@@ -41,7 +41,7 @@ int open_lib(void **lib, const char *lib_name, struct saddle_lib *saddle_lib, TR
     }
     
     get_saddle_lib(*lib, saddle_lib, tracer);
-
+    
     return 0;
 }
 
@@ -57,24 +57,24 @@ static int get_create_tests(void *lib, struct saddle_lib *saddle_lib, TRACER_FUN
     PRINT_STACK_TRACE(tracer);
     
     // NOLINTBEGIN(concurrency-mt-unsafe) : No threads here
-    saddle_lib->create_user_test = TEST_FUNCTION dlsym(lib, TEST_FUNCTION_CREATE_USER);
-    if (saddle_lib->create_user_test == NULL)
+    saddle_lib->lib_start = SADDLE_FUNCTION dlsym(lib, SADDLE_LIB_START_NAME);
+    if (saddle_lib->lib_start == NULL)
     {
-        (void) fprintf(stdout, "Could not load function %s: %s\n", TEST_FUNCTION_CREATE_USER, dlerror());
+        (void) fprintf(stdout, "Could not load function %s: %s\n", SADDLE_LIB_START_NAME, dlerror());
         return -1;
     }
     
-    saddle_lib->create_channel_test = TEST_FUNCTION dlsym(lib, TEST_FUNCTION_CREATE_CHANNEL);
-    if (saddle_lib->create_channel_test == NULL)
+    saddle_lib->lib_run = SADDLE_FUNCTION dlsym(lib, SADDLE_LIB_RUN_NAME);
+    if (saddle_lib->lib_run == NULL)
     {
-        (void) fprintf(stdout, "Could not load function %s: %s\n", TEST_FUNCTION_CREATE_CHANNEL, dlerror());
+        (void) fprintf(stdout, "Could not load function %s: %s\n", SADDLE_LIB_RUN_NAME, dlerror());
         return -1;
     }
     
-    saddle_lib->create_message_test = TEST_FUNCTION dlsym(lib, TEST_FUNCTION_CREATE_MESSAGE);
-    if (saddle_lib->create_message_test == NULL)
+    saddle_lib->lib_end = SADDLE_FUNCTION dlsym(lib, SADDLE_LIB_END_NAME);
+    if (saddle_lib->lib_end == NULL)
     {
-        (void) fprintf(stdout, "Could not load function %s: %s\n", TEST_FUNCTION_CREATE_MESSAGE, dlerror());
+        (void) fprintf(stdout, "Could not load function %s: %s\n", SADDLE_LIB_END_NAME, dlerror());
         return -1;
     }
     // NOLINTEND(concurrency-mt-unsafe)
