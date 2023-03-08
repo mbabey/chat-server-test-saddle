@@ -1,5 +1,5 @@
-#include "../include/saddle.h"
-#include "../include/library-util.h"
+#include "saddle.h"
+#include "library-util.h"
 
 void exit_saddle(struct state *state)
 {

@@ -1,6 +1,7 @@
-#ifndef CHAT_TEST_SADDLE_OBJECTS_H
-#define CHAT_TEST_SADDLE_OBJECTS_H
+#ifndef CHAT_TEST_SADDLE_STATE_H
+#define CHAT_TEST_SADDLE_STATE_H
 
+#include "../saddle_functions.h"
 #include "error-handlers.h"
 
 #include <mem_manager/manager.h>
@@ -10,14 +11,13 @@
 struct state {
     char *lib_name;
     void *lib;
-    struct test_functions test_functions;
+    struct saddle_lib saddle_lib;
     
     struct sockaddr_in addr;
-    in_port_t port_number;
     
     struct memory_manager *mm;
     struct error_saver err;
     TRACER_FUNCTION_AS(tracer);
 };
 
-#endif //CHAT_TEST_SADDLE_OBJECTS_H
+#endif //CHAT_TEST_SADDLE_STATE_H

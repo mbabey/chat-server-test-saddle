@@ -1,4 +1,4 @@
-#include "../include/saddle.h"
+#include "saddle.h"
 
 #include <stdlib.h>
 

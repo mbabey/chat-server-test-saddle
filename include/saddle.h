@@ -1,8 +1,7 @@
 #ifndef CHAT_TEST_SADDLE_SADDLE_H
 #define CHAT_TEST_SADDLE_SADDLE_H
 
-#include "../test_functions.h"
-#include "objects.h"
+#include "state.h"
 
 /**
  * setup_saddle

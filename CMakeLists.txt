@@ -22,7 +22,7 @@ set(HEADER_LIST
         ${INCLUDE_DIR}/library-util.h
         ${INCLUDE_DIR}/objects.h
         ${INCLUDE_DIR}/error-handlers.h
-        test_functions.h
+        client-test-saddle-source/include/test_functions.h
         #=vvvv= INCLUDES FOR DUMMY MAIN =vvvv=#
         )
 
