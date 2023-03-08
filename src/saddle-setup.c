@@ -106,8 +106,7 @@ int setup_saddle(struct state *state, int argc, char **argv)
         return -1;
     }
     
-    memset(&state->saddle_lib, 0, sizeof(state->saddle_lib));
-    if (open_lib(&state->lib, state->lib_name, NULL, state->tracer) == -1)
+    if (open_lib(state) == -1)
     {
         SET_ERROR(state->err);
         return -1;
@@ -131,6 +130,7 @@ static int parse_args(struct state *state, int argc, char **argv)
     
     port_num_str = NULL;
     ip_addr_str  = NULL;
+    lib_type     = NULL;
     
     while ((c = getopt(argc, argv, OPTS_LIST)) != -1) // NOLINT(concurrency-mt-unsafe) : No threads here
     {
@@ -205,7 +205,8 @@ static int parse_lib(struct state *state, const char *lib_type, void (*tracer)(c
         state->lib_name = strdup(SERVER_SADDLE);
         state->mm->mm_add(state->mm, state->lib_name);
         return 0;
-    } else if (strcmp("client", lib_type) == 0)
+    }
+    if (strcmp("client", lib_type) == 0)
     {
         state->lib_name = strdup(CLIENT_SADDLE);
         state->mm->mm_add(state->mm, state->lib_name);
@@ -253,6 +254,7 @@ static int validate_port(in_port_t *port_num, const char *port_num_str, TRACER_F
     
     long parsed_port_num;
     
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers): abra kadabra number will not change
     parsed_port_num = strtol(port_num_str, NULL, 10);
     
     if (parsed_port_num > UINT16_MAX)

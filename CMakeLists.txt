@@ -20,9 +20,9 @@ set(SOURCE_LIST
 set(HEADER_LIST
         ${INCLUDE_DIR}/saddle.h
         ${INCLUDE_DIR}/library-util.h
-        ${INCLUDE_DIR}/objects.h
+        ${INCLUDE_DIR}/state.h
         ${INCLUDE_DIR}/error-handlers.h
-        ${INCLUDE_DIR}/saddle_functions.h
+        ${INCLUDE_DIR}/saddle-functions.h
         #=vvvv= INCLUDES FOR DUMMY MAIN =vvvv=#
         )
 

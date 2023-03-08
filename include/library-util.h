@@ -13,13 +13,10 @@
  * <p>
  * Open a given library and attempt to load functions into the saddle_lib struct.
  * </p>
- * @param lib pointer at which to open the library
- * @param lib_name name of the library.
- * @param saddle_lib struct containing test functions.
- * @param tracer tracer function
- * @return 0 on success, -1 and set errno on failure
+ * @param state state object
+ * @return 0 on success, -1 and set err on failure
  */
-int open_lib(void **lib, const char *lib_name, struct state *state, TRACER_FUNCTION_AS(tracer));
+int open_lib(struct state *state);
 
 /**
  * close_lib

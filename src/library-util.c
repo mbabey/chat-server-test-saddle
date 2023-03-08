@@ -9,26 +9,24 @@
  * <p>
  * Get the test functions from the provided library
  * </p>
- * @param env environment object
- * @param lib the library in which to search
  * @param state struct to store function pointers
- * @return
+ * @return 0 on success, -1 on failure
  */
-static int get_saddle_lib(void *lib, struct state *state, TRACER_FUNCTION_AS(tracer));
+static int get_saddle_lib(struct state *state);
 
-int open_lib(void **lib, const char *lib_name, struct state *state, TRACER_FUNCTION_AS(tracer))
+int open_lib(struct state *state)
 {
-    PRINT_STACK_TRACE(tracer);
+    PRINT_STACK_TRACE(state->tracer);
     
-    *lib = dlopen(lib_name, RTLD_LAZY);
-    if (!*lib)
+    state->lib = dlopen(state->lib_name, RTLD_LAZY);
+    if (!state->lib)
     {
         // NOLINTNEXTLINE(concurrency-mt-unsafe) : No threads here
-        (void) fprintf(stderr, "Fatal: Could not open test library %s: %s\n", lib_name, dlerror());
+        (void) fprintf(stderr, "Fatal: Could not open test library %s: %s\n", state->lib_name, dlerror());
         return -1;
     }
     
-    if (get_saddle_lib(*lib, state, tracer) == -1)
+    if (get_saddle_lib(state) == -1)
     {
         return -1;
     }
@@ -36,12 +34,12 @@ int open_lib(void **lib, const char *lib_name, struct state *state, TRACER_FUNCT
     return 0;
 }
 
-static int get_saddle_lib(void *lib, struct state *state, TRACER_FUNCTION_AS(tracer))
+static int get_saddle_lib(struct state *state)
 {
-    PRINT_STACK_TRACE(tracer);
+    PRINT_STACK_TRACE(state->tracer);
     
     // NOLINTBEGIN(concurrency-mt-unsafe) : No threads here
-    state->lib_main = SADDLE_FUNCTION dlsym(lib, SADDLE_FUNCTION_NAME);
+    state->lib_main = SADDLE_FUNCTION dlsym(state->lib, SADDLE_FUNCTION_NAME);
     if (state->lib_main == NULL)
     {
         (void) fprintf(stdout, "Could not load function %s: %s\n", SADDLE_FUNCTION_NAME, dlerror());
