@@ -1,6 +1,11 @@
 #ifndef CHAT_TEST_SADDLE_TEST_FUNCTIONS_H
 #define CHAT_TEST_SADDLE_TEST_FUNCTIONS_H
 
+/**
+ * Function signature type for test functions.
+ */
+#define TEST_FUNCTION (int (*)(void))
+
 #define TEST_FUNCTION_CREATE_USER "create_user_test"
 #define TEST_FUNCTION_CREATE_CHANNEL "create_channel_test"
 #define TEST_FUNCTION_CREATE_MESSAGE "create_message_test"

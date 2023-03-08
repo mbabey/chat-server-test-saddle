@@ -106,12 +106,13 @@ int setup_saddle(struct state *state, int argc, char **argv)
         return -1;
     }
     
-    memset(&state->test_functions, 0, sizeof(state->test_functions));
-    if (open_lib(&state->lib, state->lib_name, &state->test_functions, state->tracer) == -1)
+    memset(&state->saddle_lib, 0, sizeof(state->saddle_lib));
+    if (open_lib(&state->lib, state->lib_name, &state->saddle_lib, state->tracer) == -1)
     {
         SET_ERROR(state->err);
         return -1;
     }
+    state->mm->mm_free(state->mm, state->lib_name);
     
     return 0;
 }

@@ -9,15 +9,15 @@
 /**
  * get_api
  * <p>
- * Open a given library and attempt to load functions into the test_functions struct.
+ * Open a given library and attempt to load functions into the saddle_lib struct.
  * </p>
  * @param lib pointer at which to open the library
  * @param lib_name name of the library.
- * @param test_functions struct containing test functions.
+ * @param saddle_lib struct containing test functions.
  * @param tracer tracer function
  * @return 0 on success, -1 and set errno on failure
  */
-int open_lib(void **lib, const char *lib_name, struct test_functions *test_functions, TRACER_FUNCTION_AS(tracer));
+int open_lib(void **lib, const char *lib_name, struct saddle_lib *saddle_lib, TRACER_FUNCTION_AS(tracer));
 
 /**
  * close_lib
