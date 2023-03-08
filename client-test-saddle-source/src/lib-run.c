@@ -14,28 +14,28 @@
 static int run_create_test(struct state_minor *state, struct client *client);
 
 /**
- * run_read_tests
+ * run_read_test
  * <p>
  * Run tests for READ type dispatches on all objects.
  * </p>
  */
-static void run_read_tests(struct state_minor *state, struct client *client);
+static int run_read_test(struct state_minor *state, struct client *client);
 
 /**
- * run_update_tests
+ * run_update_test
  * <p>
  * Run tests for UPDATE type dispatches on all objects.
  * </p>
  */
-static void run_update_tests(struct state_minor *state, struct client *client);
+static int run_update_test(struct state_minor *state, struct client *client);
 
 /**
- * run_destroy_tests
+ * run_destroy_test
  * <p>
  * Run tests for DESTROY type dispatches on all objects.
  * </p>
  */
-static void run_destroy_tests(struct state_minor *state, struct client *client);
+static int run_destroy_test(struct state_minor *state, struct client *client);
 
 int run_client_saddle(struct state_minor *state, struct client *client)
 {
@@ -69,7 +69,7 @@ int run_client_saddle(struct state_minor *state, struct client *client)
         case READ_CHANNEL:
         case READ_MESSAGE:
         {
-            if (run_read_tests(state, client) == -1)
+            if (run_read_test(state, client) == -1)
             {
                 return -1;
             }
@@ -80,7 +80,7 @@ int run_client_saddle(struct state_minor *state, struct client *client)
         case UPDATE_MESSAGE:
         case UPDATE_AUTH:
         {
-            if (run_update_tests(state, client) == -1)
+            if (run_update_test(state, client) == -1)
             {
                 return -1;
             }
@@ -91,7 +91,7 @@ int run_client_saddle(struct state_minor *state, struct client *client)
         case DESTROY_MESSAGE:
         case DESTROY_AUTH:
         {
-            if (run_destroy_tests(state, client) == -1)
+            if (run_destroy_test(state, client) == -1)
             {
                 return -1;
             }
@@ -115,22 +115,34 @@ static int run_create_test(struct state_minor *state, struct client *client)
     {
         case CREATE_USER:
         {
-            create_user_test();
+            if (create_user_test() == -1)
+            {
+                return -1;
+            }
             break;
         }
         case CREATE_CHANNEL:
         {
-            create_channel_test();
+            if (create_channel_test() == -1)
+            {
+                return -1;
+            }
             break;
         }
         case CREATE_MESSAGE:
         {
-            create_message_test();
+            if (create_message_test() == -1)
+            {
+                return -1;
+            }
             break;
         }
         case CREATE_AUTH:
         {
-            create_auth_test();
+            if (create_auth_test() == -1)
+            {
+                return -1;
+            }
             break;
         }
     }
@@ -138,58 +150,123 @@ static int run_create_test(struct state_minor *state, struct client *client)
     return 0;
 }
 
-static void run_read_tests(struct state_minor *state, struct client *client)
+static int run_read_test(struct state_minor *state, struct client *client)
 {
-    if (/* Appropriate Condition */)
+    PRINT_STACK_TRACE(state->tracer);
+    
+    switch(client->test_number)
     {
-        read_user_test();
+        case READ_USER:
+        {
+            if (read_user_test() == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case READ_CHANNEL:
+        {
+            if (read_channel_test() == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case READ_MESSAGE:
+        {
+            if (read_message_test() == -1)
+            {
+                return -1;
+            }
+            break;
+        }
     }
-    if (/* Appropriate Condition */)
-    {
-        read_channel_test();
-    }
-    if (/* Appropriate Condition */)
-    {
-        read_message_test();
-    }
+    
+    return 0;
 }
 
-static void run_update_tests(struct state_minor *state, struct client *client)
+static int run_update_test(struct state_minor *state, struct client *client)
 {
-    if (/* Appropriate Condition */)
+    PRINT_STACK_TRACE(state->tracer);
+    
+    switch(client->test_number)
     {
-        update_user_test();
+        case UPDATE_USER:
+        {
+            if (update_user_test() == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case UPDATE_CHANNEL:
+        {
+            if (update_channel_test() == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case UPDATE_MESSAGE:
+        {
+            if (update_message_test() == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case UPDATE_AUTH:
+        {
+            if (update_auth_test() == -1)
+            {
+                return -1;
+            }
+            break;
+        }
     }
-    if (/* Appropriate Condition */)
-    {
-        update_channel_test();
-    }
-    if (/* Appropriate Condition */)
-    {
-        update_message_test();
-    }
-    if (/* Appropriate Condition */)
-    {
-        update_auth_test();
-    }
+    
+    return 0;
 }
 
-static void run_destroy_tests(struct state_minor *state, struct client *client)
+static int run_destroy_test(struct state_minor *state, struct client *client)
 {
-    if (/* Appropriate Condition */)
+    PRINT_STACK_TRACE(state->tracer);
+    
+    switch(client->test_number)
     {
-        destroy_user_test();
+        case DESTROY_USER:
+        {
+            if (destroy_user_test() == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case DESTROY_CHANNEL:
+        {
+            if (destroy_channel_test() == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case DESTROY_MESSAGE:
+        {
+            if (destroy_message_test() == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case DESTROY_AUTH:
+        {
+            if (destroy_auth_test() == -1)
+            {
+                return -1;
+            }
+            break;
+        }
     }
-    if (/* Appropriate Condition */)
-    {
-        destroy_channel_test();
-    }
-    if (/* Appropriate Condition */)
-    {
-        destroy_message_test();
-    }
-    if (/* Appropriate Condition */)
-    {
-        destroy_auth_test();
-    }
+    
+    return 0;
 }
