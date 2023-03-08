@@ -1,5 +1,5 @@
-#include "saddle.h"
 #include "../include/library-util.h"
+#include "saddle.h"
 
 #include <arpa/inet.h>
 #include <ctype.h>
@@ -202,12 +202,12 @@ static int parse_lib(struct state *state, const char *lib_type, void (*tracer)(c
     
     if (strcmp("server", lib_type) == 0)
     {
-        state->lib_name = strdup("../server-test-saddle-source/build/libserver-test-saddle");
+        state->lib_name = strdup(SERVER_SADDLE);
         state->mm->mm_add(state->mm, state->lib_name);
         return 0;
     } else if (strcmp("client", lib_type) == 0)
     {
-        state->lib_name = strdup("../client-test-saddle-source/build/libclient-test-saddle");
+        state->lib_name = strdup(CLIENT_SADDLE);
         state->mm->mm_add(state->mm, state->lib_name);
         return 0;
     }
