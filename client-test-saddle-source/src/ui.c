@@ -42,8 +42,14 @@
     "+------------------------------------------------------------------------------+\n"\
     "Enter number or type \"q\" to quit:\n"
 
+/**
+ * Number of characters that are scanned in the input.
+ */
 #define INPUT_LINE_SIZE 2
 
+/**
+ * Determine whether a character is a linefeed or end of file.
+ */
 #define IS_LF_OR_EOF(character) ((character) == '\n' || (character) == EOF)
 
 int run_ui(struct state_minor *state, struct client *client)
@@ -66,7 +72,7 @@ int run_ui(struct state_minor *state, struct client *client)
         SET_ERROR(state->err);
         return -1;
     }
-    if (!IS_LF_OR_EOF(*buffer) || !IS_LF_OR_EOF(*(buffer + 1))) // TODO: Buffer flushing not working, needs assessment
+    if (!IS_LF_OR_EOF(*buffer) && !IS_LF_OR_EOF(*(buffer + 1))) // TODO: Buffer flushing not working, needs assessment
     {
         FLUSH_STDIN(capture);
     }
