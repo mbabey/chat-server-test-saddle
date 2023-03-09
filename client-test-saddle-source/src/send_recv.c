@@ -1,12 +1,13 @@
-#include <stdlib.h>
 #include "../include/send_recv.h"
+
+#include <stdlib.h>
 
 /**
  * Bit mask for four lowest order bits.
  */
-#define MASK_b1111 15
+#define MASK_b1111 (unsigned int) 15
 
-#define DATA_SIZE(body_size) 4 + body_size
+#define DATA_SIZE(body_size) (4 + (body_size))
 
 int recv_parse_message(struct state_minor *state, struct client *client, struct dispatch *dispatch)
 {
@@ -23,7 +24,7 @@ int recv_parse_message(struct state_minor *state, struct client *client, struct 
         return -1;
     }
     dispatch->type = version_and_type & MASK_b1111;
-    version_and_type >>= 4; // Bit shift right 4.
+    version_and_type >>= (unsigned int) 4; // Bit shift right 4.
     dispatch->version = version_and_type & MASK_b1111;
     
     // Get the object (8 bits).
@@ -78,7 +79,7 @@ int assemble_message_send(struct state_minor *state, struct client *client, stru
     
     // Pack the version and type.
     version_and_type = dispatch->version;
-    version_and_type <<= 4; // Bit shift 4 left.
+    version_and_type <<= (unsigned int) 4; // Bit shift 4 left.
     version_and_type += dispatch->type;
     *data = version_and_type;
     

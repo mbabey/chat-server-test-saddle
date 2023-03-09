@@ -2,9 +2,9 @@
 #include "../../include/error-handlers.h"
 #include "../include/state.h"
 
+#include <arpa/inet.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <arpa/inet.h>
 
 
 static void trace_reporter(const char *file, const char *func, size_t line);

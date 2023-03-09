@@ -10,6 +10,7 @@
  * </p>
  * @param state the state object
  * @param client the client object
+ * @param dispatch the dispatch to receive into
  * @return 0 on success, -1 on set err failure
  */
 int recv_parse_message(struct state_minor *state, struct client *client, struct dispatch *dispatch);
@@ -21,6 +22,7 @@ int recv_parse_message(struct state_minor *state, struct client *client, struct 
  * </p>
  * @param state the state object
  * @param client the client object
+ * @param dispatch the dispatch to send
  * @return 0 on success, -1 on set err failure
  */
 int assemble_message_send(struct state_minor *state, struct client *client, struct dispatch *dispatch);
