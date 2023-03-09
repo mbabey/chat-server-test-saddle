@@ -72,7 +72,7 @@ int run_ui(struct state_minor *state, struct client *client)
         SET_ERROR(state->err);
         return -1;
     }
-    if (!IS_LF_OR_EOF(*buffer) && !IS_LF_OR_EOF(*(buffer + 1))) // TODO: Buffer flushing not working, needs assessment
+    if (!(IS_LF_OR_EOF(*buffer) || IS_LF_OR_EOF(*(buffer + 1))))
     {
         FLUSH_STDIN(capture);
     }
@@ -90,11 +90,12 @@ int display_results(struct state_minor *state)
 {
     PRINT_STACK_TRACE(state->tracer);
     
+    char capture;
     // Display the results
     
     // Wait for key press
-    (void) fprintf(stdout, "Press any key to continue.\n");
-    getchar();
+    (void) fprintf(stdout, "Press enter/return to continue.\n");
+    FLUSH_STDIN(capture);
     
     return 0;
 }
