@@ -3,6 +3,7 @@
 
 #include "../../include/error-handlers.h"
 
+#include <mem_manager/manager.h>
 #include <netinet/in.h>
 
 /**
@@ -16,10 +17,24 @@ struct state_minor
     struct memory_manager *mm;
 };
 
+/**
+ * Information necessary to run the client.
+ */
 struct client
 {
     int socket_fd;
     int test_number;
+};
+
+/**
+ * A Network Dispatch.
+ */
+struct dispatch {
+    uint8_t version : 4;
+    uint8_t type : 4;
+    uint8_t object;
+    uint16_t body_size;
+    char *body;
 };
 
 #endif //CLIENT_TEST_SADDLE_STATE_H
