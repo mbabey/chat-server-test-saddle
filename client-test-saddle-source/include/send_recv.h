@@ -1,5 +1,5 @@
-#ifndef CLIENT_TEST_SADDLE_UTIL_H
-#define CLIENT_TEST_SADDLE_UTIL_H
+#ifndef CLIENT_TEST_SADDLE_SEND_RECV_H
+#define CLIENT_TEST_SADDLE_SEND_RECV_H
 
 #include "state.h"
 
@@ -25,4 +25,4 @@ int recv_parse_message(struct state_minor *state, struct client *client, struct 
  */
 int assemble_message_send(struct state_minor *state, struct client *client, struct dispatch *dispatch);
 
-#endif //CLIENT_TEST_SADDLE_UTIL_H
+#endif //CLIENT_TEST_SADDLE_SEND_RECV_H

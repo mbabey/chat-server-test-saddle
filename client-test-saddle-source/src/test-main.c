@@ -1,5 +1,13 @@
+#include "../../include/saddle-function.h"
+#include "../../include/error-handlers.h"
+#include "../include/state.h"
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <arpa/inet.h>
+
+
+static void trace_reporter(const char *file, const char *func, size_t line);
 
 /**
  * client-test-saddle:main
@@ -12,10 +20,30 @@
  */
 int main(int argc, char **argv)
 {
-    if (lib_main(NULL) == -1)
+    struct state_minor state;
+    in_port_t port_number;
+    
+    inet_pton(AF_INET, argv[1], &state.addr.sin_addr.s_addr);
+    port_number = strtol(argv[2], NULL, 10);
+    state.addr.sin_port   = htons(port_number);
+    state.addr.sin_family = AF_INET;
+    
+    state.tracer = trace_reporter;
+//    state.tracer = NULL;
+
+    state.mm = init_mem_manager();
+    
+    if (lib_main(&state) == -1)
     {
         return EXIT_FAILURE;
     }
     
+    free_mem_manager(state.mm);
+    
     return EXIT_SUCCESS;
+}
+
+static void trace_reporter(const char *file, const char *func, size_t line)
+{
+    (void) fprintf(stdout, "TRACE: %s : %s : @ %zu\n", file, func, line);
 }

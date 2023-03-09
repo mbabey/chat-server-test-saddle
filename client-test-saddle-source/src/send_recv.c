@@ -1,4 +1,5 @@
-#include "../include/util.h"
+#include <stdlib.h>
+#include "../include/send_recv.h"
 
 /**
  * Bit mask for four lowest order bits.
@@ -21,7 +22,7 @@ int recv_parse_message(struct state_minor *state, struct client *client, struct 
         SET_ERROR(state->err);
         return -1;
     }
-    dispatch->type    = version_and_type & MASK_b1111;
+    dispatch->type = version_and_type & MASK_b1111;
     version_and_type >>= 4; // Bit shift right 4.
     dispatch->version = version_and_type & MASK_b1111;
     
@@ -63,12 +64,12 @@ int assemble_message_send(struct state_minor *state, struct client *client, stru
 {
     PRINT_STACK_TRACE(state->tracer);
     
-    uint8_t *data;
-    uint8_t version_and_type;
+    uint8_t  *data;
+    uint8_t  version_and_type;
     uint16_t body_size_network_order;
-    ssize_t bytes_sent;
+    ssize_t  bytes_sent;
     
-    data = (uint8_t *) Mmm_malloc(DATA_SIZE(dispatch->body_size), state->mm);
+    data = (uint8_t *) malloc(DATA_SIZE(dispatch->body_size));
     if (!data)
     {
         SET_ERROR(state->err);
@@ -79,11 +80,10 @@ int assemble_message_send(struct state_minor *state, struct client *client, stru
     version_and_type = dispatch->version;
     version_and_type <<= 4; // Bit shift 4 left.
     version_and_type += dispatch->type;
-    
-    data[0] = version_and_type;
+    *data = version_and_type;
     
     // Pack the object.
-    data[1] = dispatch->object;
+    *(data + 1) = dispatch->object;
     
     // Path the body size.
     body_size_network_order = htons(dispatch->body_size);
@@ -94,6 +94,7 @@ int assemble_message_send(struct state_minor *state, struct client *client, stru
     
     // Send the dispatch.
     bytes_sent = send(client->socket_fd, data, DATA_SIZE(dispatch->body_size), 0);
+    free(data);
     if (bytes_sent == -1)
     {
         SET_ERROR(state->err);
