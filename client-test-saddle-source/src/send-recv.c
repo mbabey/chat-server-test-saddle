@@ -20,7 +20,7 @@ int recv_parse_message(struct state_minor *state, struct client *client, struct 
     bytes_read = recv(client->socket_fd, &version_and_type, sizeof(version_and_type), 0);
     if (bytes_read == -1)
     {
-        SET_ERROR(state->err);å
+        SET_ERROR(state->err);
         return -1;
     }
     dispatch->type = version_and_type & MASK_b1111;
