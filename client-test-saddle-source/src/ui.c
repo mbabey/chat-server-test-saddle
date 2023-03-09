@@ -15,6 +15,11 @@
  */
 #define CLEAR_SCREEN printf("\033[1;1H\033[2J")
 
+/**
+ * Flush standard input of extra characters to newline or EOF.
+ */
+#define FLUSH_STDIN(capture) while (((capture) = getchar()) != '\n' && (capture) != EOF)
+
 #define MENU \
     "+------------------------------------------------------------------------------+\n"\
     "|Select a test to run.                                                         |\n"\
@@ -37,11 +42,16 @@
     "+------------------------------------------------------------------------------+\n"\
     "Enter number or type \"q\" to quit:\n"
 
+#define INPUT_LINE_SIZE 2
+
+#define IS_LF_OR_EOF(character) ((character) == '\n' || (character) == EOF)
+
 int run_ui(struct state_minor *state, struct client *client)
 {
     PRINT_STACK_TRACE(state->tracer);
     
-    char    buffer[64];
+    char    buffer[INPUT_LINE_SIZE + 1];
+    char    capture;
     ssize_t chars_read;
     
     CLEAR_SCREEN;
@@ -50,13 +60,15 @@ int run_ui(struct state_minor *state, struct client *client)
     
     // Take user input
     memset(buffer, 0, sizeof(buffer));
-    (void) fflush(stdin);
-    chars_read = read(STDIN_FILENO, buffer, 3);
-    (void) fflush(stdin);
+    chars_read = read(STDIN_FILENO, buffer, INPUT_LINE_SIZE);
     if (chars_read == -1)
     {
         SET_ERROR(state->err);
         return -1;
+    }
+    if (!IS_LF_OR_EOF(*buffer) || !IS_LF_OR_EOF(*(buffer + 1))) // TODO: Buffer flushing not working, needs assessment
+    {
+        FLUSH_STDIN(capture);
     }
     
     (void) fprintf(stdout, "\n");
@@ -76,9 +88,7 @@ int display_results(struct state_minor *state)
     
     // Wait for key press
     (void) fprintf(stdout, "Press any key to continue.\n");
-    (void) fflush(stdin); // TODO: why is this broken?
-    (void) getchar();
-    (void) fflush(stdin);
+    getchar();
     
     return 0;
 }
