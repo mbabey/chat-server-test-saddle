@@ -21,7 +21,7 @@ int create_user_test(struct state_minor *state, struct client *client);
  *
  * @return 0 on success, -1 and set errno on failure
  */
-int create_channel_test(void);
+int create_channel_test(struct state_minor *state, struct client *client);
 
 /**
  *
@@ -31,7 +31,7 @@ int create_channel_test(void);
  *
  * @return 0 on success, -1 and set errno on failure
  */
-int create_message_test(void);
+int create_message_test(struct state_minor *state, struct client *client);
 
 /**
  *
