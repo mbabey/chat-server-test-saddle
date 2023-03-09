@@ -50,7 +50,6 @@ int run_client_saddle(struct state_minor *state, struct client *client)
         {
             case INVALID:
             {
-                //
                 (void) fprintf(stdout, "Invalid test, try again\n");
                 break;
             }
@@ -103,6 +102,8 @@ int run_client_saddle(struct state_minor *state, struct client *client)
                 break;
             }
         }
+    
+        display_results(state);
     }
     
     return 0;
