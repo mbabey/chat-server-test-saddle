@@ -5,6 +5,8 @@
  */
 #define MASK_b1111 15
 
+#define DATA_SIZE(body_size) 4 + body_size
+
 int recv_parse_message(struct state_minor *state, struct client *client, struct dispatch *dispatch)
 {
     PRINT_STACK_TRACE(state->tracer);
@@ -61,9 +63,42 @@ int assemble_message_send(struct state_minor *state, struct client *client, stru
 {
     PRINT_STACK_TRACE(state->tracer);
     
-    // pack the first byte
-    // pack the second byte
-    // pack third and fourth byte
+    uint8_t *data;
+    uint8_t version_and_type;
+    uint16_t body_size_network_order;
+    ssize_t bytes_sent;
+    
+    data = (uint8_t *) Mmm_malloc(DATA_SIZE(dispatch->body_size), state->mm);
+    if (!data)
+    {
+        SET_ERROR(state->err);
+        return -1;
+    }
+    
+    // Pack the version and type.
+    version_and_type = dispatch->version;
+    version_and_type <<= 4; // Bit shift 4 left.
+    version_and_type += dispatch->type;
+    
+    data[0] = version_and_type;
+    
+    // Pack the object.
+    data[1] = dispatch->object;
+    
+    // Path the body size.
+    body_size_network_order = htons(dispatch->body_size);
+    memcpy(data + 2, &body_size_network_order, sizeof(body_size_network_order));
+    
+    // Pack the body.
+    memcpy(data + 4, dispatch->body, dispatch->body_size);
+    
+    // Send the dispatch.
+    bytes_sent = send(client->socket_fd, data, DATA_SIZE(dispatch->body_size), 0);
+    if (bytes_sent == -1)
+    {
+        SET_ERROR(state->err);
+        return -1;
+    }
     
     return 0;
 }
