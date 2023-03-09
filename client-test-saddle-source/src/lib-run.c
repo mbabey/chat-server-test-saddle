@@ -1,8 +1,6 @@
-#include "../../include/saddle-function.h"
 #include "../include/test-functions.h"
 #include "../include/saddle-client.h"
-
-#include <stdlib.h>
+#include "../include/ui.h"
 
 /**
  * run_create_test
