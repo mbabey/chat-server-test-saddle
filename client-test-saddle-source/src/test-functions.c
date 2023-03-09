@@ -123,7 +123,7 @@ int create_message_test(struct state_minor *state, struct client *client)
     dispatch.type    = (unsigned int) CREATE;
     dispatch.object  = (unsigned int) MESSAGE;
     
-    dispatch_body_temp = strdup("thedog\x03the doghouse\x03yo what's up its me the dog\x031678347396\x03");
+    dispatch_body_temp = strdup("thedog""\x03""the doghouse""\x03""yo what's up its me the dog""\x03""1678347396""\x03");
     
     if (assemble_message_send(state, client, &dispatch) == -1)
     {

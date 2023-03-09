@@ -117,7 +117,7 @@ static int run_create_test(struct state_minor *state, struct client *client)
     {
         case CREATE_USER:
         {
-            if (create_user_test(NULL, NULL) == -1)
+            if (create_user_test(state, client) == -1)
             {
                 return -1;
             }
@@ -125,7 +125,7 @@ static int run_create_test(struct state_minor *state, struct client *client)
         }
         case CREATE_CHANNEL:
         {
-            if (create_channel_test(NULL, NULL) == -1)
+            if (create_channel_test(state, client) == -1)
             {
                 return -1;
             }
@@ -133,7 +133,7 @@ static int run_create_test(struct state_minor *state, struct client *client)
         }
         case CREATE_MESSAGE:
         {
-            if (create_message_test(NULL, NULL) == -1)
+            if (create_message_test(state, client) == -1)
             {
                 return -1;
             }
