@@ -9,6 +9,7 @@ int create_user_test(struct state_minor *state, struct client *client)
     printf("create_user_test\n");
     
     struct dispatch dispatch;
+    int status;
 //    const char      *login_token;
 //    const char      *display_name;
 //    const char      *password;
@@ -27,13 +28,13 @@ int create_user_test(struct state_minor *state, struct client *client)
     dispatch.body      = dispatch_body_temp;
     dispatch.body_size = strlen(dispatch.body);
     
-    if (assemble_message_send(state, client, &dispatch) == -1)
+    status = assemble_message_send(state, client, &dispatch);
+    free(dispatch_body_temp);
+    if (status == -1)
     {
         SET_ERROR(state->err);
         return -1;
     }
-    
-    free(dispatch_body_temp);
     
     if (recv_parse_message(state, client, &dispatch) == -1)
     {
@@ -64,6 +65,7 @@ int create_channel_test(struct state_minor *state, struct client *client)
     printf("create_channel_test not yet implemented.\n");
     
     struct dispatch dispatch;
+    int status;
 //    const char      *display_name;
 //    const char      *channel_name;
 //    const char      *publicity;
@@ -78,13 +80,13 @@ int create_channel_test(struct state_minor *state, struct client *client)
     dispatch.body      = dispatch_body_temp;
     dispatch.body_size = strlen(dispatch.body);
     
-    if (assemble_message_send(state, client, &dispatch) == -1)
+    status = assemble_message_send(state, client, &dispatch);
+    free(dispatch_body_temp);
+    if (status == -1)
     {
         SET_ERROR(state->err);
         return -1;
     }
-    
-    free(dispatch_body_temp);
     
     if (recv_parse_message(state, client, &dispatch) == -1)
     {
@@ -113,6 +115,7 @@ int create_channel_test(struct state_minor *state, struct client *client)
 int create_message_test(struct state_minor *state, struct client *client)
 {
     struct dispatch dispatch;
+    int status;
 //    const char      *display_name;
 //    const char      *channel_name;
 //    const char      *message_content;
@@ -125,13 +128,13 @@ int create_message_test(struct state_minor *state, struct client *client)
     
     dispatch_body_temp = strdup("thedog""\x03""the doghouse""\x03""yo what's up its me the dog""\x03""1678347396""\x03");
     
-    if (assemble_message_send(state, client, &dispatch) == -1)
+    status = assemble_message_send(state, client, &dispatch);
+    free(dispatch_body_temp);
+    if (status == -1)
     {
         SET_ERROR(state->err);
         return -1;
     }
-    
-    free(dispatch_body_temp);
     
     if (recv_parse_message(state, client, &dispatch) == -1)
     {

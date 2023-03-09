@@ -39,7 +39,9 @@
 
 int run_ui(struct state_minor *state, struct client *client)
 {
-    char    buffer[4];
+    PRINT_STACK_TRACE(state->tracer);
+    
+    char    buffer[64];
     ssize_t chars_read;
     
     CLEAR_SCREEN;
@@ -50,6 +52,7 @@ int run_ui(struct state_minor *state, struct client *client)
     memset(buffer, 0, sizeof(buffer));
     (void) fflush(stdin);
     chars_read = read(STDIN_FILENO, buffer, 3);
+    (void) fflush(stdin);
     if (chars_read == -1)
     {
         SET_ERROR(state->err);
@@ -58,7 +61,7 @@ int run_ui(struct state_minor *state, struct client *client)
     
     (void) fprintf(stdout, "\n");
     
-    // Set to STOP if input is 'q', set test_number to STOP to quit; otherwise, set test_number.
+    // Set to STOP test_number to stop if input is 'q'; otherwise, set test_number.
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers) : num will not change
     client->test_number = (buffer[0] == 'q') ? STOP : (int) strtol(buffer, NULL, 10);
     
@@ -67,12 +70,15 @@ int run_ui(struct state_minor *state, struct client *client)
 
 int display_results(struct state_minor *state)
 {
+    PRINT_STACK_TRACE(state->tracer);
+    
     // Display the results
     
     // Wait for key press
     (void) fprintf(stdout, "Press any key to continue.\n");
     (void) fflush(stdin); // TODO: why is this broken?
     (void) getchar();
+    (void) fflush(stdin);
     
     return 0;
 }

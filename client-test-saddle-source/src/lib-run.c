@@ -44,13 +44,17 @@ int run_client_saddle(struct state_minor *state, struct client *client)
     run = 1;
     while (run)
     {
-        run_ui(state, client);
+        if (run_ui(state, client) == -1)
+        {
+            SET_ERROR(state->err);
+            return -1;
+        }
         
         switch (client->test_number)
         {
             case INVALID:
             {
-                (void) fprintf(stdout, "Invalid test, try again\n");
+                (void) fprintf(stdout, "Invalid test, try again.\n");
                 break;
             }
             case CREATE_USER:
@@ -103,7 +107,10 @@ int run_client_saddle(struct state_minor *state, struct client *client)
             }
         }
     
-        display_results(state);
+        if (client->test_number != STOP)
+        {
+            display_results(state);
+        }
     }
     
     return 0;
