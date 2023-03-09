@@ -117,7 +117,7 @@ static int run_create_test(struct state_minor *state, struct client *client)
     {
         case CREATE_USER:
         {
-            if (create_user_test() == -1)
+            if (create_user_test(NULL, NULL) == -1)
             {
                 return -1;
             }

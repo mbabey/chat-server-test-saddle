@@ -13,7 +13,7 @@ set(SOURCE_LIST
         ${SOURCE_DIR}/lib-main.c
         ${SOURCE_DIR}/lib-run.c
         ${SOURCE_DIR}/ui.c
-        ${SOURCE_DIR}/send_recv.c
+        ${SOURCE_DIR}/send-recv.c
         ${SOURCE_DIR}/test-functions.c
         #=vvvv= SOURCE FOR DUMMY MAIN =vvvv=#
         ${SOURCE_DIR}/test-main.c
@@ -24,7 +24,7 @@ set(HEADER_LIST
         ${INCLUDE_DIR}/saddle-client.h
         ${INCLUDE_DIR}/state.h
         ${INCLUDE_DIR}/ui.h
-        ${INCLUDE_DIR}/send_recv.h
+        ${INCLUDE_DIR}/send-recv.h
         #=vvvv= INCLUDES FOR DUMMY MAIN =vvvv=#
         )
 

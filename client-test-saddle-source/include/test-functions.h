@@ -1,6 +1,8 @@
 #ifndef CHAT_TEST_SADDLE_TEST_FUNCTIONS_H
 #define CHAT_TEST_SADDLE_TEST_FUNCTIONS_H
 
+#include "state.h"
+
 /**
  *
  * <p>
@@ -9,7 +11,7 @@
  *
  * @return 0 on success, -1 and set errno on failure
  */
-int create_user_test(void);
+int create_user_test(struct state_minor *state, struct client *client);
 
 /**
  *
