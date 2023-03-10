@@ -5,10 +5,10 @@
 
 #include <dc_env/env.h>
 
-#if __unix__
+#if defined(__unix__) || defined(__unix) || defined(unix)
 #define SERVER_SADDLE "../server-test-saddle-source/build/libserver-test-saddle.so"
 #define CLIENT_SADDLE "../client-test-saddle-source/build/libclient-test-saddle.so"
-#elif __APPLE__
+#elif defined(__APPLE__) && defined(__MACH__)
 #define SERVER_SADDLE "../server-test-saddle-source/build/libserver-test-saddle.dylib"
 #define CLIENT_SADDLE "../client-test-saddle-source/build/libclient-test-saddle.dylib"
 #endif
