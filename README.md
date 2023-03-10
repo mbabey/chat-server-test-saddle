@@ -11,10 +11,10 @@
 4. Run the test saddle.
 
 
-      usage: ./chat-test-saddle -l <server | client> -i <ip address> -p <port number> [-t]    
-      -l <server | client>, whether to run server or client tests                             
-      -i <ip address>, if server selected for -l, will run the server at this ip address.     
-          if client selected for -l, will connect to a server at this ip address.             
-      -p <port number>, if server selected for -l, will run the server at this port number.   
-          if client selected for -l, will connect to a server at this port number.            
+      usage: ./chat-test-saddle -l <server | client> -i <ip address> -p <port number> [-t]
+      -l <server | client>, whether to run the test server or test client
+      -i <ip address>, if server selected for -l, will run the server at this ip address.
+          if client selected for -l, will connect to a server at this ip address.
+      -p <port number>, if server selected for -l, will run the server at this port number.
+          if client selected for -l, will connect to a server at this port number.   
       [-t], optionally trace the execution of the program.
