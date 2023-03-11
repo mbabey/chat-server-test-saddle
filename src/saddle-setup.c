@@ -111,7 +111,7 @@ int setup_saddle(struct state *state, int argc, char **argv)
         SET_ERROR(state->err);
         return -1;
     }
-    state->mm->mm_free(state->mm, state->lib_name);
+    mm_free(state->mm, state->lib_name);
     
     return 0;
 }
@@ -203,13 +203,13 @@ static int parse_lib(struct state *state, const char *lib_type, void (*tracer)(c
     if (strcmp("server", lib_type) == 0)
     {
         state->lib_name = strdup(SERVER_SADDLE);
-        state->mm->mm_add(state->mm, state->lib_name);
+        mm_add(state->mm, state->lib_name);
         return 0;
     }
     if (strcmp("client", lib_type) == 0)
     {
         state->lib_name = strdup(CLIENT_SADDLE);
-        state->mm->mm_add(state->mm, state->lib_name);
+        mm_add(state->mm, state->lib_name);
         return 0;
     }
     

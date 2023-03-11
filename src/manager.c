@@ -149,7 +149,7 @@ int mm_free_all(struct memory_manager *mem_manager)
     return m_freed;
 }
 
-static int mm_free_recurse(struct memory_address *ma)
+static int mm_free_recurse(struct memory_address *ma) // NOLINT(misc-no-recursion) : intentional recursion
 {
     if (ma == NULL)
     {
@@ -224,7 +224,7 @@ void *mm_realloc(void *ptr, size_t size, struct memory_manager *mem_manager)
     if (mem_manager)
     {
         ma = mm_find_in_list(mem_manager, ptr);
-        if (ma != NULL)
+        if (ma == NULL)
         {
             errno = ENODATA;
             return NULL; // mem not a part of memory manager.

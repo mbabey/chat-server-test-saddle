@@ -40,6 +40,7 @@ int free_mem_manager(struct memory_manager *mem_manager);
  * Add a new memory address node to the memory manager linked list.
  * If the memory manager does not exist, set errno to EFAULT.
  * </p>
+ * @param mem_manager the memory manager.
  * @param mem - the memory to add.
  * @return - the address of the node added, NULL on failure
  */
@@ -79,9 +80,6 @@ int mm_free_all(struct memory_manager *mem_manager);
  * </p>
  * @param size the number of bytes of memory to allocate
  * @param mem_manager the memory manager to which to add the new memory
- * @param file the file in which memory is allocated
- * @param func the function in which memory is allocated
- * @param line the line on which memory is allocated
  * @return a pointer to the newly allocated memory, NULL and set errno on failure
  */
 void *mm_malloc(size_t size, struct memory_manager *mem_manager);
@@ -96,9 +94,6 @@ void *mm_malloc(size_t size, struct memory_manager *mem_manager);
  * @param count the units of memory to allocate
  * @param size the the size of the units of memory
  * @param mem_manager the memory manager to which to add the new memory
- * @param file the file in which memory is allocated
- * @param func the function in which memory is allocated
- * @param line the line on which memory is allocated
  * @return a pointer to the newly allocated memory, NULL and set errno on failure
  */
 void *mm_calloc(size_t count, size_t size, struct memory_manager *mem_manager);
@@ -114,9 +109,6 @@ void *mm_calloc(size_t count, size_t size, struct memory_manager *mem_manager);
  * @param ptr the pointer for which to reallocate memory
  * @param size the new size of the memory
  * @param mem_manager the memory manager to which to add the new memory
- * @param file the file in which memory is allocated
- * @param func the function in which memory is allocated
- * @param line the line on which memory is allocated
  * @return a pointer to the newly allocated memory, or NULL and set errno of failure
  */
 void *mm_realloc(void *ptr, size_t size, struct memory_manager *mem_manager);
