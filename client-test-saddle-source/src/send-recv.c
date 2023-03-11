@@ -7,7 +7,22 @@
  */
 #define MASK_b1111 (unsigned int) 15
 
+/**
+ * Byte size of the data buffer to send.
+ */
 #define DATA_SIZE(body_size) (4 + (body_size))
+
+/**
+ * count_tokens
+ * <p>
+ * Count the number of ETX characters in the body.
+ * </p>
+ * @param body_size the number of bytes in the body
+ * @param body the body
+ * @param tracer tracer function
+ * @return the number of ETX tokens
+ */
+static int count_tokens(uint16_t body_size, const char *body, void (*tracer)(const char *, const char *, size_t));
 
 int recv_parse_message(struct state_minor *state, struct client *client, struct dispatch *dispatch)
 {
@@ -109,7 +124,52 @@ int parse_body(struct state_minor *state, struct client *client, char ***body_to
 {
     PRINT_STACK_TRACE(state->tracer);
     
+    int num_tokens;
+    char *token;
     
+    num_tokens = count_tokens(body_size, body, state->tracer);
+    
+    *body_tokens = mm_malloc((num_tokens + 1) * sizeof(char *), state->mm);
+    if (!*body_tokens)
+    {
+        SET_ERROR(state->err);
+        return -1;
+    }
+    
+    token = strdup(body);
+    mm_add(state->mm, token);
+    token = strtok( token, "\x03");
+    **body_tokens = token;
+    for (size_t i = 1; token; ++i)
+    {
+        token = strtok( NULL, "\x03");
+        if (token)
+        {
+            *(*body_tokens + i) = token;
+        }
+    }
+    
+    *(*body_tokens + num_tokens) = NULL;
+    
+    mm_free(state->mm, token);
     
     return 0;
+}
+
+static int count_tokens(uint16_t body_size, const char *body, void (*tracer)(const char *, const char *, size_t))
+{
+    PRINT_STACK_TRACE(tracer);
+    
+    int count;
+    
+    count = 0;
+    for (size_t i = 0; i < body_size; ++i)
+    {
+        if (*(body + i) == '\x03')
+        {
+            ++count;
+        }
+    }
+    
+    return count;
 }
