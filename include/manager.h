@@ -10,19 +10,12 @@
 /**
  * struct memory_manager
  * <p>
- * A memory manager. Stores a linked list of memory addresses. Contains
- * functions to add, free, or free all memory addresses.
+ * A memory manager. Stores a linked list of memory addresses.
  * </p>
  */
 struct memory_manager
 {
     struct memory_address *head;
-    
-    void *(*mm_add)(struct memory_manager *, void *);
-    
-    int (*mm_free)(struct memory_manager *, void *);
-    
-    int (*mm_free_all)(struct memory_manager *);
 };
 
 /**
@@ -38,9 +31,10 @@ struct memory_manager *init_mem_manager(void);
  * free_mem_manager
  * <p>
  * Free all memory in a memory manager, then free the memory manager itself.
+ * If the memory manager does not exist, set errno to EFAULT.
  * </p>
  * @param mem_manager the memory manager to be freed
- * @return 0 on success, -1 if the memory manager does not exist
+ * @return 0 on success, -1 and set errno if the memory manager does not exist
  */
 int free_mem_manager(struct memory_manager *mem_manager);
 
@@ -48,6 +42,7 @@ int free_mem_manager(struct memory_manager *mem_manager);
  * mm_add
  * <p>
  * Add a new memory address node to the memory manager linked list.
+ * If the memory manager does not exist, set errno to EFAULT.
  * </p>
  * @param mem - the memory to add.
  * @return - the address of the node added, NULL on failure
@@ -58,11 +53,14 @@ void *mm_add(struct memory_manager *mem_manager, void *mem);
  * mm_free
  * <p>
  * Free the parameter memory address and remove it from the memory manager.
- * Return -1 and if the memory address cannot be located in the memory manager.
+ * Return -1 and set errno to ENODATA if the memory address cannot be
+ * located in the memory manager.
+ * If the memory manager does not exist, set errno to EFAULT.
+ * If the memory pointed to by ptr cannot be found in the memory manager, set errno to ENODATA.
  * </p>
  * @param mem_manager - the memory manager to search
  * @param mem - the memory address to free
- * @return 0 on success, -1 on failure
+ * @return 0 on success, -1 and set errno on failure
  */
 int mm_free(struct memory_manager *mem_manager, void *mem);
 
@@ -70,8 +68,9 @@ int mm_free(struct memory_manager *mem_manager, void *mem);
  * mm_free_all
  * <p>
  * Free all memory stored in the memory manager.
+ * If the memory manager does not exist, set errno to EFAULT.
  * </p>
- * @return the number of memory items freed on success, -1 on failure
+ * @return the number of memory items freed on success, -1 and set errno on failure
  */
 int mm_free_all(struct memory_manager *mem_manager);
 
@@ -79,25 +78,24 @@ int mm_free_all(struct memory_manager *mem_manager);
  * mm_malloc
  * <p>
  * Call malloc to allocate memory to a pointer. Add the pointer to a
- * memory manager if provided. If no mem_manager is NULL, only malloc
- * will be called.
+ * memory manager if provided.
+ * If the memory manager does not exist, set errno to EFAULT.
  * </p>
  * @param size the number of bytes of memory to allocate
  * @param mem_manager the memory manager to which to add the new memory
  * @param file the file in which memory is allocated
  * @param func the function in which memory is allocated
  * @param line the line on which memory is allocated
- * @return a pointer to the newly allocated memory
+ * @return a pointer to the newly allocated memory, NULL and set errno on failure
  */
-void *mm_malloc(size_t size, struct memory_manager *mem_manager,
-                const char *file, const char *func, size_t line);
+void *mm_malloc(size_t size, struct memory_manager *mem_manager);
 
 /**
  * mm_calloc
  * <p>
  * Call calloc to allocate memory to a pointer. Add the pointer to a
- * memory manager if provided. If no mem_manager is NULL, only calloc
- * will be called.
+ * memory manager if provided.
+ * If the memory manager does not exist, set errno to EFAULT.
  * </p>
  * @param count the units of memory to allocate
  * @param size the the size of the units of memory
@@ -105,17 +103,17 @@ void *mm_malloc(size_t size, struct memory_manager *mem_manager,
  * @param file the file in which memory is allocated
  * @param func the function in which memory is allocated
  * @param line the line on which memory is allocated
- * @return a pointer to the newly allocated memory
+ * @return a pointer to the newly allocated memory, NULL and set errno on failure
  */
-void *mm_calloc(size_t count, size_t size, struct memory_manager *mem_manager,
-                const char *file, const char *func, size_t line);
+void *mm_calloc(size_t count, size_t size, struct memory_manager *mem_manager);
 
 /**
  * mm_realloc
  * <p>
  * Call realloc to reallocate memory to a pointer. Update the pointer in the
- * memory manager if provided. If no mem_manager is NULL, only realloc
- * will be called.
+ * memory manager if provided.
+ * If the memory manager does not exist, set errno to EFAULT.
+ * If the memory pointed to by ptr cannot be found in the memory manager, set errno to ENODATA.
  * </p>
  * @param ptr the pointer for which to reallocate memory
  * @param size the new size of the memory
@@ -123,36 +121,8 @@ void *mm_calloc(size_t count, size_t size, struct memory_manager *mem_manager,
  * @param file the file in which memory is allocated
  * @param func the function in which memory is allocated
  * @param line the line on which memory is allocated
- * @return a pointer to the newly allocated memory
+ * @return a pointer to the newly allocated memory, or NULL and set errno of failure
  */
-void *mm_realloc(void *ptr, size_t size, struct memory_manager *mem_manager,
-                 const char *file, const char *func, size_t line);
-
-/**
- * Mmm_malloc
- * <p>
- * Macro mm_malloc that automatically adds file, func, and line parameters.
- * </p>
- */
-#define Mmm_malloc(size, mm) \
-    mm_malloc(size, mm, __FILE__, __func__, __LINE__)
-
-/**
- * Mmm_malloc
- * <p>
- * Macro mm_calloc that automatically adds file, func, and line parameters.
- * </p>
- */
-#define Mmm_calloc(count, size, mm) \
-    mm_calloc(count, size, mm, __FILE__, __func__, __LINE__)
-
-/**
- * Mmm_malloc
- * <p>
- * Macro mm_realloc that automatically adds file, func, and line parameters.
- * </p>
- */
-#define Mmm_realloc(ptr, size, mm) \
-    mm_realloc(ptr, size, mm, __FILE__, __func__, __LINE__)
+void *mm_realloc(void *ptr, size_t size, struct memory_manager *mem_manager);
 
 #endif //MEMORY_MANAGER_MANAGER_H

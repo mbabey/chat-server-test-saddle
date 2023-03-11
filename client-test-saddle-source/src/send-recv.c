@@ -45,7 +45,7 @@ int recv_parse_message(struct state_minor *state, struct client *client, struct 
     dispatch->body_size = ntohs(dispatch->body_size);
     
     // Get the body.
-    dispatch->body = (char *) Mmm_calloc(1, dispatch->body_size + 1, state->mm);
+    dispatch->body = (char *) mm_calloc(1, dispatch->body_size + 1, state->mm);
     if (!dispatch->body)
     {
         SET_ERROR(state->err);

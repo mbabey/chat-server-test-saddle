@@ -46,14 +46,9 @@ struct memory_manager *init_mem_manager(void)
     struct memory_manager *mm;
     
     mm = (struct memory_manager *) malloc(sizeof(struct memory_manager));
-    
     if (mm)
     {
         mm->head = NULL;
-        
-        mm->mm_add      = mm_add;
-        mm->mm_free     = mm_free;
-        mm->mm_free_all = mm_free_all;
     }
     
     return mm;
@@ -63,10 +58,11 @@ int free_mem_manager(struct memory_manager *mem_manager)
 {
     if (!mem_manager)
     {
+        errno = EFAULT;
         return -1;
     }
     
-    mem_manager->mm_free_all(mem_manager);
+    mm_free_all(mem_manager);
     free(mem_manager);
     
     return 0;
@@ -74,8 +70,16 @@ int free_mem_manager(struct memory_manager *mem_manager)
 
 void *mm_add(struct memory_manager *mem_manager, void *mem)
 {
-    struct memory_address *ma     = NULL;
-    struct memory_address *ma_cur = NULL;
+    struct memory_address *ma;
+    struct memory_address *ma_cur;
+    
+    errno                         = 0;
+    
+    if (!mem_manager)
+    {
+        errno = EFAULT;
+        return NULL;
+    }
     
     ma = (struct memory_address *) malloc(sizeof(struct memory_address));
     if (!ma)
@@ -86,27 +90,34 @@ void *mm_add(struct memory_manager *mem_manager, void *mem)
     ma->addr = mem;
     ma->next = NULL;
     
-    if (mem_manager->head == NULL)
+    if (mem_manager->head == NULL) // If empty list.
     {
         mem_manager->head = ma;
-        return ma->addr;
-    }
-    
-    ma_cur = mem_manager->head;
-    while (ma_cur->next != NULL)
+    } else // If non-empty list.
     {
-        ma_cur = ma_cur->next;
+        ma_cur = mem_manager->head;
+        while (ma_cur->next != NULL)
+        {
+            ma_cur = ma_cur->next;
+        }
+        ma_cur->next = ma;
     }
-    ma_cur->next = ma;
     
     return ma->addr;
 }
 
-
 int mm_free(struct memory_manager *mem_manager, void *mem)
 {
-    struct memory_address *ma      = NULL;
-    struct memory_address *ma_prev = NULL;
+    struct memory_address *ma;
+    struct memory_address *ma_prev;
+    
+    errno = 0;
+    
+    if (!mem_manager)
+    {
+        errno = EFAULT;
+        return -1;
+    }
     
     ma = mem_manager->head;
     while (ma && ma->addr != mem) // Find ma in list, track ma_prev
@@ -117,6 +128,7 @@ int mm_free(struct memory_manager *mem_manager, void *mem)
     
     if (!ma) // If not found.
     {
+        errno = ENODATA;
         return -1;
     }
     
@@ -160,10 +172,17 @@ static int mm_free_recurse(struct memory_address *ma)
     return m_freed;
 }
 
-void *mm_malloc(size_t size, struct memory_manager *mem_manager,
-                const char *file, const char *func, size_t line)
+void *mm_malloc(size_t size, struct memory_manager *mem_manager)
 {
-    void *mem = NULL;
+    void *mem;
+    
+    errno = 0;
+    
+    if (!mem_manager)
+    {
+        errno = EFAULT;
+        return NULL;
+    }
     
     mem = malloc(size);
     if (!mem)
@@ -171,18 +190,23 @@ void *mm_malloc(size_t size, struct memory_manager *mem_manager,
         return NULL;
     }
     
-    if (mem_manager)
-    {
-        mem_manager->mm_add(mem_manager, mem);
-    }
+    mm_add(mem_manager, mem);
+    
     
     return mem;
 }
 
-void *mm_calloc(size_t count, size_t size, struct memory_manager *mem_manager,
-                const char *file, const char *func, size_t line)
+void *mm_calloc(size_t count, size_t size, struct memory_manager *mem_manager)
 {
-    void *mem = NULL;
+    void *mem;
+    
+    errno = 0;
+    
+    if (!mem_manager)
+    {
+        errno = EFAULT;
+        return NULL;
+    }
     
     mem = calloc(count, size);
     if (!mem)
@@ -190,19 +214,32 @@ void *mm_calloc(size_t count, size_t size, struct memory_manager *mem_manager,
         return NULL;
     }
     
-    if (mem_manager)
-    {
-        mem_manager->mm_add(mem_manager, mem);
-    }
+    mm_add(mem_manager, mem);
     
     return mem;
 }
 
-void *mm_realloc(void *ptr, size_t size, struct memory_manager *mem_manager,
-                 const char *file, const char *func, size_t line)
+void *mm_realloc(void *ptr, size_t size, struct memory_manager *mem_manager)
 {
-    struct memory_address *ma  = NULL;
-    void                  *mem = NULL;
+    struct memory_address *ma;
+    void                  *mem;
+    
+    errno = 0;
+    
+    // Find the memory address node in the memory manager.
+    if (mem_manager)
+    {
+        ma = mm_find_in_list(mem_manager, ptr);
+        if (ma != NULL)
+        {
+            errno = ENODATA;
+            return NULL; // mem not a part of memory manager.
+        }
+    } else
+    {
+        errno = EFAULT;
+        return NULL; // No memory manager.
+    }
     
     mem = realloc(ptr, size);
     if (!mem)
@@ -210,15 +247,7 @@ void *mm_realloc(void *ptr, size_t size, struct memory_manager *mem_manager,
         return NULL;
     }
     
-    // Update the pointer in the ma
-    if (mem_manager)
-    {
-        ma = mm_find_in_list(mem_manager, ptr);
-        if (ma != NULL)
-        {
-            ma->addr = mem;
-        }
-    }
+    ma->addr = mem;
     
     return mem;
 }

@@ -15,6 +15,7 @@ set(SOURCE_LIST
         ${SOURCE_DIR}/saddle-run.c
         ${SOURCE_DIR}/saddle-setup.c
         ${SOURCE_DIR}/library-util.c
+        ${SOURCE_DIR}/manager.c
         #=vvvv= SOURCE FOR DUMMY MAIN =vvvv=#
         )
 set(HEADER_LIST
@@ -23,6 +24,7 @@ set(HEADER_LIST
         ${INCLUDE_DIR}/state.h
         ${INCLUDE_DIR}/error-handlers.h
         ${INCLUDE_DIR}/saddle-function.h
+        ${INCLUDE_DIR}/manager.h
         #=vvvv= INCLUDES FOR DUMMY MAIN =vvvv=#
         )
 
@@ -181,7 +183,3 @@ target_include_directories(chat-test-saddle PRIVATE /usr/local/include)
 #========= ^^^ COMPILE AS EXECUTABLE ^^^ =========#
 
 add_dependencies(chat-test-saddle doxygen)
-
-#find_library(MEM_MANAGER mem_manager REQUIRED)
-#
-#target_link_libraries(chat-test-saddle PUBLIC ${MEM_MANAGER})

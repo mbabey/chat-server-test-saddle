@@ -185,7 +185,3 @@ install(FILES ${HEADER_LIST} DESTINATION include/client-test-saddle)
 #========= ^^^ COMPILE AS EXECUTABLE ^^^ =========#
 
 add_dependencies(client-test-saddle doxygen)
-#
-#find_library(MEM_MANAGER mem_manager REQUIRED)
-#
-#target_link_libraries(client-test-saddle PUBLIC ${MEM_MANAGER})
