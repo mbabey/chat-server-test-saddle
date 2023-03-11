@@ -67,7 +67,7 @@ void *mm_add(struct memory_manager *mem_manager, void *mem)
     struct memory_address *ma;
     struct memory_address *ma_cur;
     
-    errno                         = 0;
+    errno = 0;
     
     if (!mem_manager)
     {
