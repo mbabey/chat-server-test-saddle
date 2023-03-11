@@ -1,7 +1,3 @@
-//
-// Created by Maxwell Babey on 10/30/22.
-//
-
 #ifndef MEMORY_MANAGER_MANAGER_H
 #define MEMORY_MANAGER_MANAGER_H
 

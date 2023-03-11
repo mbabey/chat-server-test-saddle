@@ -1,12 +1,6 @@
-//
-// Created by Maxwell Babey on 10/30/22.
-//
-
 #include "../include/manager.h"
 #include <errno.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 /**
  * mm_free_recurse
