@@ -9,7 +9,7 @@
 
 #define OPTS_LIST "l:i:p:t"
 #define USAGE_MESSAGE                                                                           \
-    "usage: ./chat-test-saddle -l <server | client> -i <ip address> -p <port number> [-t]\n"    \
+    "usage: chat-test-saddle -l <server | client> -i <ip address> -p <port number> [-t]\n"      \
     "-l <server | client>, whether to run the test server or test client\n"                     \
     "-i <ip address>, if server selected for -l, will run the server at this ip address.\n"     \
     "\tif client selected for -l, will connect to a server at this ip address.\n"               \
@@ -167,6 +167,8 @@ static int parse_args(struct state *state, int argc, char **argv)
                     // NOLINTNEXTLINE(concurrency-mt-unsafe) : No threads here
                     (void) fprintf(stderr, "Unknown option character \'\\x%x\'.\n", optopt);
                 }
+                // NOLINTNEXTLINE(concurrency-mt-unsafe) : No threads here
+                (void) fprintf(stdout, USAGE_MESSAGE);
                 break;
             }
             default:
