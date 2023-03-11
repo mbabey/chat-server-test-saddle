@@ -2,11 +2,9 @@
 #define CLIENT_TEST_SADDLE_STATE_H
 
 #include "../../include/error-handlers.h"
+#include "../../include/manager.h"
 
-#include <mem_manager/manager.h>
 #include <netinet/in.h>
-
-
 
 /**
  * Minor state struct. See chat-server-test-saddle/include/state.h for major.

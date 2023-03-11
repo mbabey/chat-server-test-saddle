@@ -104,3 +104,12 @@ int assemble_message_send(struct state_minor *state, struct client *client, stru
     
     return 0;
 }
+
+int parse_body(struct state_minor *state, struct client *client, char ***body_tokens, uint16_t body_size, char *body)
+{
+    PRINT_STACK_TRACE(state->tracer);
+    
+    
+    
+    return 0;
+}

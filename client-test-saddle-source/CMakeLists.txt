@@ -15,16 +15,18 @@ set(SOURCE_LIST
         ${SOURCE_DIR}/ui.c
         ${SOURCE_DIR}/send-recv.c
         ${SOURCE_DIR}/test-functions.c
+        ../${SOURCE_DIR}/manager.c
         #=vvvv= SOURCE FOR DUMMY MAIN =vvvv=#
 #        ${SOURCE_DIR}/test-main.c
         )
 set(HEADER_LIST
-        ../include/saddle-function.h
         ${INCLUDE_DIR}/test-functions.h
         ${INCLUDE_DIR}/saddle-client.h
         ${INCLUDE_DIR}/state.h
         ${INCLUDE_DIR}/ui.h
         ${INCLUDE_DIR}/send-recv.h
+        ../${INCLUDE_DIR}/saddle-function.h
+        ../${INCLUDE_DIR}/manager.h
         #=vvvv= INCLUDES FOR DUMMY MAIN =vvvv=#
         )
 
@@ -183,7 +185,7 @@ install(FILES ${HEADER_LIST} DESTINATION include/client-test-saddle)
 #========= ^^^ COMPILE AS EXECUTABLE ^^^ =========#
 
 add_dependencies(client-test-saddle doxygen)
-
-find_library(MEM_MANAGER mem_manager REQUIRED)
-
-target_link_libraries(client-test-saddle PUBLIC ${MEM_MANAGER})
+#
+#find_library(MEM_MANAGER mem_manager REQUIRED)
+#
+#target_link_libraries(client-test-saddle PUBLIC ${MEM_MANAGER})

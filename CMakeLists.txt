@@ -182,6 +182,6 @@ target_include_directories(chat-test-saddle PRIVATE /usr/local/include)
 
 add_dependencies(chat-test-saddle doxygen)
 
-find_library(MEM_MANAGER mem_manager REQUIRED)
-
-target_link_libraries(chat-test-saddle PUBLIC ${MEM_MANAGER})
+#find_library(MEM_MANAGER mem_manager REQUIRED)
+#
+#target_link_libraries(chat-test-saddle PUBLIC ${MEM_MANAGER})
