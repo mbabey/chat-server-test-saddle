@@ -297,3 +297,19 @@ static int validate_ip(struct sockaddr_in *addr, const char *ip_addr_str, TRACER
         }
     }
 }
+
+int run_saddle(struct state *state)
+{
+    int ret_val;
+    
+    ret_val = state->lib_main(state);
+    
+    return ret_val;
+}
+
+void exit_saddle(struct state *state)
+{
+    close_lib(state->lib, state->lib_name, state->tracer);
+    
+    free_mem_manager(state->mm);
+}

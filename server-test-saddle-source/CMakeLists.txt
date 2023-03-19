@@ -10,21 +10,21 @@ set(CMAKE_C_STANDARD 17)
 set(SOURCE_DIR src)
 set(INCLUDE_DIR include)
 set(SOURCE_LIST
-        ${SOURCE_DIR}/core.c
-        ${SOURCE_DIR}/server_state.c
-        ${SOURCE_DIR}/process_server.c
-        ${SOURCE_DIR}/process_server_util.c
-        ${SOURCE_DIR}/main.c
+        ${SOURCE_DIR}/lib-main.c
+        ${SOURCE_DIR}/process-server.c
+        ${SOURCE_DIR}/process-server-util.c
+        ${SOURCE_DIR}/server-state.c
         #=vvvv= SOURCE FOR DUMMY MAIN =vvvv=#
+        ${SOURCE_DIR}/core.c
+        ${SOURCE_DIR}/test-main.c
         )
 set(HEADER_LIST
-        ${INCLUDE_DIR}/core.h
-        ${INCLUDE_DIR}/error_handlers.h
         ${INCLUDE_DIR}/objects.h
-        ${INCLUDE_DIR}/process_server.h
-        ${INCLUDE_DIR}/process_server_util.h
-        ${INCLUDE_DIR}/server_state.h
+        ${INCLUDE_DIR}/process-server.h
+        ${INCLUDE_DIR}/process-server-util.h
+        ${INCLUDE_DIR}/server-state.h
         #=vvvv= INCLUDES FOR DUMMY MAIN =vvvv=#
+        ${INCLUDE_DIR}/core.h
         )
 
 set(SANITIZE TRUE)
@@ -182,7 +182,3 @@ target_include_directories(server-test-saddle PRIVATE /usr/local/include)
 #========= ^^^ COMPILE AS EXECUTABLE ^^^ =========#
 
 add_dependencies(server-test-saddle doxygen)
-
-find_library(MEM_MANAGER mem_manager REQUIRED)
-
-target_link_libraries(server-test-saddle PUBLIC ${MEM_MANAGER})

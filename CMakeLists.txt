@@ -10,21 +10,21 @@ set(CMAKE_C_STANDARD 17)
 set(SOURCE_DIR src)
 set(INCLUDE_DIR include)
 set(SOURCE_LIST
-        ${SOURCE_DIR}/main.c
-        ${SOURCE_DIR}/saddle-exit.c
-        ${SOURCE_DIR}/saddle-run.c
-        ${SOURCE_DIR}/saddle-setup.c
         ${SOURCE_DIR}/library-util.c
+        ${SOURCE_DIR}/main.c
         ${SOURCE_DIR}/manager.c
+        ${SOURCE_DIR}/saddle.c
+        ${SOURCE_DIR}/util.c
         #=vvvv= SOURCE FOR DUMMY MAIN =vvvv=#
         )
 set(HEADER_LIST
-        ${INCLUDE_DIR}/saddle.h
-        ${INCLUDE_DIR}/library-util.h
-        ${INCLUDE_DIR}/state.h
         ${INCLUDE_DIR}/error-handlers.h
-        ${INCLUDE_DIR}/saddle-function.h
+        ${INCLUDE_DIR}/global-objects.h
+        ${INCLUDE_DIR}/library-util.h
         ${INCLUDE_DIR}/manager.h
+        ${INCLUDE_DIR}/saddle.h
+        ${INCLUDE_DIR}/saddle-function.h
+        ${INCLUDE_DIR}/util.h
         #=vvvv= INCLUDES FOR DUMMY MAIN =vvvv=#
         )
 

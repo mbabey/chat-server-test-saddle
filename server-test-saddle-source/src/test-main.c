@@ -1,3 +1,4 @@
+#include "../../include/saddle-function.h"
 #include "../include/core.h"
 #include "../include/server-state.h"
 
