@@ -114,11 +114,11 @@ typedef struct
     int    id;
     char   *channel_name;
     char   *creator;
-    User   *users;
+    User   **users;
     size_t users_size;
-    User   *administrators;
+    User   **administrators;
     size_t administrators_size;
-    User   *banned_users;
+    User   **banned_users;
     size_t banned_users_size;
 } Channel;
 
@@ -162,13 +162,13 @@ struct server_object
     struct parent *parent;
     struct child  *child;
     
-    User    *user_db;
+    User    **user_db;
     size_t  user_db_size;
-    Channel *channel_db;
+    Channel **channel_db;
     size_t  channel_db_size;
-    Message *message_db;
+    Message **message_db;
     size_t  message_db_size;
-    Auth    *auth_db;
+    Auth    **auth_db;
     size_t  auth_db_size;
 };
 
