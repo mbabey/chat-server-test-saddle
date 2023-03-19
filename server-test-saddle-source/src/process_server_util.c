@@ -19,7 +19,7 @@
  * @param so the state object
  * @return 0 on success, set errno and -1 on failure
  */
-static int open_semaphores(struct core_object *co, struct state_object *so);
+static int open_semaphores(struct core_object *co, struct server_object *so);
 
 /**
  * p_setup_parent
@@ -32,7 +32,7 @@ static int open_semaphores(struct core_object *co, struct state_object *so);
  * @param so the state object
  * @return 0 on success, -1 on and set errno failure.
  */
-static int p_setup_parent(struct core_object *co, struct state_object *so);
+static int p_setup_parent(struct core_object *co, struct server_object *so);
 
 /**
  * p_open_process_server_for_listen
@@ -57,13 +57,13 @@ static int p_open_process_server_for_listen(struct core_object *co, struct paren
  * @param so the state object
  * @return 0 on success, -1 and set errno of failure.
  */
-static int c_setup_child(struct core_object *co, struct state_object *so);
+static int c_setup_child(struct core_object *co, struct server_object *so);
 
-struct state_object *setup_process_state(struct memory_manager *mm)
+struct server_object *setup_process_state(struct memory_manager *mm)
 {
-    struct state_object *so;
+    struct server_object *so;
     
-    so = (struct state_object *) mm_calloc(1, sizeof(struct state_object), mm);
+    so = (struct server_object *) mm_calloc(1, sizeof(struct server_object), mm);
     if (!so) // Depending on whether more is added to this state object, this if clause may go.
     {
         return NULL;
@@ -72,7 +72,7 @@ struct state_object *setup_process_state(struct memory_manager *mm)
     return so;
 }
 
-int open_pipe_semaphores_domain_sockets(struct core_object *co, struct state_object *so)
+int open_pipe_semaphores_domain_sockets(struct core_object *co, struct server_object *so)
 {
     PRINT_STACK_TRACE(co->tracer);
     
@@ -97,7 +97,7 @@ int open_pipe_semaphores_domain_sockets(struct core_object *co, struct state_obj
     return 0;
 }
 
-static int open_semaphores(struct core_object *co, struct state_object *so)
+static int open_semaphores(struct core_object *co, struct server_object *so)
 {
     PRINT_STACK_TRACE(co->tracer);
     sem_t *pipe_write_sem;
@@ -136,7 +136,7 @@ static int open_semaphores(struct core_object *co, struct state_object *so)
     return 0;
 }
 
-int fork_child_processes(struct core_object *co, struct state_object *so)
+int fork_child_processes(struct core_object *co, struct server_object *so)
 {
     pid_t pid;
     
@@ -171,7 +171,7 @@ int fork_child_processes(struct core_object *co, struct state_object *so)
     return 0;
 }
 
-static int c_setup_child(struct core_object *co, struct state_object *so)
+static int c_setup_child(struct core_object *co, struct server_object *so)
 {
     so->parent = NULL; // Here for clarity; will already be null.
     so->child  = (struct child_struct *) mm_calloc(1, sizeof(struct child_struct), co->mm);
@@ -190,7 +190,7 @@ static int c_setup_child(struct core_object *co, struct state_object *so)
     return 0;
 }
 
-static int p_setup_parent(struct core_object *co, struct state_object *so)
+static int p_setup_parent(struct core_object *co, struct server_object *so)
 {
     so->parent = (struct parent_struct *) mm_calloc(1, sizeof(struct parent_struct), co->mm);
     if (!so->parent)
@@ -254,7 +254,7 @@ static int p_open_process_server_for_listen(struct core_object *co, struct paren
     return 0;
 }
 
-void p_destroy_parent_state(struct core_object *co, struct state_object *so, struct parent_struct *parent)
+void p_destroy_parent_state(struct core_object *co, struct server_object *so, struct parent_struct *parent)
 {
     PRINT_STACK_TRACE(co->tracer);
     int status;
@@ -288,7 +288,7 @@ void p_destroy_parent_state(struct core_object *co, struct state_object *so, str
     sem_unlink(LOG_SEM_NAME);
 }
 
-void c_destroy_child_state(struct core_object *co, struct state_object *so, struct child_struct *child)
+void c_destroy_child_state(struct core_object *co, struct server_object *so, struct child_struct *child)
 {
     PRINT_STACK_TRACE(co->tracer);
     close_fd_report_undefined_error(so->c_to_p_pipe_fds[WRITE], "state of pipe write is undefined.");

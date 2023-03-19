@@ -14,7 +14,7 @@
  * @param so the state object
  * @return 0 on success, -1 and set errno on failure
  */
-int setup_process_server(struct core_object *co, struct state_object *so);
+int setup_process_server(struct core_object *co, struct server_object *so);
 
 /**
  * run_process_server
@@ -28,7 +28,7 @@ int setup_process_server(struct core_object *co, struct state_object *so);
  * @param so the state object
  * @return 0 on success, -1 and set errno on failure
  */
-int run_process_server(struct core_object *co, struct state_object *so);
+int run_process_server(struct core_object *co, struct server_object *so);
 
 /**
  * destroy_process_state
@@ -39,6 +39,6 @@ int run_process_server(struct core_object *co, struct state_object *so);
  * @param co the core object
  * @param so the state object
  */
-void destroy_process_state(struct core_object *co, struct state_object *so);
+void destroy_process_state(struct core_object *co, struct server_object *so);
 
 #endif //PROCESS_SERVER_PROCESS_SERVER_H

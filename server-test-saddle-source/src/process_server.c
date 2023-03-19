@@ -34,7 +34,7 @@ volatile int GOGO_PROCESS = 1;
  * @param parent the parent struct
  * @return 0 on success, -1 and set errno on failure
  */
-static int p_run_poll_loop(struct core_object *co, struct state_object *so, struct parent_struct *parent);
+static int p_run_poll_loop(struct core_object *co, struct server_object *so, struct parent_struct *parent);
 
 /**
  * setup_signal_handler
@@ -89,7 +89,7 @@ static size_t p_get_pollfd_index(const struct pollfd *pollfds);
  * @param pollfds the array of pollfds
  * @return 0 on success, -1 and set errno on failure.
  */
-static int p_read_pipe_reenable_fd(struct core_object *co, struct state_object *so, struct pollfd *pollfds);
+static int p_read_pipe_reenable_fd(struct core_object *co, struct server_object *so, struct pollfd *pollfds);
 
 /**
  * p_handle_socket_action
@@ -102,7 +102,7 @@ static int p_read_pipe_reenable_fd(struct core_object *co, struct state_object *
  * @param pollfds the pollfds array
  * @return 0 on success, -1 and set errno on failure
  */
-static int p_handle_socket_action(struct core_object *co, struct state_object *so, struct pollfd *pollfds);
+static int p_handle_socket_action(struct core_object *co, struct server_object *so, struct pollfd *pollfds);
 
 /**
  * p_send_to_child
@@ -114,7 +114,7 @@ static int p_handle_socket_action(struct core_object *co, struct state_object *s
  * @param active_pollfd the active socket
  * @return 0 on success, -1 and set errno on failure
  */
-static int p_send_to_child(struct core_object *co, struct state_object *so, struct pollfd *active_pollfd);
+static int p_send_to_child(struct core_object *co, struct server_object *so, struct pollfd *active_pollfd);
 
 /**
  * p_remove_connection
@@ -139,7 +139,7 @@ static void p_remove_connection(struct core_object *co, struct parent_struct *pa
  * @param so the state object
  * @return 0 on success, -1 and set errno on failure.
  */
-static int c_run_child_process(struct core_object *co, struct state_object *so);
+static int c_run_child_process(struct core_object *co, struct server_object *so);
 
 /**
  * c_receive_and_handle_messages
@@ -152,7 +152,7 @@ static int c_run_child_process(struct core_object *co, struct state_object *so);
  * @param child the child struct
  * @return 0 on success, -1 and set errno on failure
  */
-static int c_receive_and_handle_messages(struct core_object *co, struct state_object *so, struct child_struct *child);
+static int c_receive_and_handle_messages(struct core_object *co, struct server_object *so, struct child_struct *child);
 
 /**
  * c_get_file_description_from_domain_socket
@@ -165,7 +165,7 @@ static int c_receive_and_handle_messages(struct core_object *co, struct state_ob
  * @param child the child struct
  * @return 0 on success, -1 and set errno on failure.
  */
-static int c_get_file_description_from_domain_socket(struct core_object *co, struct state_object *so,
+static int c_get_file_description_from_domain_socket(struct core_object *co, struct server_object *so,
                                                      struct child_struct *child);
 
 /**
@@ -178,9 +178,9 @@ static int c_get_file_description_from_domain_socket(struct core_object *co, str
  * @param child the child struct
  * @return 0 on success, -1 and set errno on failure.
  */
-static int c_inform_parent_recv_finished(struct core_object *co, struct state_object *so, struct child_struct *child);
+static int c_inform_parent_recv_finished(struct core_object *co, struct server_object *so, struct child_struct *child);
 
-int setup_process_server(struct core_object *co, struct state_object *so)
+int setup_process_server(struct core_object *co, struct server_object *so)
 {
     PRINT_STACK_TRACE(co->tracer);
     
@@ -210,7 +210,7 @@ int setup_process_server(struct core_object *co, struct state_object *so)
     return 0;
 }
 
-int run_process_server(struct core_object *co, struct state_object *so)
+int run_process_server(struct core_object *co, struct server_object *so)
 {
     PRINT_STACK_TRACE(co->tracer);
     
@@ -232,7 +232,7 @@ int run_process_server(struct core_object *co, struct state_object *so)
     return 0;
 }
 
-static int p_run_poll_loop(struct core_object *co, struct state_object *so, struct parent_struct *parent)
+static int p_run_poll_loop(struct core_object *co, struct server_object *so, struct parent_struct *parent)
 {
     PRINT_STACK_TRACE(co->tracer);
     struct sigaction sigint;
@@ -361,7 +361,7 @@ static size_t p_get_pollfd_index(const struct pollfd *pollfds)
     return conn_index;
 }
 
-static int p_read_pipe_reenable_fd(struct core_object *co, struct state_object *so, struct pollfd *pollfds)
+static int p_read_pipe_reenable_fd(struct core_object *co, struct server_object *so, struct pollfd *pollfds)
 {
     PRINT_STACK_TRACE(co->tracer);
     int     fd;
@@ -388,7 +388,7 @@ static int p_read_pipe_reenable_fd(struct core_object *co, struct state_object *
     return 0;
 }
 
-static int p_handle_socket_action(struct core_object *co, struct state_object *so, struct pollfd *pollfds)
+static int p_handle_socket_action(struct core_object *co, struct server_object *so, struct pollfd *pollfds)
 {
     PRINT_STACK_TRACE(co->tracer);
     struct pollfd *pollfd;
@@ -416,7 +416,7 @@ static int p_handle_socket_action(struct core_object *co, struct state_object *s
     return 0;
 }
 
-static int p_send_to_child(struct core_object *co, struct state_object *so, struct pollfd *active_pollfd)
+static int p_send_to_child(struct core_object *co, struct server_object *so, struct pollfd *active_pollfd)
 {
     PRINT_STACK_TRACE(co->tracer);
     ssize_t        bytes_sent;
@@ -488,7 +488,7 @@ static void p_remove_connection(struct core_object *co, struct parent_struct *pa
     }
 }
 
-static int c_run_child_process(struct core_object *co, struct state_object *so)
+static int c_run_child_process(struct core_object *co, struct server_object *so)
 {
     PRINT_STACK_TRACE(co->tracer);
     pid_t            pid;
@@ -519,7 +519,7 @@ static int c_run_child_process(struct core_object *co, struct state_object *so)
     return 0;
 }
 
-static int c_receive_and_handle_messages(struct core_object *co, struct state_object *so, struct child_struct *child)
+static int c_receive_and_handle_messages(struct core_object *co, struct server_object *so, struct child_struct *child)
 {
     PRINT_STACK_TRACE(co->tracer);
     
@@ -548,7 +548,7 @@ static int c_receive_and_handle_messages(struct core_object *co, struct state_ob
     return 0;
 }
 
-static int c_get_file_description_from_domain_socket(struct core_object *co, struct state_object *so,
+static int c_get_file_description_from_domain_socket(struct core_object *co, struct server_object *so,
                                                      struct child_struct *child)
 {
     PRINT_STACK_TRACE(co->tracer);
@@ -605,7 +605,7 @@ static int c_get_file_description_from_domain_socket(struct core_object *co, str
     return 0;
 }
 
-static int c_inform_parent_recv_finished(struct core_object *co, struct state_object *so, struct child_struct *child)
+static int c_inform_parent_recv_finished(struct core_object *co, struct server_object *so, struct child_struct *child)
 {
     PRINT_STACK_TRACE(co->tracer);
     ssize_t bytes_written;
@@ -627,7 +627,7 @@ static int c_inform_parent_recv_finished(struct core_object *co, struct state_ob
     return 0;
 }
 
-void destroy_process_state(struct core_object *co, struct state_object *so)
+void destroy_process_state(struct core_object *co, struct server_object *so)
 {
     PRINT_STACK_TRACE(co->tracer);
     

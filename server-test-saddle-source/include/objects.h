@@ -72,7 +72,7 @@
  * <p>
  * Holds the core information for the execution of the framework, regardless
  * of the library loaded. Includes dc_env, dc_error, memory_manager, log file,
- * and state_object. state_object contains library-dependent data, and will be
+ * and server_object. server_object contains library-dependent data, and will be
  * assigned and handled by the loaded library.
  * </p>
  */
@@ -82,13 +82,13 @@ struct core_object {
     TRACER_FUNCTION_AS(tracer);
     struct memory_manager *mm;
     
-    struct state_object *so;
+    struct server_object *so;
 };
 
 /**
  * Contains information about the program state.
  */
-struct state_object
+struct server_object
 {
     pid_t                child_pids[NUM_CHILD_PROCESSES];
     int                  domain_fds[2];

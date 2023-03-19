@@ -11,7 +11,7 @@
  * @param mm the memory manager to which the state object will be added
  * @return the state object, or NULL and set errno on failure
  */
-struct state_object *setup_process_state(struct memory_manager *mm);
+struct server_object *setup_process_state(struct memory_manager *mm);
 
 /**
  * open_pipe_semaphores_domain_sockets
@@ -23,7 +23,7 @@ struct state_object *setup_process_state(struct memory_manager *mm);
  * @param so the state object
  * @return 0 on success, -1 and set errno on failure
  */
-int open_pipe_semaphores_domain_sockets(struct core_object *co, struct state_object *so);
+int open_pipe_semaphores_domain_sockets(struct core_object *co, struct server_object *so);
 
 /**
  * fork_child_processes
@@ -35,7 +35,7 @@ int open_pipe_semaphores_domain_sockets(struct core_object *co, struct state_obj
  * @param so the state object
  * @return 0 on success, -1 and set errno on failure.
  */
-int fork_child_processes(struct core_object *co, struct state_object *so);
+int fork_child_processes(struct core_object *co, struct server_object *so);
 
 /**
  * p_destroy_parent_state
@@ -48,7 +48,7 @@ int fork_child_processes(struct core_object *co, struct state_object *so);
  * @param so the state object
  * @param parent the parent struct
  */
-void p_destroy_parent_state(struct core_object *co, struct state_object *so, struct parent_struct *parent);
+void p_destroy_parent_state(struct core_object *co, struct server_object *so, struct parent_struct *parent);
 
 /**
  * c_destroy_child_state
@@ -60,7 +60,7 @@ void p_destroy_parent_state(struct core_object *co, struct state_object *so, str
  * @param so the state object
  * @param child the child struct
  */
-void c_destroy_child_state(struct core_object *co, struct state_object *so, struct child_struct *child);
+void c_destroy_child_state(struct core_object *co, struct server_object *so, struct child_struct *child);
 
 /**
  * close_fd_report_undefined_error
