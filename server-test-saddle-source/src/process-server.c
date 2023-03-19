@@ -1,4 +1,5 @@
 #include "../../include/manager.h"
+#include "../../include/util.h"
 #include "../include/objects.h"
 #include "../include/process-server.h"
 #include "../include/process-server-util.h"
@@ -14,6 +15,7 @@
 #include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables): must be non-const
 /**
@@ -167,6 +169,18 @@ static int c_receive_and_handle_messages(struct core_object *co, struct server_o
  */
 static int c_get_file_description_from_domain_socket(struct core_object *co, struct server_object *so,
                                                      struct child *child);
+
+/**
+ * c_handle_network_dispatch
+ * <p>
+ * Handle a request-response of a network dispatch.
+ * </p>
+ * @param co the core object
+ * @param so the server object
+ * @param child the child object
+ * @return 0 on success, -1 and set err on failure
+ */
+static int c_handle_network_dispatch(struct core_object *co, struct server_object *so, struct child *child);
 
 /**
  * c_inform_parent_recv_finished
@@ -367,7 +381,7 @@ static int p_read_pipe_reenable_fd(struct core_object *co, struct server_object 
     int     fd;
     ssize_t bytes_read;
     
-    bytes_read = read(so->c_to_p_pipe_fds[READ], &fd, sizeof(int));
+    bytes_read = read(so->c_to_p_pipe_fds[READ_END], &fd, sizeof(int));
     
     sem_post(so->c_to_p_pipe_sem_write);
     
@@ -449,18 +463,18 @@ static int p_send_to_child(struct core_object *co, struct server_object *so, str
     cmsghdr->cmsg_len   = CMSG_LEN(sizeof(int));
     *((int *) CMSG_DATA(cmsghdr)) = active_pollfd->fd; // The file description to send.
     
-    if (sem_wait(so->domain_sems[WRITE]) == -1)
+    if (sem_wait(so->domain_sems[WRITE_END]) == -1)
     {
         SET_ERROR(co->err);
         return (errno == EINTR) ? 0 : -1;
     }
-    bytes_sent = sendmsg(so->domain_fds[WRITE], &msghdr, 0); // Send the msghdr.
+    bytes_sent = sendmsg(so->domain_fds[WRITE_END], &msghdr, 0); // Send the msghdr.
     if (bytes_sent == -1)
     {
         SET_ERROR(co->err);
         return -1;
     }
-    sem_post(so->domain_sems[READ]);
+    sem_post(so->domain_sems[READ_END]);
     
     return 0;
 }
@@ -534,9 +548,16 @@ static int c_receive_and_handle_messages(struct core_object *co, struct server_o
             return -1;
         }
         
-        // TODO: c_handle_http_request_response(co, so, child);
-        (void) fprintf(stdout, "HTTP request handler not implemented.\n");
-    
+        if (errno == EINTR)
+        {
+            break;
+        }
+        
+        if (c_handle_network_dispatch(co, so, child) == -1)
+        {
+            return -1;
+        }
+        
         if (c_inform_parent_recv_finished(co, so, child) == -1)
         {
             return -1;
@@ -572,15 +593,15 @@ static int c_get_file_description_from_domain_socket(struct core_object *co, str
     msghdr.msg_control    = control_buffer; // Put the control buffer into the msghdr to receive.
     msghdr.msg_controllen = sizeof(control_buffer);
     
-    if (sem_wait(so->domain_sems[READ]) == -1) // Wait for the domain socket read semaphore.
+    if (sem_wait(so->domain_sems[READ_END]) == -1) // Wait for the domain socket read semaphore.
     {
         SET_ERROR(co->err);
         return (errno == EINTR) ? 0 : -1;
     }
     
-    bytes_recv = recvmsg(so->domain_fds[READ], &msghdr, 0);
+    bytes_recv = recvmsg(so->domain_fds[READ_END], &msghdr, 0);
     
-    sem_post(so->domain_sems[WRITE]); // Signal the domain socket write semaphore.
+    sem_post(so->domain_sems[WRITE_END]); // Signal the domain socket write semaphore.
     
     if (bytes_recv == -1)
     {
@@ -605,6 +626,37 @@ static int c_get_file_description_from_domain_socket(struct core_object *co, str
     return 0;
 }
 
+static int c_handle_network_dispatch(struct core_object *co, struct server_object *so, struct child *child)
+{
+    struct dispatch dispatch;
+    char            **body_tokens;
+    int             status;
+    
+    // receive the dispatch
+    memset(&dispatch, 0, sizeof(dispatch));
+    if (recv_parse_message((struct state *) co, child->client_fd_local,
+                           &dispatch, &body_tokens) == -1)
+    {
+        return -1;
+    }
+    
+    if (perform_dispatch_operation(co, &dispatch, body_tokens) == -1)
+    {
+        mm_free(co->mm, dispatch.body);
+        dispatch.body      = strdup("500");
+        dispatch.body_size = strlen(dispatch.body);
+    }
+    
+    status = assemble_message_send((struct state *) co, child->client_fd_local, &dispatch);
+    free(dispatch.body);
+    if (status == -1)
+    {
+        return -1;
+    }
+    
+    return 0;
+}
+
 static int c_inform_parent_recv_finished(struct core_object *co, struct server_object *so, struct child *child)
 {
     PRINT_STACK_TRACE(co->tracer);
@@ -616,7 +668,7 @@ static int c_inform_parent_recv_finished(struct core_object *co, struct server_o
         return (errno == EINTR) ? 0 : -1;
     }
     
-    bytes_written = write(so->c_to_p_pipe_fds[WRITE], &child->client_fd_parent, sizeof(int));
+    bytes_written = write(so->c_to_p_pipe_fds[WRITE_END], &child->client_fd_parent, sizeof(int));
     
     if (bytes_written == -1)
     {

@@ -91,7 +91,6 @@ int recv_parse_message(struct state *state, int socket_fd, struct dispatch *disp
     
     if (parse_body((struct state *) state, body_tokens, dispatch->body_size, dispatch->body) == -1)
     {
-        SET_ERROR(state->err);
         return -1;
     }
     

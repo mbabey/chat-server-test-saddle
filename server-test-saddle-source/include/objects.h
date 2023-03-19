@@ -30,12 +30,12 @@
 /**
 * Read end of child_finished_pipe or read child_finished_semaphore.
 */
-#define READ 0
+#define READ_END 0
 
 /**
 * Write end of child_finished_pipe or read child_finished_semaphore.
 */
-#define WRITE 1
+#define WRITE_END 1
 
 /**
 * Pipe write semaphore name.

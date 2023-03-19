@@ -129,8 +129,8 @@ static int open_semaphores(struct core_object *co, struct server_object *so)
     }
     
     so->c_to_p_pipe_sem_write = pipe_write_sem;
-    so->domain_sems[READ]  = domain_read_sem;
-    so->domain_sems[WRITE] = domain_write_sem;
+    so->domain_sems[READ_END]  = domain_read_sem;
+    so->domain_sems[WRITE_END] = domain_write_sem;
     so->log_sem = log_sem;
     
     return 0;
@@ -181,11 +181,11 @@ static int c_setup_child(struct core_object *co, struct server_object *so)
         return -1; // Will go to ERROR state in child process.
     }
     
-    close_fd_report_undefined_error(so->c_to_p_pipe_fds[READ], "state of parent pipe write is undefined.");
-    close_fd_report_undefined_error(so->domain_fds[WRITE], "state of parent domain socket is undefined.");
+    close_fd_report_undefined_error(so->c_to_p_pipe_fds[READ_END], "state of parent pipe write is undefined.");
+    close_fd_report_undefined_error(so->domain_fds[WRITE_END], "state of parent domain socket is undefined.");
     
-    so->c_to_p_pipe_fds[READ] = 0;
-    so->domain_fds[WRITE]     = 0;
+    so->c_to_p_pipe_fds[READ_END] = 0;
+    so->domain_fds[WRITE_END]     = 0;
     
     return 0;
 }
@@ -200,18 +200,18 @@ static int p_setup_parent(struct core_object *co, struct server_object *so)
     }
     so->child = NULL; // Here for clarity; will already be null.
     
-    close_fd_report_undefined_error(so->c_to_p_pipe_fds[WRITE], "state of parent pipe write is undefined.");
-    close_fd_report_undefined_error(so->domain_fds[READ], "state of parent domain socket is undefined.");
+    close_fd_report_undefined_error(so->c_to_p_pipe_fds[WRITE_END], "state of parent pipe write is undefined.");
+    close_fd_report_undefined_error(so->domain_fds[READ_END], "state of parent domain socket is undefined.");
     
-    so->c_to_p_pipe_fds[WRITE] = 0;
-    so->domain_fds[READ]       = 0;
+    so->c_to_p_pipe_fds[WRITE_END] = 0;
+    so->domain_fds[READ_END]       = 0;
     
     if (p_open_process_server_for_listen(co, so->parent, &co->listen_addr) == -1)
     {
         return -1;
     }
     
-    so->parent->pollfds[1].fd     = so->c_to_p_pipe_fds[READ];
+    so->parent->pollfds[1].fd     = so->c_to_p_pipe_fds[READ_END];
     so->parent->pollfds[1].events = POLLIN;
     
     return 0;
@@ -268,8 +268,8 @@ void p_destroy_parent_state(struct core_object *co, struct server_object *so, st
         waitpid(so->child_pids[c], &status, 0);
     }
     
-    close_fd_report_undefined_error(so->c_to_p_pipe_fds[READ], "state of pipe read is undefined.");
-    close_fd_report_undefined_error(so->domain_fds[WRITE], "state of parent domain socket is undefined.");
+    close_fd_report_undefined_error(so->c_to_p_pipe_fds[READ_END], "state of pipe read is undefined.");
+    close_fd_report_undefined_error(so->domain_fds[WRITE_END], "state of parent domain socket is undefined.");
     
     for (size_t sfd_num = 0; sfd_num < POLLFDS_SIZE; ++sfd_num)
     {
@@ -279,8 +279,8 @@ void p_destroy_parent_state(struct core_object *co, struct server_object *so, st
     mm_free(co->mm, parent);
     
     sem_close(so->c_to_p_pipe_sem_write);
-    sem_close(so->domain_sems[READ]);
-    sem_close(so->domain_sems[WRITE]);
+    sem_close(so->domain_sems[READ_END]);
+    sem_close(so->domain_sems[WRITE_END]);
     sem_close(so->log_sem);
     sem_unlink(PIPE_WRITE_SEM_NAME);
     sem_unlink(DOMAIN_READ_SEM_NAME);
@@ -291,8 +291,8 @@ void p_destroy_parent_state(struct core_object *co, struct server_object *so, st
 void c_destroy_child_state(struct core_object *co, struct server_object *so, struct child *child)
 {
     PRINT_STACK_TRACE(co->tracer);
-    close_fd_report_undefined_error(so->c_to_p_pipe_fds[WRITE], "state of pipe write is undefined.");
-    close_fd_report_undefined_error(so->domain_fds[READ], "state of child domain socket is undefined.");
+    close_fd_report_undefined_error(so->c_to_p_pipe_fds[WRITE_END], "state of pipe write is undefined.");
+    close_fd_report_undefined_error(so->domain_fds[READ_END], "state of child domain socket is undefined.");
     
     mm_free(co->mm, child);
 }

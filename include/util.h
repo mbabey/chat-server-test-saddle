@@ -3,7 +3,6 @@
 
 #include "global-objects.h"
 
-
 /**
  * recv_parse_message
  * <p>

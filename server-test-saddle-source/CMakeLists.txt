@@ -14,7 +14,9 @@ set(SOURCE_LIST
         ${SOURCE_DIR}/process-server.c
         ${SOURCE_DIR}/process-server-util.c
         ${SOURCE_DIR}/server-state.c
+        ${SOURCE_DIR}/chat.c
         ../${SOURCE_DIR}/manager.c
+        ../${SOURCE_DIR}/util.c
         #=vvvv= SOURCE FOR DUMMY MAIN =vvvv=#
         ${SOURCE_DIR}/core.c
         ${SOURCE_DIR}/test-main.c
@@ -24,7 +26,9 @@ set(HEADER_LIST
         ${INCLUDE_DIR}/process-server.h
         ${INCLUDE_DIR}/process-server-util.h
         ${INCLUDE_DIR}/server-state.h
+        ${INCLUDE_DIR}/chat.h
         ../${INCLUDE_DIR}/manager.h
+        ../${INCLUDE_DIR}/util.h
         #=vvvv= INCLUDES FOR DUMMY MAIN =vvvv=#
         ${INCLUDE_DIR}/core.h
         )
