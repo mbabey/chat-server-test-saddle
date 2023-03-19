@@ -68,18 +68,12 @@
 #define FOR_EACH_SOCKET_POLLFD_p_IN_POLLFDS for (size_t p = 2; p < POLLFDS_SIZE; ++p)
 
 /**
- * core_object
- * <p>
- * Holds the core information for the execution of the framework, regardless
- * of the library loaded. Includes dc_env, dc_error, memory_manager, log file,
- * and server_object. server_object contains library-dependent data, and will be
- * assigned and handled by the loaded library.
- * </p>
+ * Contains information about the program state.
  */
 struct core_object
 {
-    struct sockaddr_in    listen_addr;
-    struct error_saver    err;
+    struct sockaddr_in listen_addr;
+    struct error_saver err;
     
     TRACER_FUNCTION_AS(tracer);
     
@@ -89,7 +83,7 @@ struct core_object
 };
 
 /**
- * Contains information about the program state.
+ * Contains information about the server state.
  */
 struct server_object
 {
@@ -104,6 +98,50 @@ struct server_object
 };
 
 /**
+ * User. Contains information about a User.
+ */
+typedef struct
+{
+    int  id;
+    char *display_name;
+} User;
+
+/**
+ * Channel. Contains information about a Channel.
+ */
+typedef struct
+{
+    int  id;
+    char *channel_name;
+    char *creator;
+    User *users;
+    User *administrators;
+    User *banned_users;
+} Channel;
+
+/**
+ * Message. Contains information about a Message.
+ */
+typedef struct
+{
+    int  id;
+    int  user_id;
+    int  channel_id;
+    char *message_content;
+    int  timestamp;
+} Message;
+
+/**
+ * Auth. Contains information about a Auth.
+ */
+typedef struct
+{
+    int        user_id;
+    const char *login_token;
+    char       *password;
+} Auth;
+
+/**
  * Contains information about the parent state.
  */
 struct parent
@@ -111,6 +149,11 @@ struct parent
     struct pollfd      pollfds[POLLFDS_SIZE]; // 0th position is the listen socket fd, 1st position is pipe.
     struct sockaddr_in client_addrs[MAX_CONNECTIONS];
     size_t             num_connections;
+    
+    User    *user_list;
+    Channel *channel_list;
+    Message *message_list;
+    Auth    *auth_list;
 };
 
 /**
