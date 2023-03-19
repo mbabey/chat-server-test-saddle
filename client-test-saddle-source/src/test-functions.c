@@ -9,42 +9,31 @@ int create_user_test(struct state_minor *state, struct client *client)
     printf("create_user_test\n");
     
     struct dispatch dispatch;
-    int status;
-//    const char      *login_token;
-//    const char      *display_name;
-//    const char      *password;
-    char            *dispatch_body_temp;
+    int             status;
+    char            **body_tokens;
     
-    dispatch.version = (unsigned int) 1;
-    dispatch.type    = (unsigned int) CREATE;
-    dispatch.object  = (unsigned int) USER;
-    
-    // TODO: Make var args function to assemble body out of strings.
-//    login_token = "bigdog69\n";
-//    display_name = "thedog\n";
-//    password = "password1234@!\n";
-    dispatch_body_temp = strdup("bigdog69\x03thedog\x03password1234@!\x03");
-    
-    dispatch.body      = dispatch_body_temp;
+    dispatch.version   = (unsigned int) 1;
+    dispatch.type      = (unsigned int) CREATE;
+    dispatch.object    = (unsigned int) USER;
+    dispatch.body      = strdup("bigdog69\x03thedog\x03password1234@!\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     status = assemble_message_send((struct state *) state, client->socket_fd, &dispatch);
-    free(dispatch_body_temp);
+    free(dispatch.body);
     if (status == -1)
     {
-        SET_ERROR(state->err);
         return -1;
     }
     
-    if (recv_parse_message((struct state *) state, client->socket_fd, &dispatch) == -1)
+    if (recv_parse_message((struct state *) state, client->socket_fd, &dispatch, &body_tokens) == -1)
     {
-        SET_ERROR(state->err);
         return -1;
     }
     
+    // TODO: make this attach to a struct for printing later.
     if (dispatch.version != (unsigned int) 1)
     {
-        printf("Test failed: bad version number\n"); // TODO: make this attach to a struct for printing later.
+        printf("Test failed: bad version number\n");
     }
     if (dispatch.type != (unsigned int) CREATE)
     {
@@ -55,7 +44,7 @@ int create_user_test(struct state_minor *state, struct client *client)
         printf("Test failed: bad object\n");
     }
     
-    // TODO: body parsing function.
+    // TODO: test the body somehow
     
     return 0;
 }
@@ -65,32 +54,27 @@ int create_channel_test(struct state_minor *state, struct client *client)
     printf("create_channel_test not yet implemented.\n");
     
     struct dispatch dispatch;
-    int status;
+    int             status;
+    char            **body_tokens;
 //    const char      *display_name;
 //    const char      *channel_name;
 //    const char      *publicity;
-    char            *dispatch_body_temp;
     
-    dispatch.version = (unsigned int) 1;
-    dispatch.type    = (unsigned int) CREATE;
-    dispatch.object  = (unsigned int) CHANNEL;
-    
-    dispatch_body_temp = strdup("the doghouse\x03thedog\x031\x03");
-    
-    dispatch.body      = dispatch_body_temp;
+    dispatch.version   = (unsigned int) 1;
+    dispatch.type      = (unsigned int) CREATE;
+    dispatch.object    = (unsigned int) CHANNEL;
+    dispatch.body      = strdup("the doghouse\x03thedog\x031\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     status = assemble_message_send((struct state *) state, client->socket_fd, &dispatch);
-    free(dispatch_body_temp);
+    free(dispatch.body);
     if (status == -1)
     {
-        SET_ERROR(state->err);
         return -1;
     }
     
-    if (recv_parse_message((struct state *) state, client->socket_fd, &dispatch) == -1)
+    if (recv_parse_message((struct state *) state, client->socket_fd, &dispatch, &body_tokens) == -1)
     {
-        SET_ERROR(state->err);
         return -1;
     }
     
@@ -115,30 +99,29 @@ int create_channel_test(struct state_minor *state, struct client *client)
 int create_message_test(struct state_minor *state, struct client *client)
 {
     struct dispatch dispatch;
-    int status;
+    int             status;
+    char **body_tokens;
 //    const char      *display_name;
 //    const char      *channel_name;
 //    const char      *message_content;
 //    time_t          timestamp;
-    char *dispatch_body_temp;
     
     dispatch.version = (unsigned int) 1;
     dispatch.type    = (unsigned int) CREATE;
     dispatch.object  = (unsigned int) MESSAGE;
-    
-    dispatch_body_temp = strdup("thedog""\x03""the doghouse""\x03""yo what's up its me the dog""\x03""1678347396""\x03");
+    dispatch.body = strdup(
+            "thedog""\x03""the doghouse""\x03""yo what's up its me the dog""\x03""1678347396""\x03");
+    dispatch.body_size = strlen(dispatch.body);
     
     status = assemble_message_send((struct state *) state, client->socket_fd, &dispatch);
-    free(dispatch_body_temp);
+    free(dispatch.body);
     if (status == -1)
     {
-        SET_ERROR(state->err);
         return -1;
     }
     
-    if (recv_parse_message((struct state *) state, client->socket_fd, &dispatch) == -1)
+    if (recv_parse_message((struct state *) state, client->socket_fd, &dispatch, &body_tokens) == -1)
     {
-        SET_ERROR(state->err);
         return -1;
     }
     
@@ -155,7 +138,6 @@ int create_message_test(struct state_minor *state, struct client *client)
         printf("Test failed: bad object\n");
     }
     
-    // TODO: body parsing function.
     
     return 0;
 }

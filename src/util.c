@@ -13,6 +13,22 @@
 #define DATA_SIZE(body_size) (4 + (body_size))
 
 /**
+ * parse_body
+ * <p>
+ * Parse the body of a dispatch. Count the number ETX in the body and allocate
+ * an array of strings in body_tokens of that count plus one. Then, tokenize
+ * the body on ETX and store each token in the string array.
+ * </p>
+ * @param state the state object
+ * @param client the client object
+ * @param body_tokens the string array to store the body tokens
+ * @param body_size the body size
+ * @param body the body
+ * @return 0 on success, -1 and set err on failure
+ */
+static int parse_body(struct state *state, char ***body_tokens, uint16_t body_size, char *body);
+
+/**
  * count_tokens
  * <p>
  * Count the number of ETX characters in the body.
@@ -24,7 +40,7 @@
  */
 static int count_tokens(uint16_t body_size, const char *body, void (*tracer)(const char *, const char *, size_t));
 
-int recv_parse_message(struct state *state, int socket_fd, struct dispatch *dispatch)
+int recv_parse_message(struct state *state, int socket_fd, struct dispatch *dispatch, char ***body_tokens)
 {
     PRINT_STACK_TRACE(state->tracer);
     
@@ -73,6 +89,12 @@ int recv_parse_message(struct state *state, int socket_fd, struct dispatch *disp
         return -1;
     }
     
+    if (parse_body((struct state *) state, body_tokens, dispatch->body_size, dispatch->body) == -1)
+    {
+        SET_ERROR(state->err);
+        return -1;
+    }
+    
     return 0;
 }
 
@@ -109,7 +131,7 @@ int assemble_message_send(struct state *state, int socket_fd, struct dispatch *d
     memcpy(data + 4, dispatch->body, dispatch->body_size);
     
     // Send the dispatch.
-    bytes_sent = send(client->socket_fd, data, DATA_SIZE(dispatch->body_size), 0);
+    bytes_sent = send(socket_fd, data, DATA_SIZE(dispatch->body_size), 0);
     free(data);
     if (bytes_sent == -1)
     {
@@ -120,7 +142,7 @@ int assemble_message_send(struct state *state, int socket_fd, struct dispatch *d
     return 0;
 }
 
-int parse_body(struct state *state, char ***body_tokens, uint16_t body_size, char *body)
+static int parse_body(struct state *state, char ***body_tokens, uint16_t body_size, char *body)
 {
     PRINT_STACK_TRACE(state->tracer);
     
