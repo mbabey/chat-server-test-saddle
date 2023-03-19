@@ -3,7 +3,7 @@
 /**
  * handle_create
  * <p>
- * Handle a CREATE type dispatch.
+ * Switch on the Object of a CREATE Type Dispatch.
  * </p>
  * @param co the core object
  * @param dispatch the dispatch
@@ -13,9 +13,57 @@
 static int handle_create(struct core_object *co, struct dispatch *dispatch, char **body_tokens);
 
 /**
+ * handle_create_user
+ * <p>
+ * Create a User account.
+ * </p>
+ * @param co the core object
+ * @param dispatch the dispatch
+ * @param body_tokens the tokenized dispatch body
+ * @return 0 on success, -1 and set err on failure.
+ */
+static int handle_create_user(struct core_object *co, struct dispatch *dispatch, char **body_tokens);
+
+/**
+ * handle_create_channel
+ * <p>
+ * Create a Channel.
+ * </p>
+ * @param co the core object
+ * @param dispatch the dispatch
+ * @param body_tokens the tokenized dispatch body
+ * @return 0 on success, -1 and set err on failure.
+ */
+static int handle_create_channel(struct core_object *co, struct dispatch *dispatch, char **body_tokens);
+
+/**
+ * handle_create_message
+ * <p>
+ * Create a Message in a Channel.
+ * </p>
+ * @param co the core object
+ * @param dispatch the dispatch
+ * @param body_tokens the tokenized dispatch body
+ * @return 0 on success, -1 and set err on failure.
+ */
+static int handle_create_message(struct core_object *co, struct dispatch *dispatch, char **body_tokens);
+
+/**
+ * handle_create_auth
+ * <p>
+ * Log a User in.
+ * </p>
+ * @param co the core object
+ * @param dispatch the dispatch
+ * @param body_tokens the tokenized dispatch body
+ * @return 0 on success, -1 and set err on failure.
+ */
+static int handle_create_auth(struct core_object *co, struct dispatch *dispatch, char **body_tokens);
+
+/**
  * handle_read
  * <p>
- * Handle a READ type dispatch.
+ * Switch on the Object of a READ Type Dispatch.
  * </p>
  * @param co the core object
  * @param dispatch the dispatch
@@ -25,9 +73,45 @@ static int handle_create(struct core_object *co, struct dispatch *dispatch, char
 static int handle_read(struct core_object *co, struct dispatch *dispatch, char **body_tokens);
 
 /**
+ * handle_read_user
+ * <p>
+ * Get User information and put it in the dispatch.
+ * </p>
+ * @param co the core object
+ * @param dispatch the dispatch
+ * @param body_tokens the tokenized dispatch body
+ * @return 0 on success, -1 and set err on failure
+ */
+static int handle_read_user(struct core_object *co, struct dispatch *dispatch, char **body_tokens);
+
+/**
+ * handle_read_channel
+ * <p>
+ * Get Channel information and put it in the dispatch.
+ * </p>
+ * @param co the core object
+ * @param dispatch the dispatch
+ * @param body_tokens the tokenized dispatch body
+ * @return 0 on success, -1 and set err on failure
+ */
+static int handle_read_channel(struct core_object *co, struct dispatch *dispatch, char **body_tokens);
+
+/**
+ * handle_read_message
+ * <p>
+ * Get Message information and put it in the dispatch.
+ * </p>
+ * @param co the core object
+ * @param dispatch the dispatch
+ * @param body_tokens the tokenized dispatch body
+ * @return 0 on success, -1 and set err on failure
+ */
+static int handle_read_message(struct core_object *co, struct dispatch *dispatch, char **body_tokens);
+
+/**
  * handle_update
  * <p>
- * Handle a UPDATE type dispatch.
+ * Switch on the Object of an UPDATE Type Dispatch.
  * </p>
  * @param co the core object
  * @param dispatch the dispatch
@@ -39,7 +123,7 @@ static int handle_update(struct core_object *co, struct dispatch *dispatch, char
 /**
  * handle_destroy
  * <p>
- * Handle a DESTROY type dispatch.
+ * Switch on the Object of a DESTROY Type Dispatch.
  * </p>
  * @param co the core object
  * @param dispatch the dispatch
@@ -62,6 +146,8 @@ static int handle_ping(struct core_object *co, struct dispatch *dispatch, char *
 
 int perform_dispatch_operation(struct core_object *co, struct dispatch *dispatch, char **body_tokens)
 {
+    PRINT_STACK_TRACE(co->tracer);
+    
     switch (dispatch->type)
     {
         case CREATE:
@@ -97,17 +183,129 @@ int perform_dispatch_operation(struct core_object *co, struct dispatch *dispatch
 }
 
 static int handle_create(struct core_object *co, struct dispatch *dispatch, char **body_tokens)
-{ return 0; }
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    switch (dispatch->object)
+    {
+        case USER:
+        {
+            if (handle_create_user(co, dispatch, body_tokens) == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case CHANNEL:
+        {
+            if (handle_create_channel(co, dispatch, body_tokens) == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case MESSAGE:
+        {
+            if (handle_create_message(co, dispatch, body_tokens) == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case AUTH:
+        {
+            if (handle_create_auth(co, dispatch, body_tokens) == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        default:;
+    }
+    
+    return 0;
+}
+
+static int handle_create_user(struct core_object *co, struct dispatch *dispatch, char **body_tokens)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    return 0;
+}
+
+static int handle_create_channel(struct core_object *co, struct dispatch *dispatch, char **body_tokens)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    return 0;
+}
+
+static int handle_create_message(struct core_object *co, struct dispatch *dispatch, char **body_tokens)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    return 0;
+}
+
+static int handle_create_auth(struct core_object *co, struct dispatch *dispatch, char **body_tokens)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    return 0;
+}
 
 static int handle_read(struct core_object *co, struct dispatch *dispatch, char **body_tokens)
 { return 0; }
 
+static int handle_read_user(struct core_object *co, struct dispatch *dispatch, char **body_tokens)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    return 0;
+}
+
+static int handle_read_channel(struct core_object *co, struct dispatch *dispatch, char **body_tokens)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    return 0;
+}
+
+static int handle_read_message(struct core_object *co, struct dispatch *dispatch, char **body_tokens)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    return 0;
+}
+
 static int handle_update(struct core_object *co, struct dispatch *dispatch, char **body_tokens)
-{ return 0; }
+{
+    PRINT_STACK_TRACE(co->tracer);
+    return 0;
+}
+
+static int handle_update_user(struct core_object *co, struct dispatch *dispatch, char **body_tokens);
+
+static int handle_update_channel(struct core_object *co, struct dispatch *dispatch, char **body_tokens);
+
+static int handle_update_message(struct core_object *co, struct dispatch *dispatch, char **body_tokens);
+
+static int handle_update_auth(struct core_object *co, struct dispatch *dispatch, char **body_tokens);
 
 static int handle_destroy(struct core_object *co, struct dispatch *dispatch, char **body_tokens)
-{ return 0; }
+{
+    PRINT_STACK_TRACE(co->tracer);
+    return 0;
+}
+
+static int handle_destroy_user(struct core_object *co, struct dispatch *dispatch, char **body_tokens);
+
+static int handle_destroy_channel(struct core_object *co, struct dispatch *dispatch, char **body_tokens);
+
+static int handle_destroy_message(struct core_object *co, struct dispatch *dispatch, char **body_tokens);
+
+static int handle_destroy_auth(struct core_object *co, struct dispatch *dispatch, char **body_tokens);
 
 static int handle_ping(struct core_object *co, struct dispatch *dispatch, char **body_tokens)
-{ return 0; }
+{
+    PRINT_STACK_TRACE(co->tracer);
+    return 0;
+}
 

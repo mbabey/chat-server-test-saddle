@@ -1,5 +1,6 @@
 #include "../../include/manager.h"
 #include "../../include/util.h"
+#include "../include/chat.h"
 #include "../include/objects.h"
 #include "../include/process-server.h"
 #include "../include/process-server-util.h"
@@ -628,6 +629,8 @@ static int c_get_file_description_from_domain_socket(struct core_object *co, str
 
 static int c_handle_network_dispatch(struct core_object *co, struct server_object *so, struct child *child)
 {
+    PRINT_STACK_TRACE(co->tracer);
+    
     struct dispatch dispatch;
     char            **body_tokens;
     int             status;
