@@ -1,5 +1,5 @@
 #include "../include/core.h"
-#include "../include/server_state.h"
+#include "../include/server-state.h"
 
 #include <stdlib.h>
 #include <string.h>

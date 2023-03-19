@@ -1,7 +1,7 @@
 #ifndef PROCESS_SERVER_OBJECTS_H
 #define PROCESS_SERVER_OBJECTS_H
 
-#include "error_handlers.h"
+#include "../../include/error-handlers.h"
 
 #include <semaphore.h>
 #include <poll.h>
