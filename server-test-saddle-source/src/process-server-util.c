@@ -100,38 +100,54 @@ int open_pipe_semaphores_domain_sockets(struct core_object *co, struct server_ob
 static int open_semaphores(struct core_object *co, struct server_object *so)
 {
     PRINT_STACK_TRACE(co->tracer);
+    
     sem_t *pipe_write_sem;
     sem_t *domain_read_sem;
     sem_t *domain_write_sem;
-    sem_t *log_sem;
+    sem_t *user_db_sem;
+    sem_t *channel_db_sem;
+    sem_t *message_db_sem;
+    sem_t *auth_db_sem;
     
     // Value 0 will block; value 1 will allow first process to enter, then behave as if value was 0.
     pipe_write_sem   = sem_open(PIPE_WRITE_SEM_NAME, O_CREAT, S_IRUSR | S_IWUSR, 1);
     domain_read_sem  = sem_open(DOMAIN_READ_SEM_NAME, O_CREAT, S_IRUSR | S_IWUSR, 0);
     domain_write_sem = sem_open(DOMAIN_WRITE_SEM_NAME, O_CREAT, S_IRUSR | S_IWUSR, 1);
-    log_sem          = sem_open(LOG_SEM_NAME, O_CREAT, S_IRUSR | S_IWUSR, 1);
+    user_db_sem      = sem_open(USER_SEM_NAME, O_CREAT, S_IRUSR | S_IWUSR, 1);
+    channel_db_sem   = sem_open(CHANNEL_SEM_NAME, O_CREAT, S_IRUSR | S_IWUSR, 1);
+    message_db_sem   = sem_open(MESSAGE_SEM_NAME, O_CREAT, S_IRUSR | S_IWUSR, 1);
+    auth_db_sem      = sem_open(AUTH_SEM_NAME, O_CREAT, S_IRUSR | S_IWUSR, 1);
     if (pipe_write_sem == SEM_FAILED
         || domain_read_sem == SEM_FAILED || domain_write_sem == SEM_FAILED
-        || log_sem == SEM_FAILED)
+            )
     {
         SET_ERROR(co->err);
         // Closing an unopened semaphore will return -1 and set errno = EINVAL, which can be ignored.
         sem_close(pipe_write_sem);
         sem_close(domain_read_sem);
         sem_close(domain_write_sem);
-        sem_close(log_sem);
+        sem_close(user_db_sem);
+        sem_close(channel_db_sem);
+        sem_close(message_db_sem);
+        sem_close(auth_db_sem);
         // Unlinking an unopened semaphore will return -1 and set errno = ENOENT, which can be ignored.
         sem_unlink(PIPE_WRITE_SEM_NAME);
         sem_unlink(DOMAIN_READ_SEM_NAME);
         sem_unlink(DOMAIN_WRITE_SEM_NAME);
-        sem_unlink(LOG_SEM_NAME);
+        sem_unlink(USER_SEM_NAME);
+        sem_unlink(CHANNEL_SEM_NAME);
+        sem_unlink(MESSAGE_SEM_NAME);
+        sem_unlink(AUTH_SEM_NAME);
         return -1;
     }
     
     so->c_to_p_pipe_sem_write = pipe_write_sem;
     so->domain_sems[READ_END]  = domain_read_sem;
     so->domain_sems[WRITE_END] = domain_write_sem;
-    so->log_sem = log_sem;
+    so->user_db_sem    = user_db_sem;
+    so->channel_db_sem = channel_db_sem;
+    so->message_db_sem = message_db_sem;
+    so->auth_db_sem    = auth_db_sem;
     
     return 0;
 }
@@ -281,11 +297,18 @@ void p_destroy_parent_state(struct core_object *co, struct server_object *so, st
     sem_close(so->c_to_p_pipe_sem_write);
     sem_close(so->domain_sems[READ_END]);
     sem_close(so->domain_sems[WRITE_END]);
-    sem_close(so->log_sem);
+    sem_close(so->user_db_sem);
+    sem_close(so->channel_db_sem);
+    sem_close(so->message_db_sem);
+    sem_close(so->auth_db_sem);
     sem_unlink(PIPE_WRITE_SEM_NAME);
     sem_unlink(DOMAIN_READ_SEM_NAME);
     sem_unlink(DOMAIN_WRITE_SEM_NAME);
-    sem_unlink(LOG_SEM_NAME);
+    sem_unlink(USER_SEM_NAME);
+    sem_unlink(CHANNEL_SEM_NAME);
+    sem_unlink(MESSAGE_SEM_NAME);
+    sem_unlink(AUTH_SEM_NAME);
+
 }
 
 void c_destroy_child_state(struct core_object *co, struct server_object *so, struct child *child)

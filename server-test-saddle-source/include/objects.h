@@ -40,22 +40,37 @@
 /**
 * Pipe write semaphore name.
 */
-#define PIPE_WRITE_SEM_NAME "/p_2f6a08" // Random hex to prevent collision of this filename with others.
+#define PIPE_WRITE_SEM_NAME "/pw_3fda69" // Random hex to prevent collision of this filename with others.
 
 /**
 * Domain socket read semaphore name.
 */
-#define DOMAIN_READ_SEM_NAME "/dr_2f6a08"
+#define DOMAIN_READ_SEM_NAME "/dr_3fda69"
 
 /**
 * Domain socket write semaphore name.
 */
-#define DOMAIN_WRITE_SEM_NAME "/dw_2f6a08"
+#define DOMAIN_WRITE_SEM_NAME "/dw_3fda69"
 
 /**
-* Log semaphore name.
+* User db semaphore name.
 */
-#define LOG_SEM_NAME "/l_2f6a08"
+#define USER_SEM_NAME "/u_3fda69"
+
+/**
+* Channel db semaphore name.
+*/
+#define CHANNEL_SEM_NAME "/ch_3fda69"
+
+/**
+* Message db semaphore name.
+*/
+#define MESSAGE_SEM_NAME "/m_3fda69"
+
+/**
+* Auth db semaphore name.
+*/
+#define AUTH_SEM_NAME "/au_3fda69"
 
 /**
  * For each loop macro for looping over child processes.
