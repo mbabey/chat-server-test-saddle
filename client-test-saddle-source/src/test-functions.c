@@ -1,5 +1,5 @@
-#include "../include/test-functions.h"
 #include "../../include/util.h"
+#include "../include/test-functions.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,7 +28,7 @@ int create_user_test(struct state_minor *state, struct client *client)
     dispatch.body      = dispatch_body_temp;
     dispatch.body_size = strlen(dispatch.body);
     
-    status = assemble_message_send(state, 0, &dispatch);
+    status = assemble_message_send((struct state *) state, client->socket_fd, &dispatch);
     free(dispatch_body_temp);
     if (status == -1)
     {
@@ -36,7 +36,7 @@ int create_user_test(struct state_minor *state, struct client *client)
         return -1;
     }
     
-    if (recv_parse_message(state, 0, &dispatch) == -1)
+    if (recv_parse_message((struct state *) state, client->socket_fd, &dispatch) == -1)
     {
         SET_ERROR(state->err);
         return -1;
@@ -80,7 +80,7 @@ int create_channel_test(struct state_minor *state, struct client *client)
     dispatch.body      = dispatch_body_temp;
     dispatch.body_size = strlen(dispatch.body);
     
-    status = assemble_message_send(state, 0, &dispatch);
+    status = assemble_message_send((struct state *) state, client->socket_fd, &dispatch);
     free(dispatch_body_temp);
     if (status == -1)
     {
@@ -88,7 +88,7 @@ int create_channel_test(struct state_minor *state, struct client *client)
         return -1;
     }
     
-    if (recv_parse_message(state, 0, &dispatch) == -1)
+    if (recv_parse_message((struct state *) state, client->socket_fd, &dispatch) == -1)
     {
         SET_ERROR(state->err);
         return -1;
@@ -128,7 +128,7 @@ int create_message_test(struct state_minor *state, struct client *client)
     
     dispatch_body_temp = strdup("thedog""\x03""the doghouse""\x03""yo what's up its me the dog""\x03""1678347396""\x03");
     
-    status = assemble_message_send(state, 0, &dispatch);
+    status = assemble_message_send((struct state *) state, client->socket_fd, &dispatch);
     free(dispatch_body_temp);
     if (status == -1)
     {
@@ -136,7 +136,7 @@ int create_message_test(struct state_minor *state, struct client *client)
         return -1;
     }
     
-    if (recv_parse_message(state, 0, &dispatch) == -1)
+    if (recv_parse_message((struct state *) state, client->socket_fd, &dispatch) == -1)
     {
         SET_ERROR(state->err);
         return -1;
