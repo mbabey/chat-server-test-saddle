@@ -1,8 +1,8 @@
+#include "../../include/manager.h"
 #include "../include/process-server-util.h"
 
 #include <arpa/inet.h>
 #include <fcntl.h>
-#include <mem_manager/manager.h>
 #include <semaphore.h>
 #include <signal.h>
 #include <string.h>

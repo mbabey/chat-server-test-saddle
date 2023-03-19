@@ -14,6 +14,7 @@ set(SOURCE_LIST
         ${SOURCE_DIR}/process-server.c
         ${SOURCE_DIR}/process-server-util.c
         ${SOURCE_DIR}/server-state.c
+        ../${SOURCE_DIR}/manager.c
         #=vvvv= SOURCE FOR DUMMY MAIN =vvvv=#
         ${SOURCE_DIR}/core.c
         ${SOURCE_DIR}/test-main.c
@@ -23,6 +24,7 @@ set(HEADER_LIST
         ${INCLUDE_DIR}/process-server.h
         ${INCLUDE_DIR}/process-server-util.h
         ${INCLUDE_DIR}/server-state.h
+        ../${INCLUDE_DIR}/manager.h
         #=vvvv= INCLUDES FOR DUMMY MAIN =vvvv=#
         ${INCLUDE_DIR}/core.h
         )
@@ -177,7 +179,6 @@ set(CMAKE_C_CLANG_TIDY clang-tidy -checks=${CLANG_TIDY_CHECKS};--quiet)
 #========= vvv COMPILE AS EXECUTABLE vvv =========#
 
 add_executable(server-test-saddle ${SOURCE_LIST})
-target_include_directories(server-test-saddle PRIVATE /usr/local/include)
 
 #========= ^^^ COMPILE AS EXECUTABLE ^^^ =========#
 

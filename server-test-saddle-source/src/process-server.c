@@ -1,10 +1,10 @@
+#include "../../include/manager.h"
 #include "../include/objects.h"
 #include "../include/process-server.h"
 #include "../include/process-server-util.h"
 
 #include <arpa/inet.h>
 #include <errno.h>
-#include <mem_manager/manager.h>
 #include <netinet/in.h>
 #include <poll.h>
 #include <signal.h>
