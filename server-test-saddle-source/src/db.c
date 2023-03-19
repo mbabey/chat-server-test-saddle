@@ -1,5 +1,5 @@
 #include "../../include/global-objects.h"
-#include "../include/pseudo-db.h"
+#include "../include/db.h"
 
 int db_create(struct core_object *co, struct server_object *so, int type, void *object)
 {

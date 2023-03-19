@@ -1,5 +1,5 @@
-#ifndef SERVER_TEST_SADDLE_PSEUDO_DB_H
-#define SERVER_TEST_SADDLE_PSEUDO_DB_H
+#ifndef SERVER_TEST_SADDLE_DB_H
+#define SERVER_TEST_SADDLE_DB_H
 
 #include "objects.h"
 
@@ -21,4 +21,4 @@ int db_update(struct core_object *co, struct server_object *so, int type, void *
 
 int db_destroy(struct core_object *co, struct server_object *so, int type, void *object);
 
-#endif //SERVER_TEST_SADDLE_PSEUDO_DB_H
+#endif //SERVER_TEST_SADDLE_DB_H
