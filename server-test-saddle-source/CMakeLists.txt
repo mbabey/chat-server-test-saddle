@@ -10,11 +10,20 @@ set(CMAKE_C_STANDARD 17)
 set(SOURCE_DIR src)
 set(INCLUDE_DIR include)
 set(SOURCE_LIST
+        ${SOURCE_DIR}/core.c
+        ${SOURCE_DIR}/server_state.c
+        ${SOURCE_DIR}/process_server.c
+        ${SOURCE_DIR}/process_server_util.c
         ${SOURCE_DIR}/main.c
         #=vvvv= SOURCE FOR DUMMY MAIN =vvvv=#
         )
 set(HEADER_LIST
-        ../client-test-saddle-source/include/test-functions.h
+        ${INCLUDE_DIR}/core.h
+        ${INCLUDE_DIR}/error_handlers.h
+        ${INCLUDE_DIR}/objects.h
+        ${INCLUDE_DIR}/process_server.h
+        ${INCLUDE_DIR}/process_server_util.h
+        ${INCLUDE_DIR}/server_state.h
         #=vvvv= INCLUDES FOR DUMMY MAIN =vvvv=#
         )
 
@@ -109,7 +118,7 @@ set(DOXYGEN_QUIET YES)
 
 doxygen_add_docs(doxygen
         ${HEADER_LIST}
-        WORKING_DIRECTORY ..
+        WORKING_DIRECTORY .
         COMMENT "Generating Doxygen documentation for server-test-saddle")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -137,16 +146,16 @@ set(CMAKE_C_CLANG_TIDY clang-tidy -checks=${CLANG_TIDY_CHECKS};--quiet)
 
 #========= vvv COMPILE AS LIBRARY vvv =========#
 
-#add_library(server-test-saddle-source-saddle SHARED ${SOURCE_LIST} ${HEADER_LIST})
-#target_include_directories(server-test-saddle-source-saddle PRIVATE include/server-test-saddle-source-saddle)
-#target_include_directories(server-test-saddle-source-saddle PRIVATE /usr/local/include)
-#target_link_directories(server-test-saddle-source-saddle PRIVATE /usr/local/lib)
+#add_library(server-test-saddle SHARED ${SOURCE_LIST} ${HEADER_LIST})
+#target_include_directories(server-test-saddle PRIVATE include/server-test-saddle)
+#target_include_directories(server-test-saddle PRIVATE /usr/local/include)
+#target_link_directories(server-test-saddle PRIVATE /usr/local/lib)
 
 #if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-#    target_include_directories(server-test-saddle-source-saddle PRIVATE /usr/include)
+#    target_include_directories(server-test-saddle PRIVATE /usr/include)
 #endif ()
 
-#set_target_properties(server-test-saddle-source-saddle PROPERTIES
+#set_target_properties(server-test-saddle PROPERTIES
 #        VERSION ${PROJECT_VERSION}
 #        SOVERSION ${PROJECT_VERSION_MAJOR})
 
@@ -161,8 +170,8 @@ set(CMAKE_C_CLANG_TIDY clang-tidy -checks=${CLANG_TIDY_CHECKS};--quiet)
 #set(INSTALL_LIB_DIR lib${LIBSUFFIX} CACHE PATH "Installation directory for libraries")
 #mark_as_advanced(INSTALL_LIB_DIR)
 
-#install(TARGETS server-test-saddle-source-saddle LIBRARY DESTINATION ${INSTALL_LIB_DIR})
-#install(FILES ${HEADER_LIST} DESTINATION include/server-test-saddle-source-saddle)
+#install(TARGETS server-test-saddle LIBRARY DESTINATION ${INSTALL_LIB_DIR})
+#install(FILES ${HEADER_LIST} DESTINATION include/server-test-saddle)
 
 #========= ^^^ COMPILE AS LIBRARY ^^^ =========#
 #========= vvv COMPILE AS EXECUTABLE vvv =========#
@@ -174,24 +183,6 @@ target_include_directories(server-test-saddle PRIVATE /usr/local/include)
 
 add_dependencies(server-test-saddle doxygen)
 
-find_library(LIBDC_ERROR dc_error REQUIRED)
-find_library(LIBDC_ENV dc_env REQUIRED)
-find_library(LIBDC_C dc_c REQUIRED)
-find_library(LIBDC_POSIX dc_posix REQUIRED)
-find_library(LIBDC_UNIX dc_unix REQUIRED)
-find_library(LIBDC_UTIL dc_util REQUIRED)
-find_library(LIBDC_FSM dc_fsm REQUIRED)
-find_library(LIB_CONFIG config REQUIRED)
-find_library(LIBDC_APPLICATION dc_application REQUIRED)
 find_library(MEM_MANAGER mem_manager REQUIRED)
 
-target_link_libraries(server-test-saddle PUBLIC ${LIBDC_ERROR})
-target_link_libraries(server-test-saddle PUBLIC ${LIBDC_ENV})
-target_link_libraries(server-test-saddle PUBLIC ${LIBDC_C})
-target_link_libraries(server-test-saddle PUBLIC ${LIBDC_POSIX})
-target_link_libraries(server-test-saddle PUBLIC ${LIBDC_UNIX})
-target_link_libraries(server-test-saddle PUBLIC ${LIBDC_UTIL})
-target_link_libraries(server-test-saddle PUBLIC ${LIBDC_FSM})
-target_link_libraries(server-test-saddle PUBLIC ${LIB_CONFIG})
-target_link_libraries(server-test-saddle PUBLIC ${LIBDC_APPLICATION})
 target_link_libraries(server-test-saddle PUBLIC ${MEM_MANAGER})
