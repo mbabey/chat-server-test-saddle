@@ -10,7 +10,7 @@ int lib_main(void *args)
 {
     int                next_state;
     int                run;
-    struct core_object *co = (struct core_object);
+    struct core_object *co = (struct core_object *) args;
     
     if (next_state == -1)
     {

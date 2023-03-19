@@ -2,7 +2,8 @@
 
 #include <stdlib.h>
 
-enum States {
+enum States
+{
     SETUP,
     RUN,
     ERROR,
@@ -11,11 +12,12 @@ enum States {
 
 int main(int argc, char **argv)
 {
-    int run;
-    int next_state;
-    struct state state;
-
-    run = 1;
+    int            run;
+    int            next_state;
+    struct state   state;
+    struct library library;
+    
+    run        = 1;
     next_state = SETUP;
     while (run)
     {
@@ -23,12 +25,12 @@ int main(int argc, char **argv)
         {
             case SETUP:
             {
-                next_state = (setup_saddle(&state, argc, argv) == -1) ? ERROR : RUN;
+                next_state = (setup_saddle(&state, NULL, argc, argv) == -1) ? ERROR : RUN;
                 break;
             }
             case RUN:
             {
-                next_state = (run_saddle(&state) == -1) ? ERROR : EXIT;
+                next_state = (run_saddle(&state, NULL) == -1) ? ERROR : EXIT;
                 break;
             }
             case ERROR:
@@ -40,7 +42,7 @@ int main(int argc, char **argv)
             }
             case EXIT:
             {
-                exit_saddle(&state);
+                exit_saddle(&state, NULL);
                 run = 0;
                 break;
             }

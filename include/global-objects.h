@@ -18,7 +18,12 @@ struct state {
     struct error_saver err;
     TRACER_FUNCTION_AS(tracer);
     struct memory_manager *mm;
-    
+};
+
+/**
+ * Information necessary to load and run a test library.
+ */
+struct library {
     void *lib;
     char *lib_name;
     int (*lib_main)(void *);
@@ -37,7 +42,7 @@ struct dispatch
 };
 
 /**
- * Dispatch Types
+ * Dispatch Types.
  */
 enum Type
 {
@@ -49,6 +54,9 @@ enum Type
     PINGCHANNEL
 };
 
+/**
+ * Dispatch Objects.
+ */
 enum Object
 {
     USER = 1,

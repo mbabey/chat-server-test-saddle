@@ -21,7 +21,7 @@
  * @param state state object
  * @return 0 on success, -1 and set err on failure
  */
-int open_lib(struct state *state);
+int open_lib(struct state *state, struct library *library);
 
 /**
  * close_lib

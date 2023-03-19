@@ -1,5 +1,5 @@
 #include "../include/library-util.h"
-#include "saddle.h"
+#include "../include/saddle.h"
 
 #include <arpa/inet.h>
 #include <ctype.h>
@@ -38,7 +38,7 @@ static void trace_reporter(const char *file, const char *func, size_t line);
  * @param argv the argument vector
  * @return 0 on success, -1 and set errno on failure
  */
-static int parse_args(struct state *state, int argc, char **argv);
+static int parse_args(struct state *state, struct library *library, int argc, char **argv);
 
 /**
  * parse_lib
@@ -49,7 +49,8 @@ static int parse_args(struct state *state, int argc, char **argv);
  * @param tracer tracing function
  * @return 0 on success, -1 on failure
  */
-static int parse_lib(struct state *state, const char *lib_type, void (*tracer)(const char *, const char *, size_t));
+static int parse_lib(struct state *state, struct library *library, const char *lib_type,
+                     void (*tracer)(const char *, const char *, size_t));
 
 /**
  * parse_ip_and_port
@@ -90,7 +91,7 @@ static int validate_port(in_port_t *port_num, const char *port_num_str, TRACER_F
  */
 static int validate_ip(struct sockaddr_in *addr, const char *ip_addr_str, TRACER_FUNCTION_AS(tracer));
 
-int setup_saddle(struct state *state, int argc, char **argv)
+int setup_saddle(struct state *state, struct library *library, int argc, char **argv)
 {
     memset(state, 0, sizeof(*state));
     
@@ -101,17 +102,17 @@ int setup_saddle(struct state *state, int argc, char **argv)
         return -1;
     }
     
-    if (parse_args(state, argc, argv) == -1)
+    if (parse_args(state, library, argc, argv) == -1)
     {
         return -1;
     }
     
-    if (open_lib(state) == -1)
+    if (open_lib(state, library) == -1)
     {
         SET_ERROR(state->err);
         return -1;
     }
-    mm_free(state->mm, state->lib_name);
+    mm_free(state->mm, library->lib_name);
     
     return 0;
 }
@@ -121,7 +122,7 @@ static void trace_reporter(const char *file, const char *func, size_t line)
     (void) fprintf(stdout, "TRACE: %s : %s : @ %zu\n", file, func, line);
 }
 
-static int parse_args(struct state *state, int argc, char **argv)
+static int parse_args(struct state *state, struct library *library, int argc, char **argv)
 {
     int        c;
     const char *port_num_str;
@@ -181,7 +182,7 @@ static int parse_args(struct state *state, int argc, char **argv)
     int addr_err;
     int lib_err;
     
-    lib_err  = parse_lib(state, lib_type, state->tracer);
+    lib_err  = parse_lib(state, library, lib_type, state->tracer);
     addr_err = parse_ip_and_port(&state->addr, port_num_str, ip_addr_str, state->tracer);
     
     if (addr_err || lib_err)
@@ -194,7 +195,8 @@ static int parse_args(struct state *state, int argc, char **argv)
     return 0;
 }
 
-static int parse_lib(struct state *state, const char *lib_type, void (*tracer)(const char *, const char *, size_t))
+static int parse_lib(struct state *state, struct library *library, const char *lib_type,
+                     void (*tracer)(const char *, const char *, size_t))
 {
     PRINT_STACK_TRACE(tracer);
     if (!lib_type)
@@ -204,14 +206,14 @@ static int parse_lib(struct state *state, const char *lib_type, void (*tracer)(c
     
     if (strcmp("server", lib_type) == 0)
     {
-        state->lib_name = strdup(SERVER_SADDLE);
-        mm_add(state->mm, state->lib_name);
+        library->lib_name = strdup(SERVER_SADDLE);
+        mm_add(state->mm, library->lib_name);
         return 0;
     }
     if (strcmp("client", lib_type) == 0)
     {
-        state->lib_name = strdup(CLIENT_SADDLE);
-        mm_add(state->mm, state->lib_name);
+        library->lib_name = strdup(CLIENT_SADDLE);
+        mm_add(state->mm, library->lib_name);
         return 0;
     }
     
@@ -298,18 +300,18 @@ static int validate_ip(struct sockaddr_in *addr, const char *ip_addr_str, TRACER
     }
 }
 
-int run_saddle(struct state *state)
+int run_saddle(struct state *state, struct library *library)
 {
     int ret_val;
     
-    ret_val = state->lib_main(state);
+    ret_val = library->lib_main(state);
     
     return ret_val;
 }
 
-void exit_saddle(struct state *state)
+void exit_saddle(struct state *state, struct library *library)
 {
-    close_lib(state->lib, state->lib_name, state->tracer);
+    close_lib(library->lib, library->lib_name, state->tracer);
     
     free_mem_manager(state->mm);
 }

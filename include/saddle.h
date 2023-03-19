@@ -13,10 +13,10 @@
  * @param argv the arguments
  * @return 0 on success, -1 and set errno on failure
  */
-int setup_saddle(struct state *state, int argc, char **argv);
+int setup_saddle(struct state *state, struct library *library, int argc, char **argv);
 
-int run_saddle(struct state *state);
+int run_saddle(struct state *state, struct library *library);
 
-void exit_saddle(struct state *state);
+void exit_saddle(struct state *state, struct library *library);
 
 #endif //CHAT_TEST_SADDLE_SADDLE_H
