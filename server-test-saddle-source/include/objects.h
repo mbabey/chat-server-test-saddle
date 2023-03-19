@@ -111,12 +111,15 @@ typedef struct
  */
 typedef struct
 {
-    int  id;
-    char *channel_name;
-    char *creator;
-    User *users;
-    User *administrators;
-    User *banned_users;
+    int    id;
+    char   *channel_name;
+    char   *creator;
+    User   *users;
+    size_t users_size;
+    User   *administrators;
+    size_t administrators_size;
+    User   *banned_users;
+    size_t banned_users_size;
 } Channel;
 
 /**
@@ -159,10 +162,14 @@ struct server_object
     struct parent *parent;
     struct child  *child;
     
-    User    *user_list;
-    Channel *channel_list;
-    Message *message_list;
-    Auth    *auth_list;
+    User    *user_db;
+    size_t  user_db_size;
+    Channel *channel_db;
+    size_t  channel_db_size;
+    Message *message_db;
+    size_t  message_db_size;
+    Auth    *auth_db;
+    size_t  auth_db_size;
 };
 
 /**
