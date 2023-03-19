@@ -76,10 +76,13 @@
  * assigned and handled by the loaded library.
  * </p>
  */
-struct core_object {
-    struct sockaddr_in listen_addr;
-    struct error_saver err;
+struct core_object
+{
+    struct sockaddr_in    listen_addr;
+    struct error_saver    err;
+    
     TRACER_FUNCTION_AS(tracer);
+    
     struct memory_manager *mm;
     
     struct server_object *so;
@@ -90,20 +93,20 @@ struct core_object {
  */
 struct server_object
 {
-    pid_t                child_pids[NUM_CHILD_PROCESSES];
-    int                  domain_fds[2];
-    int                  c_to_p_pipe_fds[2];
-    sem_t                *domain_sems[2];
-    sem_t                *c_to_p_pipe_sem_write;
-    sem_t                *log_sem;
-    struct parent_struct *parent;
-    struct child_struct  *child;
+    pid_t         child_pids[NUM_CHILD_PROCESSES];
+    int           domain_fds[2];
+    int           c_to_p_pipe_fds[2];
+    sem_t         *domain_sems[2];
+    sem_t         *c_to_p_pipe_sem_write;
+    sem_t         *log_sem;
+    struct parent *parent;
+    struct child  *child;
 };
 
 /**
  * Contains information about the parent state.
  */
-struct parent_struct
+struct parent
 {
     struct pollfd      pollfds[POLLFDS_SIZE]; // 0th position is the listen socket fd, 1st position is pipe.
     struct sockaddr_in client_addrs[MAX_CONNECTIONS];
@@ -113,7 +116,7 @@ struct parent_struct
 /**
  * Contains information about the child state.
  */
-struct child_struct
+struct child
 {
     int                client_fd_parent;
     int                client_fd_local;

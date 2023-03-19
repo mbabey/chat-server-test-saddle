@@ -34,7 +34,7 @@ volatile int GOGO_PROCESS = 1;
  * @param parent the parent struct
  * @return 0 on success, -1 and set errno on failure
  */
-static int p_run_poll_loop(struct core_object *co, struct server_object *so, struct parent_struct *parent);
+static int p_run_poll_loop(struct core_object *co, struct server_object *so, struct parent *parent);
 
 /**
  * setup_signal_handler
@@ -67,7 +67,7 @@ static void end_gogo_handler(int signal);
  * @param pollfds the pollfd array
  * @return the 0 on success, -1 and set errno on failure
  */
-static int p_accept_new_connection(struct core_object *co, struct parent_struct *parent, struct pollfd *pollfds);
+static int p_accept_new_connection(struct core_object *co, struct parent *parent, struct pollfd *pollfds);
 
 /**
  * p_get_pollfd_index
@@ -127,7 +127,7 @@ static int p_send_to_child(struct core_object *co, struct server_object *so, str
  * @param conn_index the index of the connection in the array of client_addrs
  * @param listen_pollfd the listen pollfd
  */
-static void p_remove_connection(struct core_object *co, struct parent_struct *parent,
+static void p_remove_connection(struct core_object *co, struct parent *parent,
                                 struct pollfd *pollfd, size_t conn_index, struct pollfd *listen_pollfd);
 
 /**
@@ -152,7 +152,7 @@ static int c_run_child_process(struct core_object *co, struct server_object *so)
  * @param child the child struct
  * @return 0 on success, -1 and set errno on failure
  */
-static int c_receive_and_handle_messages(struct core_object *co, struct server_object *so, struct child_struct *child);
+static int c_receive_and_handle_messages(struct core_object *co, struct server_object *so, struct child *child);
 
 /**
  * c_get_file_description_from_domain_socket
@@ -166,7 +166,7 @@ static int c_receive_and_handle_messages(struct core_object *co, struct server_o
  * @return 0 on success, -1 and set errno on failure.
  */
 static int c_get_file_description_from_domain_socket(struct core_object *co, struct server_object *so,
-                                                     struct child_struct *child);
+                                                     struct child *child);
 
 /**
  * c_inform_parent_recv_finished
@@ -178,7 +178,7 @@ static int c_get_file_description_from_domain_socket(struct core_object *co, str
  * @param child the child struct
  * @return 0 on success, -1 and set errno on failure.
  */
-static int c_inform_parent_recv_finished(struct core_object *co, struct server_object *so, struct child_struct *child);
+static int c_inform_parent_recv_finished(struct core_object *co, struct server_object *so, struct child *child);
 
 int setup_process_server(struct core_object *co, struct server_object *so)
 {
@@ -232,7 +232,7 @@ int run_process_server(struct core_object *co, struct server_object *so)
     return 0;
 }
 
-static int p_run_poll_loop(struct core_object *co, struct server_object *so, struct parent_struct *parent)
+static int p_run_poll_loop(struct core_object *co, struct server_object *so, struct parent *parent)
 {
     PRINT_STACK_TRACE(co->tracer);
     struct sigaction sigint;
@@ -309,7 +309,7 @@ static void end_gogo_handler(int signal)
 
 #pragma GCC diagnostic pop
 
-static int p_accept_new_connection(struct core_object *co, struct parent_struct *parent, struct pollfd *pollfds)
+static int p_accept_new_connection(struct core_object *co, struct parent *parent, struct pollfd *pollfds)
 {
     PRINT_STACK_TRACE(co->tracer);
     int       new_cfd;
@@ -465,7 +465,7 @@ static int p_send_to_child(struct core_object *co, struct server_object *so, str
     return 0;
 }
 
-static void p_remove_connection(struct core_object *co, struct parent_struct *parent,
+static void p_remove_connection(struct core_object *co, struct parent *parent,
                                 struct pollfd *pollfd, size_t conn_index, struct pollfd *listen_pollfd)
 {
     PRINT_STACK_TRACE(co->tracer);
@@ -519,7 +519,7 @@ static int c_run_child_process(struct core_object *co, struct server_object *so)
     return 0;
 }
 
-static int c_receive_and_handle_messages(struct core_object *co, struct server_object *so, struct child_struct *child)
+static int c_receive_and_handle_messages(struct core_object *co, struct server_object *so, struct child *child)
 {
     PRINT_STACK_TRACE(co->tracer);
     
@@ -527,7 +527,7 @@ static int c_receive_and_handle_messages(struct core_object *co, struct server_o
     while (GOGO_PROCESS)
     {
         // Clean the child struct.
-        memset(child, 0, sizeof(struct child_struct));
+        memset(child, 0, sizeof(struct child));
         
         if (c_get_file_description_from_domain_socket(co, so, child) == -1)
         {
@@ -549,7 +549,7 @@ static int c_receive_and_handle_messages(struct core_object *co, struct server_o
 }
 
 static int c_get_file_description_from_domain_socket(struct core_object *co, struct server_object *so,
-                                                     struct child_struct *child)
+                                                     struct child *child)
 {
     PRINT_STACK_TRACE(co->tracer);
     
@@ -605,7 +605,7 @@ static int c_get_file_description_from_domain_socket(struct core_object *co, str
     return 0;
 }
 
-static int c_inform_parent_recv_finished(struct core_object *co, struct server_object *so, struct child_struct *child)
+static int c_inform_parent_recv_finished(struct core_object *co, struct server_object *so, struct child *child)
 {
     PRINT_STACK_TRACE(co->tracer);
     ssize_t bytes_written;

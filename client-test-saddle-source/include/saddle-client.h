@@ -1,7 +1,7 @@
 #ifndef CLIENT_TEST_SADDLE_SADDLE_CLIENT_H
 #define CLIENT_TEST_SADDLE_SADDLE_CLIENT_H
 
-#include "state.h"
+#include "client-objects.h"
 
 enum TestNumber
 {

@@ -1,7 +1,7 @@
 #ifndef CHAT_TEST_SADDLE_TEST_FUNCTIONS_H
 #define CHAT_TEST_SADDLE_TEST_FUNCTIONS_H
 
-#include "state.h"
+#include "client-objects.h"
 
 /**
  *

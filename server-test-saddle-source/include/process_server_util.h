@@ -48,7 +48,7 @@ int fork_child_processes(struct core_object *co, struct server_object *so);
  * @param so the state object
  * @param parent the parent struct
  */
-void p_destroy_parent_state(struct core_object *co, struct server_object *so, struct parent_struct *parent);
+void p_destroy_parent_state(struct core_object *co, struct server_object *so, struct parent *parent);
 
 /**
  * c_destroy_child_state
@@ -60,7 +60,7 @@ void p_destroy_parent_state(struct core_object *co, struct server_object *so, st
  * @param so the state object
  * @param child the child struct
  */
-void c_destroy_child_state(struct core_object *co, struct server_object *so, struct child_struct *child);
+void c_destroy_child_state(struct core_object *co, struct server_object *so, struct child *child);
 
 /**
  * close_fd_report_undefined_error

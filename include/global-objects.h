@@ -24,4 +24,37 @@ struct state {
     int (*lib_main)(void *);
 };
 
+/**
+ * A Network Dispatch.
+ */
+struct dispatch
+{
+    uint8_t  version: 4;
+    uint8_t  type: 4;
+    uint8_t  object;
+    uint16_t body_size;
+    char     *body;
+};
+
+/**
+ * Dispatch Types
+ */
+enum Type
+{
+    CREATE = 1,
+    READ,
+    UPDATE,
+    DESTROY,
+    PINGUSER = 9,
+    PINGCHANNEL
+};
+
+enum Object
+{
+    USER = 1,
+    CHANNEL,
+    MESSAGE,
+    AUTH
+};
+
 #endif //CHAT_TEST_SADDLE_STATE_H

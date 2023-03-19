@@ -45,7 +45,7 @@ static int p_setup_parent(struct core_object *co, struct server_object *so);
  * @param listen_addr the address on which to listen
  * @return 0 on success, -1 and set errno on failure
  */
-static int p_open_process_server_for_listen(struct core_object *co, struct parent_struct *parent,
+static int p_open_process_server_for_listen(struct core_object *co, struct parent *parent,
                                             struct sockaddr_in *listen_addr);
 
 /**
@@ -174,7 +174,7 @@ int fork_child_processes(struct core_object *co, struct server_object *so)
 static int c_setup_child(struct core_object *co, struct server_object *so)
 {
     so->parent = NULL; // Here for clarity; will already be null.
-    so->child  = (struct child_struct *) mm_calloc(1, sizeof(struct child_struct), co->mm);
+    so->child  = (struct child *) mm_calloc(1, sizeof(struct child), co->mm);
     if (!so->child)
     {
         SET_ERROR(co->err);
@@ -192,7 +192,7 @@ static int c_setup_child(struct core_object *co, struct server_object *so)
 
 static int p_setup_parent(struct core_object *co, struct server_object *so)
 {
-    so->parent = (struct parent_struct *) mm_calloc(1, sizeof(struct parent_struct), co->mm);
+    so->parent = (struct parent *) mm_calloc(1, sizeof(struct parent), co->mm);
     if (!so->parent)
     {
         SET_ERROR(co->err);
@@ -217,7 +217,7 @@ static int p_setup_parent(struct core_object *co, struct server_object *so)
     return 0;
 }
 
-static int p_open_process_server_for_listen(struct core_object *co, struct parent_struct *parent,
+static int p_open_process_server_for_listen(struct core_object *co, struct parent *parent,
                                             struct sockaddr_in *listen_addr)
 {
     PRINT_STACK_TRACE(co->tracer);
@@ -254,7 +254,7 @@ static int p_open_process_server_for_listen(struct core_object *co, struct paren
     return 0;
 }
 
-void p_destroy_parent_state(struct core_object *co, struct server_object *so, struct parent_struct *parent)
+void p_destroy_parent_state(struct core_object *co, struct server_object *so, struct parent *parent)
 {
     PRINT_STACK_TRACE(co->tracer);
     int status;
@@ -288,7 +288,7 @@ void p_destroy_parent_state(struct core_object *co, struct server_object *so, st
     sem_unlink(LOG_SEM_NAME);
 }
 
-void c_destroy_child_state(struct core_object *co, struct server_object *so, struct child_struct *child)
+void c_destroy_child_state(struct core_object *co, struct server_object *so, struct child *child)
 {
     PRINT_STACK_TRACE(co->tracer);
     close_fd_report_undefined_error(so->c_to_p_pipe_fds[WRITE], "state of pipe write is undefined.");

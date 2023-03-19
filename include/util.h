@@ -1,7 +1,8 @@
-#ifndef CLIENT_TEST_SADDLE_SEND_RECV_H
-#define CLIENT_TEST_SADDLE_SEND_RECV_H
+#ifndef CLIENT_TEST_SADDLE_UTIL_H
+#define CLIENT_TEST_SADDLE_UTIL_H
 
-#include "state.h"
+#include "global-objects.h"
+
 
 /**
  * recv_parse_message
@@ -13,7 +14,7 @@
  * @param dispatch the dispatch to receive into
  * @return 0 on success, -1 on set err failure
  */
-int recv_parse_message(struct state_minor *state, struct client *client, struct dispatch *dispatch);
+int recv_parse_message(struct state *state, int socket_fd, struct dispatch *dispatch);
 
 /**
  * assemble_message_send
@@ -25,7 +26,7 @@ int recv_parse_message(struct state_minor *state, struct client *client, struct 
  * @param dispatch the dispatch to send
  * @return 0 on success, -1 on set err failure
  */
-int assemble_message_send(struct state_minor *state, struct client *client, struct dispatch *dispatch);
+int assemble_message_send(struct state *state, int socket_fd, struct dispatch *dispatch);
 
 /**
  * parse_body
@@ -41,6 +42,6 @@ int assemble_message_send(struct state_minor *state, struct client *client, stru
  * @param body the body
  * @return 0 on success, -1 and set err on failure
  */
-int parse_body(struct state_minor *state, struct client *client, char ***body_tokens, uint16_t body_size, char *body);
+int parse_body(struct state *state, char ***body_tokens, uint16_t body_size, char *body);
 
-#endif //CLIENT_TEST_SADDLE_SEND_RECV_H
+#endif //CLIENT_TEST_SADDLE_UTIL_H

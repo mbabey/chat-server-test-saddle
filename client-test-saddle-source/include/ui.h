@@ -1,7 +1,7 @@
 #ifndef CLIENT_TEST_SADDLE_UI_H
 #define CLIENT_TEST_SADDLE_UI_H
 
-#include "state.h"
+#include "client-objects.h"
 
 /**
  * run_ui

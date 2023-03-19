@@ -1,7 +1,7 @@
 #ifndef CHAT_SERVER_TEST_SADDLE_UTIL_H
 #define CHAT_SERVER_TEST_SADDLE_UTIL_H
 
-#include "state.h"
+#include "global-objects.h"
 
 #include <dc_env/env.h>
 
