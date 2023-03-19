@@ -83,21 +83,6 @@ struct core_object
 };
 
 /**
- * Contains information about the server state.
- */
-struct server_object
-{
-    pid_t         child_pids[NUM_CHILD_PROCESSES];
-    int           domain_fds[2];
-    int           c_to_p_pipe_fds[2];
-    sem_t         *domain_sems[2];
-    sem_t         *c_to_p_pipe_sem_write;
-    sem_t         *log_sem;
-    struct parent *parent;
-    struct child  *child;
-};
-
-/**
  * User. Contains information about a User.
  */
 typedef struct
@@ -141,6 +126,30 @@ typedef struct
     char       *password;
 } Auth;
 
+
+/**
+ * Contains information about the server state.
+ */
+struct server_object
+{
+    pid_t         child_pids[NUM_CHILD_PROCESSES];
+    int           domain_fds[2];
+    int           c_to_p_pipe_fds[2];
+    sem_t         *domain_sems[2];
+    sem_t         *c_to_p_pipe_sem_write;
+    sem_t         *user_db_sem;
+    sem_t         *channel_db_sem;
+    sem_t         *message_db_sem;
+    sem_t         *auth_db_sem;
+    struct parent *parent;
+    struct child  *child;
+    
+    User    *user_list;
+    Channel *channel_list;
+    Message *message_list;
+    Auth    *auth_list;
+};
+
 /**
  * Contains information about the parent state.
  */
@@ -149,11 +158,6 @@ struct parent
     struct pollfd      pollfds[POLLFDS_SIZE]; // 0th position is the listen socket fd, 1st position is pipe.
     struct sockaddr_in client_addrs[MAX_CONNECTIONS];
     size_t             num_connections;
-    
-    User    *user_list;
-    Channel *channel_list;
-    Message *message_list;
-    Auth    *auth_list;
 };
 
 /**
