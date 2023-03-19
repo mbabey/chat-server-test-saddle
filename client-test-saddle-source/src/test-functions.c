@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int create_user_test(struct state_minor *state, struct client *client)
+int create_user_test(struct client_state *state)
 {
     printf("create_user_test\n");
     
@@ -21,14 +21,14 @@ int create_user_test(struct state_minor *state, struct client *client)
     dispatch.body      = strdup("bigdog69\x03thedog\x03password1234@!\x03");
     dispatch.body_size = strlen(dispatch.body);
     
-    status = assemble_message_send((struct state *) state, client->socket_fd, &dispatch);
+    status = assemble_message_send((struct state *) state, state->socket_fd, &dispatch);
     free(dispatch.body);
     if (status == -1)
     {
         return -1;
     }
     
-    if (recv_parse_message((struct state *) state, client->socket_fd, &dispatch, &body_tokens) == -1)
+    if (recv_parse_message((struct state *) state, state->socket_fd, &dispatch, &body_tokens) == -1)
     {
         return -1;
     }
@@ -52,7 +52,7 @@ int create_user_test(struct state_minor *state, struct client *client)
     return 0;
 }
 
-int create_channel_test(struct state_minor *state, struct client *client)
+int create_channel_test(struct client_state *state)
 {
     printf("create_channel_test not yet implemented.\n");
     
@@ -69,14 +69,14 @@ int create_channel_test(struct state_minor *state, struct client *client)
     dispatch.body      = strdup("the doghouse\x03thedog\x03""1""\x03");
     dispatch.body_size = strlen(dispatch.body);
     
-    status = assemble_message_send((struct state *) state, client->socket_fd, &dispatch);
+    status = assemble_message_send((struct state *) state, state->socket_fd, &dispatch);
     free(dispatch.body);
     if (status == -1)
     {
         return -1;
     }
     
-    if (recv_parse_message((struct state *) state, client->socket_fd, &dispatch, &body_tokens) == -1)
+    if (recv_parse_message((struct state *) state, state->socket_fd, &dispatch, &body_tokens) == -1)
     {
         return -1;
     }
@@ -97,7 +97,7 @@ int create_channel_test(struct state_minor *state, struct client *client)
     return 0;
 }
 
-int create_message_test(struct state_minor *state, struct client *client)
+int create_message_test(struct client_state *state)
 {
     struct dispatch dispatch;
     int             status;
@@ -113,14 +113,14 @@ int create_message_test(struct state_minor *state, struct client *client)
     dispatch.body      = strdup("thedog\x03the doghouse\x03yo what's up its me the dog\x03""1678347396""\x03");
     dispatch.body_size = strlen(dispatch.body);
     
-    status = assemble_message_send((struct state *) state, client->socket_fd, &dispatch);
+    status = assemble_message_send((struct state *) state, state->socket_fd, &dispatch);
     free(dispatch.body);
     if (status == -1)
     {
         return -1;
     }
     
-    if (recv_parse_message((struct state *) state, client->socket_fd, &dispatch, &body_tokens) == -1)
+    if (recv_parse_message((struct state *) state, state->socket_fd, &dispatch, &body_tokens) == -1)
     {
         return -1;
     }

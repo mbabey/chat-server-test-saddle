@@ -12,19 +12,19 @@ set(INCLUDE_DIR include)
 set(SOURCE_LIST
         ${SOURCE_DIR}/lib-main.c
         ${SOURCE_DIR}/lib-run.c
-        ${SOURCE_DIR}/ui.c
-        ${SOURCE_DIR}/send-recv.c
         ${SOURCE_DIR}/test-functions.c
+        ${SOURCE_DIR}/ui.c
+        ../${SOURCE_DIR}/util.c
         ../${SOURCE_DIR}/manager.c
         #=vvvv= SOURCE FOR DUMMY MAIN =vvvv=#
 #        ${SOURCE_DIR}/test-main.c
         )
 set(HEADER_LIST
-        ${INCLUDE_DIR}/test-functions.h
+        ${INCLUDE_DIR}/client-objects.h
         ${INCLUDE_DIR}/saddle-client.h
-        ${INCLUDE_DIR}/state.h
+        ${INCLUDE_DIR}/test-functions.h
         ${INCLUDE_DIR}/ui.h
-        ${INCLUDE_DIR}/send-recv.h
+        ../${INCLUDE_DIR}/util.h
         ../${INCLUDE_DIR}/saddle-function.h
         ../${INCLUDE_DIR}/manager.h
         #=vvvv= INCLUDES FOR DUMMY MAIN =vvvv=#

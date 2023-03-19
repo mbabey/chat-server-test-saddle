@@ -9,10 +9,9 @@
  * Display the user interface menu on stdout. Get user input.
  * </p>
  * @param state the state object
- * @param client tne client object
  * @return 0 on success, -1 and set err on failure.
  */
-int run_ui(struct state_minor *state, struct client *client);
+int run_ui(struct client_state *state);
 
 /**
  * display_results
@@ -22,6 +21,6 @@ int run_ui(struct state_minor *state, struct client *client);
  * @param state the state object
  * @return 0 on success, -1 and set err on failure.
  */
-int display_results(struct state_minor *state);
+int display_results(struct client_state *state);
 
 #endif //CLIENT_TEST_SADDLE_UI_H

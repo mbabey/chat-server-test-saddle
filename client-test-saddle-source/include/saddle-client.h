@@ -23,6 +23,6 @@ enum TestNumber
  * @param client the client object
  * @return 0 on success, -1 on and set err failure
  */
-int run_client_saddle(struct state_minor *state, struct client *client);
+int run_client_saddle(struct client_state *state);
 
 #endif //CLIENT_TEST_SADDLE_SADDLE_CLIENT_H

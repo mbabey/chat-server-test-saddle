@@ -7,9 +7,9 @@
 #include <netinet/in.h>
 
 /**
- * Minor state struct. See chat-server-test-saddle/include/state.h for major.
+ * Information necessary to run the Client test saddle. A type of state struct.
  */
-struct state_minor
+struct client_state
 {
     struct sockaddr_in    addr;
     struct error_saver    err;
@@ -17,13 +17,7 @@ struct state_minor
     TRACER_FUNCTION_AS(tracer);
     
     struct memory_manager *mm;
-};
-
-/**
- * Information necessary to run the client.
- */
-struct client
-{
+    
     int socket_fd;
     int test_number;
 };

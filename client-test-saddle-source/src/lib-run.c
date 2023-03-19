@@ -9,7 +9,7 @@
  * </p>
  * @param state
  */
-static int run_create_test(struct state_minor *state, struct client *client);
+static int run_create_test(struct client_state *state);
 
 /**
  * run_read_test
@@ -17,7 +17,7 @@ static int run_create_test(struct state_minor *state, struct client *client);
  * Run tests for READ type dispatches on all objects.
  * </p>
  */
-static int run_read_test(struct state_minor *state, struct client *client);
+static int run_read_test(struct client_state *state);
 
 /**
  * run_update_test
@@ -25,7 +25,7 @@ static int run_read_test(struct state_minor *state, struct client *client);
  * Run tests for UPDATE type dispatches on all objects.
  * </p>
  */
-static int run_update_test(struct state_minor *state, struct client *client);
+static int run_update_test(struct client_state *state);
 
 /**
  * run_destroy_test
@@ -33,9 +33,9 @@ static int run_update_test(struct state_minor *state, struct client *client);
  * Run tests for DESTROY type dispatches on all objects.
  * </p>
  */
-static int run_destroy_test(struct state_minor *state, struct client *client);
+static int run_destroy_test(struct client_state *state);
 
-int run_client_saddle(struct state_minor *state, struct client *client)
+int run_client_saddle(struct client_state *state)
 {
     PRINT_STACK_TRACE(state->tracer);
     
@@ -44,13 +44,13 @@ int run_client_saddle(struct state_minor *state, struct client *client)
     run = 1;
     while (run)
     {
-        if (run_ui(state, client) == -1)
+        if (run_ui(state) == -1)
         {
             SET_ERROR(state->err);
             return -1;
         }
         
-        switch (client->test_number)
+        switch (state->test_number)
         {
             case INVALID:
             {
@@ -62,7 +62,7 @@ int run_client_saddle(struct state_minor *state, struct client *client)
             case CREATE_MESSAGE:
             case CREATE_AUTH:
             {
-                if (run_create_test(state, client) == -1)
+                if (run_create_test(state) == -1)
                 {
                     return -1;
                 }
@@ -72,7 +72,7 @@ int run_client_saddle(struct state_minor *state, struct client *client)
             case READ_CHANNEL:
             case READ_MESSAGE:
             {
-                if (run_read_test(state, client) == -1)
+                if (run_read_test(state) == -1)
                 {
                     return -1;
                 }
@@ -83,7 +83,7 @@ int run_client_saddle(struct state_minor *state, struct client *client)
             case UPDATE_MESSAGE:
             case UPDATE_AUTH:
             {
-                if (run_update_test(state, client) == -1)
+                if (run_update_test(state) == -1)
                 {
                     return -1;
                 }
@@ -94,7 +94,7 @@ int run_client_saddle(struct state_minor *state, struct client *client)
             case DESTROY_MESSAGE:
             case DESTROY_AUTH:
             {
-                if (run_destroy_test(state, client) == -1)
+                if (run_destroy_test(state) == -1)
                 {
                     return -1;
                 }
@@ -107,7 +107,7 @@ int run_client_saddle(struct state_minor *state, struct client *client)
             }
         }
     
-        if (client->test_number != STOP)
+        if (state->test_number != STOP)
         {
             display_results(state);
         }
@@ -116,15 +116,15 @@ int run_client_saddle(struct state_minor *state, struct client *client)
     return 0;
 }
 
-static int run_create_test(struct state_minor *state, struct client *client)
+static int run_create_test(struct client_state *state)
 {
     PRINT_STACK_TRACE(state->tracer);
     
-    switch (client->test_number)
+    switch (state->test_number)
     {
         case CREATE_USER:
         {
-            if (create_user_test(state, client) == -1)
+            if (create_user_test(state) == -1)
             {
                 return -1;
             }
@@ -132,7 +132,7 @@ static int run_create_test(struct state_minor *state, struct client *client)
         }
         case CREATE_CHANNEL:
         {
-            if (create_channel_test(state, client) == -1)
+            if (create_channel_test(state) == -1)
             {
                 return -1;
             }
@@ -140,7 +140,7 @@ static int run_create_test(struct state_minor *state, struct client *client)
         }
         case CREATE_MESSAGE:
         {
-            if (create_message_test(state, client) == -1)
+            if (create_message_test(state) == -1)
             {
                 return -1;
             }
@@ -159,11 +159,11 @@ static int run_create_test(struct state_minor *state, struct client *client)
     return 0;
 }
 
-static int run_read_test(struct state_minor *state, struct client *client)
+static int run_read_test(struct client_state *state)
 {
     PRINT_STACK_TRACE(state->tracer);
     
-    switch (client->test_number)
+    switch (state->test_number)
     {
         case READ_USER:
         {
@@ -194,11 +194,11 @@ static int run_read_test(struct state_minor *state, struct client *client)
     return 0;
 }
 
-static int run_update_test(struct state_minor *state, struct client *client)
+static int run_update_test(struct client_state *state)
 {
     PRINT_STACK_TRACE(state->tracer);
     
-    switch (client->test_number)
+    switch (state->test_number)
     {
         case UPDATE_USER:
         {
@@ -237,11 +237,11 @@ static int run_update_test(struct state_minor *state, struct client *client)
     return 0;
 }
 
-static int run_destroy_test(struct state_minor *state, struct client *client)
+static int run_destroy_test(struct client_state *state)
 {
     PRINT_STACK_TRACE(state->tracer);
     
-    switch (client->test_number)
+    switch (state->test_number)
     {
         case DESTROY_USER:
         {

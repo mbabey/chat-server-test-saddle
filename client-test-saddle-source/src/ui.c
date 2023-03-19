@@ -52,7 +52,7 @@
  */
 #define IS_LF_OR_EOF(character) ((character) == '\n' || (character) == EOF)
 
-int run_ui(struct state_minor *state, struct client *client)
+int run_ui(struct client_state *state)
 {
     PRINT_STACK_TRACE(state->tracer);
     
@@ -81,12 +81,12 @@ int run_ui(struct state_minor *state, struct client *client)
     
     // Set to STOP test_number to stop if input is 'q'; otherwise, set test_number.
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers) : num will not change
-    client->test_number = (buffer[0] == 'q') ? STOP : (int) strtol(buffer, NULL, 10);
+    state->test_number = (buffer[0] == 'q') ? STOP : (int) strtol(buffer, NULL, 10);
     
     return 0;
 }
 
-int display_results(struct state_minor *state)
+int display_results(struct client_state *state)
 {
     PRINT_STACK_TRACE(state->tracer);
     

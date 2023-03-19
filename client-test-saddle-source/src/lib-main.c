@@ -12,7 +12,7 @@
  * @param client the client object
  * @return 0 on success, -1 and set err on failure
  */
-static int open_socket_connect(struct state_minor *state, struct client *client);
+static int open_socket_connect(struct client_state *state);
 
 /**
  * disconnect_close_socket
@@ -23,25 +23,24 @@ static int open_socket_connect(struct state_minor *state, struct client *client)
  * @param client the client object
  * @return 0 on success, -1 and set err on failure
  */
-static int disconnect_close_socket(struct state_minor *state, struct client *client);
+static int disconnect_close_socket(struct client_state *state);
 
 int lib_main(void *args)
 {
-    struct state_minor *state = (struct state_minor *) args;
+    struct client_state *state = (struct client_state *) args;
     PRINT_STACK_TRACE(state->tracer);
-    struct client client;
     
-    if (open_socket_connect(state, &client) == -1)
+    if (open_socket_connect(state) == -1)
     {
         return -1;
     }
     
-    if (run_client_saddle(state, &client) == -1)
+    if (run_client_saddle(state) == -1)
     {
         return -1;
     }
     
-    if (disconnect_close_socket(state, &client) == -1)
+    if (disconnect_close_socket(state) == -1)
     {
         return -1;
     }
@@ -49,7 +48,7 @@ int lib_main(void *args)
     return 0;
 }
 
-static int open_socket_connect(struct state_minor *state, struct client *client)
+static int open_socket_connect(struct client_state *state)
 {
     PRINT_STACK_TRACE(state->tracer);
     
@@ -70,16 +69,16 @@ static int open_socket_connect(struct state_minor *state, struct client *client)
         return -1;
     }
     
-    client->socket_fd = fd;
+    state->socket_fd = fd;
     
     return 0;
 }
 
-static int disconnect_close_socket(struct state_minor *state, struct client *client)
+static int disconnect_close_socket(struct client_state *state)
 {
     PRINT_STACK_TRACE(state->tracer);
     
-    if (close(client->socket_fd) == -1)
+    if (close(state->socket_fd) == -1)
     {
         switch (errno)
         {
