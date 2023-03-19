@@ -6,10 +6,10 @@
 /**
  * setup_process_state
  * <p>
- * Set up the state object for the process server. Add it to the memory manager.
+ * Set up the server object for the process server. Add it to the memory manager.
  * </p>
- * @param mm the memory manager to which the state object will be added
- * @return the state object, or NULL and set errno on failure
+ * @param mm the memory manager to which the server object will be added
+ * @return the server object, or NULL and set errno on failure
  */
 struct server_object *setup_process_state(struct memory_manager *mm);
 
@@ -20,10 +20,21 @@ struct server_object *setup_process_state(struct memory_manager *mm);
  * the domain socket, and the log file.
  * </p>
  * @param co the core object
- * @param so the state object
+ * @param so the server object
  * @return 0 on success, -1 and set errno on failure
  */
 int open_pipe_semaphores_domain_sockets(struct core_object *co, struct server_object *so);
+
+/**
+ * open_databases
+ * <p>
+ * Open the User, Channel, Message, and Auth databases.
+ * </p>
+ * @param co the core object
+ * @param so the server object
+ * @return 0 on success, -1 and set err on failure
+ */
+int open_databases(struct core_object *co, struct server_object *so);
 
 /**
  * fork_child_processes
@@ -32,7 +43,7 @@ int open_pipe_semaphores_domain_sockets(struct core_object *co, struct server_ob
  * parent process and the children in the child processes.
  * </p>
  * @param co the core object
- * @param so the state object
+ * @param so the server object
  * @return 0 on success, -1 and set errno on failure.
  */
 int fork_child_processes(struct core_object *co, struct server_object *so);
@@ -45,7 +56,7 @@ int fork_child_processes(struct core_object *co, struct server_object *so);
  * free allocated memory.
  * </p>
  * @param co the core object
- * @param so the state object
+ * @param so the server object
  * @param parent the parent struct
  */
 void p_destroy_parent_state(struct core_object *co, struct server_object *so, struct parent *parent);
@@ -57,10 +68,20 @@ void p_destroy_parent_state(struct core_object *co, struct server_object *so, st
  * UNIX socket connection, free allocated memory.
  * </p>
  * @param co the core object
- * @param so the state object
+ * @param so the server object
  * @param child the child struct
  */
 void c_destroy_child_state(struct core_object *co, struct server_object *so, struct child *child);
+
+/**
+ * close_databases
+ * <p>
+ * Close the User, Channel, Message, and Auth databases.
+ * </p>
+ * @param co the core object
+ * @param so the server object
+ */
+void close_databases(struct core_object *co, struct server_object *so);
 
 /**
  * close_fd_report_undefined_error

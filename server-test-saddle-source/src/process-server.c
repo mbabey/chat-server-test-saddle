@@ -215,6 +215,11 @@ int setup_process_server(struct core_object *co, struct server_object *so)
         return -1;
     }
     
+    if (open_databases(co, so) == -1)
+    {
+        return -1;
+    }
+    
     GOGO_PROCESS = 1;
     
     if (fork_child_processes(co, so) == -1)
@@ -693,4 +698,6 @@ void destroy_process_state(struct core_object *co, struct server_object *so)
     {
         c_destroy_child_state(co, so, so->child);
     }
+    
+    close_databases(co, so);
 }
