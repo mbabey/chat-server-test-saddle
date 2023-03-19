@@ -88,7 +88,7 @@ int open_pipe_semaphores_domain_sockets(struct core_object *co, struct server_ob
         return -1;
     }
     
-    if (socketpair(AF_UNIX, SOCK_STREAM, 0, so->domain_fds) == -1) // lol I love linux
+    if (socketpair(AF_UNIX, SOCK_STREAM, 0, so->domain_fds) == -1)
     {
         SET_ERROR(co->err);
         return -1;
@@ -117,9 +117,9 @@ static int open_semaphores(struct core_object *co, struct server_object *so)
     channel_db_sem   = sem_open(CHANNEL_SEM_NAME, O_CREAT, S_IRUSR | S_IWUSR, 1);
     message_db_sem   = sem_open(MESSAGE_SEM_NAME, O_CREAT, S_IRUSR | S_IWUSR, 1);
     auth_db_sem      = sem_open(AUTH_SEM_NAME, O_CREAT, S_IRUSR | S_IWUSR, 1);
-    if (pipe_write_sem == SEM_FAILED
-        || domain_read_sem == SEM_FAILED || domain_write_sem == SEM_FAILED
-            )
+    if (pipe_write_sem == SEM_FAILED || domain_read_sem == SEM_FAILED || domain_write_sem == SEM_FAILED
+        || user_db_sem == SEM_FAILED || channel_db_sem == SEM_FAILED || message_db_sem == SEM_FAILED ||
+        auth_db_sem == SEM_FAILED)
     {
         SET_ERROR(co->err);
         // Closing an unopened semaphore will return -1 and set errno = EINVAL, which can be ignored.
@@ -308,7 +308,7 @@ void p_destroy_parent_state(struct core_object *co, struct server_object *so, st
     sem_unlink(CHANNEL_SEM_NAME);
     sem_unlink(MESSAGE_SEM_NAME);
     sem_unlink(AUTH_SEM_NAME);
-
+    
 }
 
 void c_destroy_child_state(struct core_object *co, struct server_object *so, struct child *child)
