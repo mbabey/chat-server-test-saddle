@@ -2,6 +2,18 @@
 #include "../include/db.h"
 
 /**
+ * insert_user
+ * <p>
+ * Insert a new User into the User database.
+ * </p>
+ * @param co the core object
+ * @param so the server object
+ * @param user the User to insert
+ * @return 0 on success, -1 and set err on failure.
+ */
+static int insert_user(struct core_object *co, struct server_object *so, const User *user);
+
+/**
  * serialize_user
  * <p>
  * Serialize a User struct.
@@ -11,7 +23,7 @@
  * @param user the user to serialize
  * @return 0 on success, -1 and set err on failure
  */
-static int serialize_user(struct core_object *co, uint8_t **serial_user, User *user);
+static int serialize_user(struct core_object *co, uint8_t **serial_user, const User *user);
 
 /**
  * print_db_error
@@ -22,6 +34,7 @@ static int serialize_user(struct core_object *co, uint8_t **serial_user, User *u
  */
 static void print_db_error(int err_code);
 
+
 int db_create(struct core_object *co, struct server_object *so, int type, void *object)
 {
     PRINT_STACK_TRACE(co->tracer);
@@ -30,43 +43,10 @@ int db_create(struct core_object *co, struct server_object *so, int type, void *
     {
         case USER:
         {
-            User    *user;
-            uint8_t *serial_user;
-            int     serial_user_size;
-            int     insert_status;
-            datum   key;
-            datum   value;
-            
-            user = (User *) object;
-            
-            serial_user_size = serialize_user(&serial_user, user);
-            if (serial_user_size == -1)
+            if (insert_user(co, so, object) == -1)
             {
                 return -1;
             }
-            
-            key.dptr    = user->display_name;
-            key.dsize   = strlen(user->display_name + 1);
-            value.dptr  = serial_user;
-            value.dsize = serial_user_size;
-            
-            if (sem_wait(so->user_db_sem) == -1)
-            {
-                SET_ERROR(co->err);
-                return -1;
-            }
-            
-            insert_status = dbm_store(so->user_db, key, value, DBM_INSERT);
-            if (insert_status == 1)
-            {
-                (void) fprintf(stdout, "Database error occurred: entry with key \"%s\" exists.\n", (char *) key.dptr);
-            } else if (insert_status == -1)
-            {
-                print_db_error(dbm_error(so->user_db));
-            }
-            
-            sem_post(so->user_db_sem);
-            
             break;
         }
         case CHANNEL:
@@ -78,7 +58,7 @@ int db_create(struct core_object *co, struct server_object *so, int type, void *
             if (sem_wait(so->channel_db_sem) == -1)
             {
                 SET_ERROR(co->err);
-                return -1;
+//                return -1;
             }
             
             sem_post(so->channel_db_sem);
@@ -123,7 +103,47 @@ int db_create(struct core_object *co, struct server_object *so, int type, void *
     return 0;
 }
 
-static int serialize_user(struct core_object *co, uint8_t **serial_user, User *user)
+static int insert_user(struct core_object *co, struct server_object *so, const User *user)
+{
+    uint8_t *serial_user;
+    int     serial_user_size;
+    int     insert_status;
+    datum   key;
+    datum   value;
+    
+    serial_user_size = serialize_user(co, &serial_user, user);
+    if (serial_user_size == -1)
+    {
+        return -1;
+    }
+    
+    key.dptr    = user->display_name;
+    key.dsize   = strlen(user->display_name + 1);
+    value.dptr  = serial_user;
+    value.dsize = serial_user_size;
+    
+    if (sem_wait(so->user_db_sem) == -1)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
+    
+    insert_status = dbm_store(so->user_db, key, value, DBM_INSERT);
+    
+    sem_post(so->user_db_sem);
+    
+    if (insert_status == 1)
+    {
+        (void) fprintf(stdout, "Database error occurred: entry with key \"%s\" exists.\n", (char *) key.dptr);
+    } else if (insert_status == -1)
+    {
+        print_db_error(dbm_error(so->user_db));
+    }
+    
+    return 0;
+}
+
+static int serialize_user(struct core_object *co, uint8_t **serial_user, const User *user)
 {
     PRINT_STACK_TRACE(co->tracer);
     
