@@ -1,6 +1,15 @@
 #include "../../include/global-objects.h"
 #include "../include/db.h"
 
+/**
+ * print_db_error
+ * <p>
+ * Print an error message based on the error code of passed.
+ * </p>
+ * @param err_code the error code
+ */
+static void print_db_error(int err_code);
+
 int db_create(struct core_object *co, struct server_object *so, int type, void *object)
 {
     PRINT_STACK_TRACE(co->tracer);
@@ -9,14 +18,26 @@ int db_create(struct core_object *co, struct server_object *so, int type, void *
     {
         case USER:
         {
-            User *new_user;
+            User    *user;
+            uint8_t *serial_user;
+            int     serial_user_size;
+            int     insert_status;
+            datum   key;
+            datum   value;
             
-            new_user = mm_malloc(sizeof(User), co->mm);
-            if (!new_user)
+            user = (User *) object;
+            
+            serial_user_size = serialize_user(&serial_user, user);
+            if (serial_user_size == -1)
             {
                 SET_ERROR(co->err);
                 return -1;
             }
+            
+            key.dptr    = user->display_name;
+            key.dsize   = strlen(user->display_name + 1);
+            value.dptr  = serial_user;
+            value.dsize = serial_user_size;
             
             if (sem_wait(so->user_db_sem) == -1)
             {
@@ -24,98 +45,65 @@ int db_create(struct core_object *co, struct server_object *so, int type, void *
                 return -1;
             }
             
-            so->user_db = mm_realloc(so->user_db, (so->user_db_size + 1) * sizeof(User), co->mm);
-            if (!so->user_db)
+            insert_status = dbm_store(so->user_db, key, value, DBM_INSERT);
+            if (insert_status == 1)
             {
-                SET_ERROR(co->err);
-                return -1;
+                (void) fprintf(stdout, "Database error occurred: entry with key \"%s\" exists.\n", (char *) key.dptr);
+            } else if (insert_status == -1)
+            {
+                print_db_error(dbm_error(so->user_db));
             }
-    
-            *(so->user_db + ++so->user_db_size) = new_user;
+            
+            sem_post(so->user_db_sem);
             
             break;
         }
         case CHANNEL:
         {
-            Channel *new_channel;
-    
-            new_channel = mm_malloc(sizeof(Channel), co->mm);
-            if (!new_channel)
-            {
-                SET_ERROR(co->err);
-                return -1;
-            }
-    
+            Channel *channel;
+            
+            channel = (Channel *) object;
+            
             if (sem_wait(so->channel_db_sem) == -1)
             {
                 SET_ERROR(co->err);
                 return -1;
             }
-    
-            so->channel_db = mm_realloc(so->channel_db, (so->channel_db_size + 1) * sizeof(Channel), co->mm);
-            if (!so->channel_db)
-            {
-                SET_ERROR(co->err);
-                return -1;
-            }
-    
-            *(so->channel_db + ++so->channel_db_size) = new_channel;
+            
+            sem_post(so->channel_db_sem);
             
             break;
         }
         case MESSAGE:
         {
-            Message *new_message;
-    
-            new_message = mm_malloc(sizeof(Message), co->mm);
-            if (!new_message)
-            {
-                SET_ERROR(co->err);
-                return -1;
-            }
-    
+            Message *message;
+            
+            message = (Message *) object;
+            
             if (sem_wait(so->message_db_sem) == -1)
             {
                 SET_ERROR(co->err);
                 return -1;
             }
-    
-            so->message_db = mm_realloc(so->message_db, (so->message_db_size + 1) * sizeof(Message), co->mm);
-            if (!so->message_db)
-            {
-                SET_ERROR(co->err);
-                return -1;
-            }
-    
-            *(so->message_db + ++so->message_db_size) = new_message;
+            
+            sem_post(so->message_db_sem);
             
             break;
         }
         case AUTH:
         {
-            Auth *new_auth;
-    
-            new_auth = mm_malloc(sizeof(Auth), co->mm);
-            if (!new_auth)
-            {
-                SET_ERROR(co->err);
-                return -1;
-            }
-    
+            Auth *auth;
+            
+            auth = (Auth *) object;
+            
             if (sem_wait(so->auth_db_sem) == -1)
             {
                 SET_ERROR(co->err);
                 return -1;
             }
-    
-            so->auth_db = mm_realloc(so->auth_db, (so->auth_db_size + 1) * sizeof(Auth), co->mm);
-            if (!so->auth_db)
-            {
-                SET_ERROR(co->err);
-                return -1;
-            }
-    
-            *(so->auth_db + ++so->auth_db_size) = new_auth;
+            
+            sem_post(so->auth_db_sem);
+            
             break;
         }
         default:;
@@ -143,4 +131,67 @@ int db_destroy(struct core_object *co, struct server_object *so, int type, void 
     PRINT_STACK_TRACE(co->tracer);
     
     return 0;
+}
+
+static void print_db_error(int err_code)
+{
+    switch (err_code)
+    {
+        case 1:
+        {
+            (void) fprintf(stdout, "Database error occurred: The specified key was not found in the database.\n");
+            break;
+        }
+        case 2:
+        {
+            (void) fprintf(stdout, "Database error occurred: The database file could not be opened.\n");
+            break;
+        }
+        case 3:
+        {
+            (void) fprintf(stdout, "Database error occurred: The database file could not be created.\n");
+            break;
+        }
+        case 4:
+        {
+            (void) fprintf(stdout, "Database error occurred: An I/O error occurred while reading or writing the database file.\n");
+            break;
+        }
+        case 5:
+        {
+            (void) fprintf(stdout, "Database error occurred: The database was not opened in read-write mode.\n");
+            break;
+        }
+        case 6:
+        {
+            (void) fprintf(stdout, "Database error occurred: The database is already open and cannot be reopened.\n");
+            break;
+        }
+        case 7:
+        {
+            (void) fprintf(stdout, "Database error occurred: The specified key or value was too long to be stored in the database.\n");
+            break;
+        }
+        case 8:
+        {
+            (void) fprintf(stdout, "Database error occurred: A memory allocation error occurred.\n");
+            break;
+        }
+        case 9:
+        {
+            (void) fprintf(stdout, "Database error occurred: The database file format is invalid.\n");
+            break;
+        }
+        case 10:
+        {
+            (void) fprintf(stdout, "Database error occurred: The database file is too old and needs to be rebuilt.\n");
+            break;
+        }
+        case 11:
+        {
+            (void) fprintf(stdout, "Database error occurred: An unknown error occurred.\n");
+            break;
+        }
+        default:;
+    }
 }

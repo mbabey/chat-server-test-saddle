@@ -52,6 +52,7 @@ typedef struct
 {
     int  id;
     char *display_name;
+    int privilege_level;
 } User;
 
 /**
