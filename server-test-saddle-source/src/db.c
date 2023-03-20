@@ -26,6 +26,42 @@ static int insert_user(struct core_object *co, struct server_object *so, const U
 static int serialize_user(struct core_object *co, uint8_t **serial_user, const User *user);
 
 /**
+ * insert_channel
+ * <p>
+ * Insert a new Channel into the Channel database.
+ * </p>
+ * @param co the core object
+ * @param so the server object
+ * @param user the Channel to insert
+ * @return 0 on success, -1 and set err on failure.
+ */
+static int insert_channel(struct core_object *co, struct server_object *so, Channel *channel);
+
+/**
+ * insert_message
+ * <p>
+ * Insert a new Message into the Message database.
+ * </p>
+ * @param co the core object
+ * @param so the server object
+ * @param user the Message to insert
+ * @return 0 on success, -1 and set err on failure.
+ */
+static int insert_message(struct core_object *co, struct server_object *so, Message *message);
+
+/**
+ * insert_auth
+ * <p>
+ * Insert a new Auth into the Auth database.
+ * </p>
+ * @param co the core object
+ * @param so the server object
+ * @param user the Auth to insert
+ * @return 0 on success, -1 and set err on failure.
+ */
+static int insert_auth(struct core_object *co, struct server_object *so, Auth *auth);
+
+/**
  * print_db_error
  * <p>
  * Print an error message based on the error code of passed.
@@ -43,7 +79,7 @@ int db_create(struct core_object *co, struct server_object *so, int type, void *
     {
         case USER:
         {
-            if (insert_user(co, so, object) == -1)
+            if (insert_user(co, so, (User *) object) == -1)
             {
                 return -1;
             }
@@ -51,50 +87,26 @@ int db_create(struct core_object *co, struct server_object *so, int type, void *
         }
         case CHANNEL:
         {
-            Channel *channel;
-            
-            channel = (Channel *) object;
-            
-            if (sem_wait(so->channel_db_sem) == -1)
+            if (insert_channel(co, so, (Channel *) object) == -1)
             {
-                SET_ERROR(co->err);
-//                return -1;
+                return -1;
             }
-            
-            sem_post(so->channel_db_sem);
-            
             break;
         }
         case MESSAGE:
         {
-            Message *message;
-            
-            message = (Message *) object;
-            
-            if (sem_wait(so->message_db_sem) == -1)
+            if (insert_message(co, so, (Message *) object) == -1)
             {
-                SET_ERROR(co->err);
                 return -1;
             }
-            
-            sem_post(so->message_db_sem);
-            
             break;
         }
         case AUTH:
         {
-            Auth *auth;
-            
-            auth = (Auth *) object;
-            
-            if (sem_wait(so->auth_db_sem) == -1)
+            if (insert_auth(co, so, (Auth *) object) == -1)
             {
-                SET_ERROR(co->err);
                 return -1;
             }
-            
-            sem_post(so->auth_db_sem);
-            
             break;
         }
         default:;
@@ -134,7 +146,8 @@ static int insert_user(struct core_object *co, struct server_object *so, const U
     
     if (insert_status == 1)
     {
-        (void) fprintf(stdout, "Database error occurred: entry with key \"%s\" exists.\n", (char *) key.dptr);
+        (void) fprintf(stdout, "Database error occurred: entry with key \"%s\" already exists in User database.\n",
+                       (char *) key.dptr);
     } else if (insert_status == -1)
     {
         print_db_error(dbm_error(so->user_db));
@@ -161,6 +174,135 @@ static int serialize_user(struct core_object *co, uint8_t **serial_user, const U
     memcpy(*(serial_user + byte_offset), user->display_name, strlen(user->display_name) + 1);
     byte_offset += strlen(user->display_name) + 1;
     memcpy(*(serial_user + byte_offset), &user->privilege_level, sizeof(user->privilege_level));
+    
+    return 0;
+}
+
+static int insert_channel(struct core_object *co, struct server_object *so, Channel *channel)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    uint8_t *serial_channel;
+    int     serial_channel_size;
+    int     insert_status;
+    datum   key;
+    datum   value;
+    
+    serial_channel_size = serialize_channel(co, &serial_channel, channel);
+    if (serial_channel_size == -1)
+    {
+        return -1;
+    }
+    
+    key.dptr    = channel->channel_name;
+    key.dsize   = strlen(channel->channel_name + 1);
+    value.dptr  = serial_channel;
+    value.dsize = serial_channel_size;
+    
+    if (sem_wait(so->channel_db_sem) == -1)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
+    
+    insert_status = dbm_store(so->channel_db, key, value, DBM_INSERT);
+    
+    sem_post(so->channel_db_sem);
+    
+    if (insert_status == 1)
+    {
+        (void) fprintf(stdout, "Database error occurred: entry with key \"%s\" already exists in Channel database.\n",
+                       (char *) key.dptr);
+    } else if (insert_status == -1)
+    {
+        print_db_error(dbm_error(so->channel_db));
+    }
+    
+    return 0;
+}
+
+static int insert_message(struct core_object *co, struct server_object *so, Message *message)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    uint8_t *serial_message;
+    int     serial_message_size;
+    int     insert_status;
+    datum   key;
+    datum   value;
+    
+    serial_message_size = serialize_message(co, &serial_message, message);
+    if (serial_message_size == -1)
+    {
+        return -1;
+    }
+    
+    key.dptr    = &message->id;
+    key.dsize   = sizeof(message->id);
+    value.dptr  = serial_message;
+    value.dsize = serial_message_size;
+    
+    if (sem_wait(so->message_db_sem) == -1)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
+    
+    insert_status = dbm_store(so->message_db, key, value, DBM_INSERT);
+    
+    sem_post(so->message_db_sem);
+    
+    if (insert_status == 1)
+    {
+        (void) fprintf(stdout, "Database error occurred: entry with key \"%s\" already exists in Message database.\n",
+                       (char *) key.dptr);
+    } else if (insert_status == -1)
+    {
+        print_db_error(dbm_error(so->message_db));
+    }
+    
+    return 0;
+}
+
+static int insert_auth(struct core_object *co, struct server_object *so, Auth *auth)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    uint8_t *serial_auth;
+    int     serial_auth_size;
+    int     insert_status;
+    datum   key;
+    datum   value;
+    
+    serial_auth_size = serialize_auth(co, &serial_auth, auth);
+    if (serial_auth_size == -1)
+    {
+        return -1;
+    }
+    
+    key.dptr    = &auth->user_id;
+    key.dsize   = sizeof(auth->user_id);
+    value.dptr  = serial_auth;
+    value.dsize = serial_auth_size;
+    
+    if (sem_wait(so->auth_db_sem) == -1)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
+    
+    insert_status = dbm_store(so->auth_db, key, value, DBM_INSERT);
+    
+    sem_post(so->auth_db_sem);
+    
+    if (insert_status == 1)
+    {
+        (void) fprintf(stdout, "Database error occurred: entry with key \"%s\" already exists in Auth database.\n",
+                       (char *) key.dptr);
+    } else if (insert_status == -1)
+    {
+        print_db_error(dbm_error(so->auth_db));
+    }
     
     return 0;
 }
