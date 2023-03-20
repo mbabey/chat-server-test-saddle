@@ -19,8 +19,8 @@ static int insert_user(struct core_object *co, struct server_object *so, const U
  * Serialize a User struct.
  * </p>
  * @param co the core object
- * @param serial_user the buffer into which to serialize the user
- * @param user the user to serialize
+ * @param serial_user the buffer into which to serialize the User
+ * @param user the User to serialize
  * @return 0 on success, -1 and set err on failure
  */
 static int serialize_user(struct core_object *co, uint8_t **serial_user, const User *user);
@@ -38,6 +38,18 @@ static int serialize_user(struct core_object *co, uint8_t **serial_user, const U
 static int insert_channel(struct core_object *co, struct server_object *so, Channel *channel);
 
 /**
+ * serialize_channel
+ * <p>
+ * Serialize a Channel struct.
+ * </p>
+ * @param co the core object
+ * @param serial_user the buffer into which to serialize the Channel
+ * @param user the Channel to serialize
+ * @return 0 on success, -1 and set err on failure
+ */
+static int serialize_channel(struct core_object *co, uint8_t **serial_user, const Channel *channel);
+
+/**
  * insert_message
  * <p>
  * Insert a new Message into the Message database.
@@ -50,6 +62,18 @@ static int insert_channel(struct core_object *co, struct server_object *so, Chan
 static int insert_message(struct core_object *co, struct server_object *so, Message *message);
 
 /**
+ * serialize_message
+ * <p>
+ * Serialize a Message struct.
+ * </p>
+ * @param co the core object
+ * @param serial_user the buffer into which to serialize the Message
+ * @param user the Message to serialize
+ * @return 0 on success, -1 and set err on failure
+ */
+static int serialize_message(struct core_object *co, uint8_t **serial_user, const Message *message);
+
+/**
  * insert_auth
  * <p>
  * Insert a new Auth into the Auth database.
@@ -60,6 +84,18 @@ static int insert_message(struct core_object *co, struct server_object *so, Mess
  * @return 0 on success, -1 and set err on failure.
  */
 static int insert_auth(struct core_object *co, struct server_object *so, Auth *auth);
+
+/**
+ * serialize_auth
+ * <p>
+ * Serialize a Auth struct.
+ * </p>
+ * @param co the core object
+ * @param serial_user the buffer into which to serialize the Auth
+ * @param user the Auth to serialize
+ * @return 0 on success, -1 and set err on failure
+ */
+static int serialize_auth(struct core_object *co, uint8_t **serial_user, const Auth *auth);
 
 /**
  * print_db_error
@@ -221,6 +257,8 @@ static int insert_channel(struct core_object *co, struct server_object *so, Chan
     return 0;
 }
 
+static int serialize_channel(struct core_object *co, uint8_t **serial_user, const Channel *channel);
+
 static int insert_message(struct core_object *co, struct server_object *so, Message *message)
 {
     PRINT_STACK_TRACE(co->tracer);
@@ -264,6 +302,8 @@ static int insert_message(struct core_object *co, struct server_object *so, Mess
     return 0;
 }
 
+static int serialize_message(struct core_object *co, uint8_t **serial_user, const Message *message);
+
 static int insert_auth(struct core_object *co, struct server_object *so, Auth *auth)
 {
     PRINT_STACK_TRACE(co->tracer);
@@ -306,6 +346,8 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
     
     return 0;
 }
+
+static int serialize_auth(struct core_object *co, uint8_t **serial_user, const Auth *auth);
 
 int db_read(struct core_object *co, struct server_object *so, int type, void *object)
 {
