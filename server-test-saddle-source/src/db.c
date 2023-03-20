@@ -196,7 +196,9 @@ static int serialize_user(struct core_object *co, uint8_t **serial_user, const U
 {
     PRINT_STACK_TRACE(co->tracer);
     
-    *serial_user = mm_malloc(sizeof(user->id) + strlen(user->display_name) + 1 + sizeof(user->privilege_level), co->mm);
+    *serial_user = mm_malloc(sizeof(user->id)
+                             + strlen(user->display_name) + 1
+                             + sizeof(user->privilege_level), co->mm);
     if (!*serial_user)
     {
         SET_ERROR(co->err);
@@ -351,6 +353,29 @@ static int insert_message(struct core_object *co, struct server_object *so, Mess
 static int serialize_message(struct core_object *co, uint8_t **serial_message, const Message *message)
 {
     PRINT_STACK_TRACE(co->tracer);
+    
+    *serial_message = mm_malloc(sizeof(message->id)
+                                + sizeof(message->user_id)
+                                + sizeof(message->channel_id)
+                                  * strlen(message->message_content) + 1
+                                + sizeof(message->timestamp), co->mm);
+    if (!*serial_message)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
+    
+    size_t byte_offset;
+    
+    memcpy(*serial_message, &message->id, sizeof(message->id));
+    byte_offset = sizeof(message->id);
+    memcpy(*(serial_message + byte_offset), &message->user_id, sizeof(message->user_id));
+    byte_offset += sizeof(message->user_id);
+    memcpy(*(serial_message + byte_offset), &message->channel_id, sizeof(message->channel_id));
+    byte_offset += sizeof(message->channel_id);
+    memcpy(*(serial_message + byte_offset), message->message_content, strlen(message->message_content) + 1);
+    byte_offset += strlen(message->message_content) + 1;
+    memcpy(*(serial_message + byte_offset), &message->timestamp, sizeof(message->timestamp));
     
     return 0;
 }
