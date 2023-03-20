@@ -153,6 +153,8 @@ int db_create(struct core_object *co, struct server_object *so, int type, void *
 
 static int insert_user(struct core_object *co, struct server_object *so, const User *user)
 {
+    PRINT_STACK_TRACE(co->tracer);
+    
     uint8_t *serial_user;
     int     serial_user_size;
     int     insert_status;
@@ -357,7 +359,7 @@ static int serialize_message(struct core_object *co, uint8_t **serial_message, c
     *serial_message = mm_malloc(sizeof(message->id)
                                 + sizeof(message->user_id)
                                 + sizeof(message->channel_id)
-                                  * strlen(message->message_content) + 1
+                                + strlen(message->message_content) + 1
                                 + sizeof(message->timestamp), co->mm);
     if (!*serial_message)
     {
@@ -426,6 +428,23 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
 static int serialize_auth(struct core_object *co, uint8_t **serial_auth, const Auth *auth)
 {
     PRINT_STACK_TRACE(co->tracer);
+    
+    *serial_auth = mm_malloc(sizeof(auth->user_id)
+                             * strlen(auth->login_token) + 1
+                             + strlen(auth->password) + 1, co->mm);
+    if (!*serial_auth)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
+    
+    size_t byte_offset;
+    
+    memcpy(*serial_auth, &auth->user_id, sizeof(auth->user_id));
+    byte_offset = sizeof(auth->user_id);
+    memcpy(*(serial_auth + byte_offset), auth->login_token, strlen(auth->login_token) + 1);
+    byte_offset += strlen(auth->login_token) + 1;
+    memcpy(*(serial_auth + byte_offset), auth->password, strlen(auth->password) + 1); // TODO: hash this lol
     
     return 0;
 }
