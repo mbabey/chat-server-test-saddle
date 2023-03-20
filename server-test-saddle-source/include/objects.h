@@ -8,27 +8,27 @@
 #include <ndbm.h>
 #include <netinet/in.h>
 
-#define NUM_CHILD_PROCESSES 8 /** The number of worker processes to be spawned to handle network requests. */
-#define CONNECTION_QUEUE 100 /** The number of connections that can be queued on the listening socket. */
-#define MAX_CONNECTIONS 5 /** The maximum number of connections that can be accepted by the process server. */
-#define POLLFDS_SIZE 2 + MAX_CONNECTIONS /** The size of the pollfds array. +2 for listen socket and child-to-parent pipe. */
-#define READ_END 0 /** Read end of child_finished_pipe or read child_finished_semaphore. */
-#define WRITE_END 1 /** Write end of child_finished_pipe or read child_finished_semaphore. */
+#define NUM_CHILD_PROCESSES 8              /** The number of worker processes to be spawned to handle network requests. */
+#define CONNECTION_QUEUE 100               /** The number of connections that can be queued on the listening socket. */
+#define MAX_CONNECTIONS 5                  /** The maximum number of connections that can be accepted by the process server. */
+#define POLLFDS_SIZE 2 + MAX_CONNECTIONS   /** The size of the pollfds array. +2 for listen socket and child-to-parent pipe. */
+#define READ_END 0                         /** Read end of child_finished_pipe or read child_finished_semaphore. */
+#define WRITE_END 1                        /** Write end of child_finished_pipe or read child_finished_semaphore. */
 
-#define PIPE_WRITE_SEM_NAME "/pw_3fda69" /** Pipe write semaphore name. */
-#define DOMAIN_READ_SEM_NAME "/dr_3fda69" /** Domain socket read semaphore name. */
+#define PIPE_WRITE_SEM_NAME "/pw_3fda69"   /** Pipe write semaphore name. */
+#define DOMAIN_READ_SEM_NAME "/dr_3fda69"  /** Domain socket read semaphore name. */
 #define DOMAIN_WRITE_SEM_NAME "/dw_3fda69" /** Domain socket write semaphore name. */
-#define USER_SEM_NAME "/u_3fda69" /** User db semaphore name. */
-#define CHANNEL_SEM_NAME "/ch_3fda69" /** Channel db semaphore name. */
-#define MESSAGE_SEM_NAME "/m_3fda69" /** Message db semaphore name. */
-#define AUTH_SEM_NAME "/au_3fda69" /** Auth db semaphore name. */
-#define USER_DB_NAME "/dbu_3fda69" /** User db name. */
-#define CHANNEL_DB_NAME "/dbch_3fda69" /** Channel db name. */
-#define MESSAGE_DB_NAME "/dbm_3fda69" /** Message db name. */
-#define AUTH_DB_NAME "/dbau_3fda69" /** Auth db name. */
+#define USER_SEM_NAME "/u_3fda69"          /** User db semaphore name. */
+#define CHANNEL_SEM_NAME "/ch_3fda69"      /** Channel db semaphore name. */
+#define MESSAGE_SEM_NAME "/m_3fda69"       /** Message db semaphore name. */
+#define AUTH_SEM_NAME "/au_3fda69"         /** Auth db semaphore name. */
+#define USER_DB_NAME "/dbu_3fda69"         /** User db name. */
+#define CHANNEL_DB_NAME "/dbch_3fda69"     /** Channel db name. */
+#define MESSAGE_DB_NAME "/dbm_3fda69"      /** Message db name. */
+#define AUTH_DB_NAME "/dbau_3fda69"        /** Auth db name. */
 
 #define FOR_EACH_CHILD_c_IN_CHILD_PIDS for (size_t c = 0; c < NUM_CHILD_PROCESSES; ++c) /** For each loop macro for looping over child processes. */
-#define FOR_EACH_SOCKET_POLLFD_p_IN_POLLFDS for (size_t p = 2; p < POLLFDS_SIZE; ++p) /** For each loop macro for looping over socket pollfds. */
+#define FOR_EACH_SOCKET_POLLFD_p_IN_POLLFDS for (size_t p = 2; p < POLLFDS_SIZE; ++p)   /** For each loop macro for looping over socket pollfds. */
 
 /**
  * Contains information about the program state.
@@ -44,55 +44,6 @@ struct core_object
     
     struct server_object *so;
 };
-
-/**
- * User. Contains information about a User.
- */
-typedef struct
-{
-    int  id;
-    char *display_name;
-    int privilege_level;
-} User;
-
-/**
- * Channel. Contains information about a Channel.
- */
-typedef struct
-{
-    int    id;
-    char   *channel_name;
-    char   *creator;
-    User   **users;
-    size_t users_size;
-    User   **administrators;
-    size_t administrators_size;
-    User   **banned_users;
-    size_t banned_users_size;
-} Channel;
-
-/**
- * Message. Contains information about a Message.
- */
-typedef struct
-{
-    int  id;
-    int  user_id;
-    int  channel_id;
-    char *message_content;
-    int  timestamp;
-} Message;
-
-/**
- * Auth. Contains information about a Auth.
- */
-typedef struct
-{
-    int        user_id;
-    const char *login_token;
-    char       *password;
-} Auth;
-
 
 /**
  * Contains information about the server state.
@@ -115,15 +66,6 @@ struct server_object
     DBM *channel_db;
     DBM *message_db;
     DBM *auth_db;
-
-//    User    **user_db;
-//    size_t  user_db_size;
-//    Channel **channel_db;
-//    size_t  channel_db_size;
-//    Message **message_db;
-//    size_t  message_db_size;
-//    Auth    **auth_db;
-//    size_t  auth_db_size;
 };
 
 /**
@@ -145,5 +87,53 @@ struct child
     int                client_fd_local;
     struct sockaddr_in client_addr;
 };
+
+/**
+ * User. Contains information about a User.
+ */
+typedef struct
+{
+    int  id;
+    char *display_name;
+    int  privilege_level;
+} User;
+
+/**
+ * Channel. Contains information about a Channel.
+ */
+typedef struct
+{
+    int    id;
+    char   *channel_name;
+    char   *creator;
+    User   **users; // this is a null terminated list.
+    size_t users_size; // this is the number of bytes.
+    User   **administrators;
+    size_t administrators_size;
+    User   **banned_users;
+    size_t banned_users_size;
+} Channel;
+
+/**
+ * Message. Contains information about a Message.
+ */
+typedef struct
+{
+    int  id;
+    int  user_id;
+    int  channel_id;
+    char *message_content;
+    int  timestamp;
+} Message;
+
+/**
+ * Auth. Contains information about an Auth.
+ */
+typedef struct
+{
+    int        user_id;
+    const char *login_token;
+    char       *password;
+} Auth;
 
 #endif //PROCESS_SERVER_OBJECTS_H

@@ -43,11 +43,11 @@ static int insert_channel(struct core_object *co, struct server_object *so, Chan
  * Serialize a Channel struct.
  * </p>
  * @param co the core object
- * @param serial_user the buffer into which to serialize the Channel
+ * @param serial_channel the buffer into which to serialize the Channel
  * @param user the Channel to serialize
  * @return 0 on success, -1 and set err on failure
  */
-static int serialize_channel(struct core_object *co, uint8_t **serial_user, const Channel *channel);
+static int serialize_channel(struct core_object *co, uint8_t **serial_channel, const Channel *channel);
 
 /**
  * insert_message
@@ -67,11 +67,11 @@ static int insert_message(struct core_object *co, struct server_object *so, Mess
  * Serialize a Message struct.
  * </p>
  * @param co the core object
- * @param serial_user the buffer into which to serialize the Message
+ * @param serial_message the buffer into which to serialize the Message
  * @param user the Message to serialize
  * @return 0 on success, -1 and set err on failure
  */
-static int serialize_message(struct core_object *co, uint8_t **serial_user, const Message *message);
+static int serialize_message(struct core_object *co, uint8_t **serial_message, const Message *message);
 
 /**
  * insert_auth
@@ -91,11 +91,11 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
  * Serialize a Auth struct.
  * </p>
  * @param co the core object
- * @param serial_user the buffer into which to serialize the Auth
+ * @param serial_auth the buffer into which to serialize the Auth
  * @param user the Auth to serialize
  * @return 0 on success, -1 and set err on failure
  */
-static int serialize_auth(struct core_object *co, uint8_t **serial_user, const Auth *auth);
+static int serialize_auth(struct core_object *co, uint8_t **serial_auth, const Auth *auth);
 
 /**
  * print_db_error
@@ -196,14 +196,14 @@ static int serialize_user(struct core_object *co, uint8_t **serial_user, const U
 {
     PRINT_STACK_TRACE(co->tracer);
     
-    size_t byte_offset;
-    
     *serial_user = mm_malloc(sizeof(user->id) + strlen(user->display_name) + 1 + sizeof(user->privilege_level), co->mm);
     if (!*serial_user)
     {
         SET_ERROR(co->err);
         return -1;
     }
+    
+    size_t byte_offset;
     
     memcpy(*serial_user, &user->id, sizeof(user->id));
     byte_offset = sizeof(user->id);
@@ -257,7 +257,53 @@ static int insert_channel(struct core_object *co, struct server_object *so, Chan
     return 0;
 }
 
-static int serialize_channel(struct core_object *co, uint8_t **serial_user, const Channel *channel);
+static int serialize_channel(struct core_object *co, uint8_t **serial_channel, const Channel *channel)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    *serial_channel = mm_malloc(sizeof(channel->id)
+                                + strlen(channel->channel_name) + 1
+                                + strlen(channel->creator) + 1
+                                + channel->users_size
+                                + channel->administrators_size
+                                + channel->banned_users_size, co->mm);
+    if (!*serial_channel)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
+    
+    size_t byte_offset;
+    User   **list;
+    
+    memcpy(*serial_channel, &channel->id, sizeof(channel->id));
+    byte_offset = sizeof(channel->id);
+    memcpy(*(serial_channel + byte_offset), channel->channel_name, strlen(channel->channel_name) + 1);
+    byte_offset += strlen(channel->channel_name) + 1;
+    memcpy(*(serial_channel + byte_offset), channel->creator, strlen(channel->creator) + 1);
+    byte_offset += strlen(channel->creator) + 1;
+    
+    list = channel->users;
+    for (; *list != NULL; ++list)
+    {
+        memcpy(*(serial_channel + byte_offset), (*list)->display_name, strlen((*list)->display_name) + 1);
+        byte_offset += strlen((*list)->display_name) + 1;
+    }
+    list = channel->administrators;
+    for (; *list != NULL; ++list)
+    {
+        memcpy(*(serial_channel + byte_offset), (*list)->display_name, strlen((*list)->display_name) + 1);
+        byte_offset += strlen((*list)->display_name) + 1;
+    }
+    list = channel->banned_users;
+    for (; *list != NULL; ++list)
+    {
+        memcpy(*(serial_channel + byte_offset), (*list)->display_name, strlen((*list)->display_name) + 1);
+        byte_offset += strlen((*list)->display_name) + 1;
+    }
+    
+    return 0;
+}
 
 static int insert_message(struct core_object *co, struct server_object *so, Message *message)
 {
@@ -302,7 +348,12 @@ static int insert_message(struct core_object *co, struct server_object *so, Mess
     return 0;
 }
 
-static int serialize_message(struct core_object *co, uint8_t **serial_user, const Message *message);
+static int serialize_message(struct core_object *co, uint8_t **serial_message, const Message *message)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    return 0;
+}
 
 static int insert_auth(struct core_object *co, struct server_object *so, Auth *auth)
 {
@@ -347,7 +398,12 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
     return 0;
 }
 
-static int serialize_auth(struct core_object *co, uint8_t **serial_user, const Auth *auth);
+static int serialize_auth(struct core_object *co, uint8_t **serial_auth, const Auth *auth)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    return 0;
+}
 
 int db_read(struct core_object *co, struct server_object *so, int type, void *object)
 {
