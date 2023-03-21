@@ -131,12 +131,10 @@ static int find_by_name(struct core_object *co, DBM *db, sem_t *db_sem, uint8_t 
  * Deserialize a User into a User struct.
  * </p>
  * @param co the core object
- * @param so the server object
  * @param user_get the User struct
  * @param serial_user the bytes to deserialize
- * @return 0 on success, -1 and set err on failure
  */
-static int deserialize_user(struct core_object *co, struct server_object *so, User **user_get, uint8_t *serial_user);
+static void deserialize_user(struct core_object *co, User **user_get, uint8_t *serial_user);
 
 /**
  * read_online_users
@@ -602,10 +600,8 @@ static int read_user(struct core_object *co, struct server_object *so, User **us
         SET_ERROR(co->err);
         return -1;
     }
-    if (deserialize_user(co, so, user_get, serial_user) == -1)
-    {
-        return -1;
-    }
+    
+    deserialize_user(co, user_get, serial_user);
     
     return 0;
 }
@@ -652,7 +648,7 @@ static int find_by_name(struct core_object *co, DBM *db, sem_t *db_sem, uint8_t 
     return 0;
 }
 
-static int deserialize_user(struct core_object *co, struct server_object *so, User **user_get, uint8_t *serial_user)
+static void deserialize_user(struct core_object *co, User **user_get, uint8_t *serial_user)
 {
     PRINT_STACK_TRACE(co->tracer);
     
@@ -665,8 +661,6 @@ static int deserialize_user(struct core_object *co, struct server_object *so, Us
     memcpy(&(*user_get)->privilege_level, (serial_user + byte_offset), sizeof((*user_get)->privilege_level));
     byte_offset += sizeof((*user_get)->privilege_level);
     memcpy(&(*user_get)->online_status, (serial_user + byte_offset), sizeof((*user_get)->online_status));
-    
-    return 0;
 }
 
 int db_update(struct core_object *co, struct server_object *so, int type, void *object)
