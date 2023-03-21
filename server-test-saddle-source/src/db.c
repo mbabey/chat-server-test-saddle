@@ -654,7 +654,19 @@ static int find_by_name(struct core_object *co, DBM *db, sem_t *db_sem, uint8_t 
 
 static int deserialize_user(struct core_object *co, struct server_object *so, User **user_get, uint8_t *serial_user)
 {
-
+    PRINT_STACK_TRACE(co->tracer);
+    
+    size_t byte_offset;
+    
+    memcpy(&(*user_get)->id, serial_user, sizeof((*user_get)->id));
+    byte_offset = sizeof((*user_get)->id);
+    strcpy((*user_get)->display_name, (char *) (serial_user + byte_offset));
+    byte_offset += strlen((*user_get)->display_name);
+    memcpy(&(*user_get)->privilege_level, (serial_user + byte_offset), sizeof((*user_get)->privilege_level));
+    byte_offset += sizeof((*user_get)->privilege_level);
+    memcpy(&(*user_get)->online_status, (serial_user + byte_offset), sizeof((*user_get)->online_status));
+    
+    return 0;
 }
 
 int db_update(struct core_object *co, struct server_object *so, int type, void *object)
