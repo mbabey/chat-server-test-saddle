@@ -11,7 +11,7 @@
  * @param user the User to insert
  * @return 0 on success, -1 and set err on failure.
  */
-static int insert_user(struct core_object *co, struct server_object *so, const User *user);
+static int insert_user(struct core_object *co, struct server_object *so, User *user);
 
 /**
  * serialize_user
@@ -201,7 +201,7 @@ int db_create(struct core_object *co, struct server_object *so, int type, void *
     return 0;
 }
 
-static int insert_user(struct core_object *co, struct server_object *so, const User *user)
+static int insert_user(struct core_object *co, struct server_object *so, User *user)
 {
     PRINT_STACK_TRACE(co->tracer);
     
@@ -217,8 +217,8 @@ static int insert_user(struct core_object *co, struct server_object *so, const U
         return -1;
     }
     
-    key.dptr    = user->display_name;
-    key.dsize   = strlen(user->display_name + 1);
+    key.dptr    = serial_user;
+    key.dsize   = sizeof(user->id);
     value.dptr  = serial_user;
     value.dsize = serial_user_size;
     
@@ -287,8 +287,8 @@ static int insert_channel(struct core_object *co, struct server_object *so, Chan
         return -1;
     }
     
-    key.dptr    = channel->channel_name;
-    key.dsize   = strlen(channel->channel_name + 1);
+    key.dptr    = serial_channel;
+    key.dsize   = sizeof(channel->id);
     value.dptr  = serial_channel;
     value.dsize = serial_channel_size;
     
@@ -378,7 +378,7 @@ static int insert_message(struct core_object *co, struct server_object *so, Mess
         return -1;
     }
     
-    key.dptr    = &message->id;
+    key.dptr    = serial_message;
     key.dsize   = sizeof(message->id);
     value.dptr  = serial_message;
     value.dsize = serial_message_size;
@@ -451,7 +451,7 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
         return -1;
     }
     
-    key.dptr    = &auth->user_id;
+    key.dptr    = serial_auth;
     key.dsize   = sizeof(auth->user_id);
     value.dptr  = serial_auth;
     value.dsize = serial_auth_size;
