@@ -567,10 +567,16 @@ static int read_user(struct core_object *co, struct server_object *so, User **us
     
     uint8_t *serial_user;
     
-    // read the database to find the serial user
+    // Read the database to find the User
     if (find_by_name(co, so->user_db, so->user_db_sem, &serial_user, display_name) == -1)
     {
         return -1;
+    }
+    
+    if (!serial_user) // User not found.
+    {
+        *user_get = NULL;
+        return 0;
     }
     
     // deserialize the user and put it in *user_get
@@ -604,7 +610,7 @@ static int find_by_name(struct core_object *co, DBM *db, sem_t *db_sem, uint8_t 
     sem_post(db_sem); // strcmps are done outside of db time.
     
     // Compare the display name to the name in the db
-    while (strcmp((char *) ((uint8_t *) value.dptr + sizeof(int)), name) != 0)
+    while (key.dptr && strcmp((char *) ((uint8_t *) value.dptr + sizeof(int)), name) != 0)
     {
         if (sem_wait(db_sem) == -1)
         {
@@ -618,7 +624,11 @@ static int find_by_name(struct core_object *co, DBM *db, sem_t *db_sem, uint8_t 
         sem_post(db_sem);
     }
     
-    *serial_object = value.dptr;
+    if (!key.dptr && dbm_error(db))
+    {
+        print_db_error(dbm_error(db));
+    }
+    *serial_object = value.dptr; // Will be null if not found.
     
     return 0;
 }
