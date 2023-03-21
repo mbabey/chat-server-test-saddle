@@ -245,7 +245,7 @@ static int insert_user(struct core_object *co, struct server_object *so, User *u
     }
     if (serial_user)
     {
-        (void) fprintf(stdout, "Database error occurred: entry with name \"%s\" already exists in User database.\n",
+        (void) fprintf(stdout, "Database error occurred: User with name \"%s\" already exists in User database.\n",
                        user->display_name);
         return 1;
     }
@@ -273,7 +273,7 @@ static int insert_user(struct core_object *co, struct server_object *so, User *u
     
     if (insert_status == 1)
     {
-        (void) fprintf(stdout, "Database error occurred: entry with ID \"%d\" already exists in User database.\n",
+        (void) fprintf(stdout, "Database error occurred: User with ID \"%d\" already exists in User database.\n",
                        *(int *) key.dptr);
         return 1;
     } else if (insert_status == -1)
@@ -321,6 +321,18 @@ static int insert_channel(struct core_object *co, struct server_object *so, Chan
     datum   key;
     datum   value;
     
+    // Determine if a channel with the channel name already exists in the database.
+    if (find_by_name(co, so->user_db, so->user_db_sem, &serial_channel, channel->channel_name) == -1)
+    {
+        return -1;
+    }
+    if (serial_channel)
+    {
+        (void) fprintf(stdout, "Database error occurred: Channel with name \"%s\" already exists in Channel database.\n",
+                       channel->channel_name);
+        return 1;
+    }
+    
     serial_channel_size = serialize_channel(co, &serial_channel, channel);
     if (serial_channel_size == -1)
     {
@@ -344,8 +356,8 @@ static int insert_channel(struct core_object *co, struct server_object *so, Chan
     
     if (insert_status == 1)
     {
-        (void) fprintf(stdout, "Database error occurred: entry with key \"%s\" already exists in Channel database.\n",
-                       (char *) key.dptr);
+        (void) fprintf(stdout, "Database error occurred: Channel with ID \"%d\" already exists in Channel database.\n",
+                       *(int *) key.dptr);
     } else if (insert_status == -1)
     {
         print_db_error(dbm_error(so->channel_db));
@@ -435,8 +447,8 @@ static int insert_message(struct core_object *co, struct server_object *so, Mess
     
     if (insert_status == 1)
     {
-        (void) fprintf(stdout, "Database error occurred: entry with key \"%s\" already exists in Message database.\n",
-                       (char *) key.dptr);
+        (void) fprintf(stdout, "Database error occurred: Message with ID \"%d\" already exists in Message database.\n",
+                       *(int *) key.dptr);
     } else if (insert_status == -1)
     {
         print_db_error(dbm_error(so->message_db));
@@ -485,6 +497,18 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
     datum   key;
     datum   value;
     
+    // Determine if an auth with the login token already exists in the database.
+    if (find_by_name(co, so->user_db, so->user_db_sem, &serial_auth, auth->login_token) == -1)
+    {
+        return -1;
+    }
+    if (serial_auth)
+    {
+        (void) fprintf(stdout, "Database error occurred: Auth with token \"%s\" already exists in Auth database.\n",
+                       auth->login_token);
+        return 1;
+    }
+    
     serial_auth_size = serialize_auth(co, &serial_auth, auth);
     if (serial_auth_size == -1)
     {
@@ -508,8 +532,8 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
     
     if (insert_status == 1)
     {
-        (void) fprintf(stdout, "Database error occurred: entry with key \"%s\" already exists in Auth database.\n",
-                       (char *) key.dptr);
+        (void) fprintf(stdout, "Database error occurred: Auth with ID \"%d\" already exists in Auth database.\n",
+                       *(int *) key.dptr);
     } else if (insert_status == -1)
     {
         print_db_error(dbm_error(so->auth_db));
