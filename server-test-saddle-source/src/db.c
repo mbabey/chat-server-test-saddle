@@ -107,9 +107,13 @@ static int serialize_auth(struct core_object *co, uint8_t **serial_auth, const A
  * @param user the User to retrieve
  * @return the User
  */
-static User *read_user(struct core_object *co, struct server_object *so, User *user);
-static Channel *read_channel(struct core_object *co, struct server_object *so, Channel *channel);
-static Message *read_message(struct core_object *co, struct server_object *so, Message *message);
+static int read_user(struct core_object *co, struct server_object *so, User **user_get, const char *display_name);
+
+static int read_online_users(struct core_object *co, struct server_object *so, User ***users_get);
+
+static int read_channel(struct core_object *co, struct server_object *so, Channel **channel_get, const char *channel_name);
+
+static int read_messages(struct core_object *co, struct server_object *so, Message ***messages_get, int num_messages);
 
 /**
  * print_db_error
@@ -119,7 +123,6 @@ static Message *read_message(struct core_object *co, struct server_object *so, M
  * @param err_code the error code
  */
 static void print_db_error(int err_code);
-
 
 int db_create(struct core_object *co, struct server_object *so, int type, void *object)
 {
@@ -466,7 +469,7 @@ static int serialize_auth(struct core_object *co, uint8_t **serial_auth, const A
     return 0;
 }
 
-int db_read(struct core_object *co, struct server_object *so, int type, void *object)
+int db_read(struct core_object *co, struct server_object *so, int type, void ***object_dst, void *object_query)
 {
     PRINT_STACK_TRACE(co->tracer);
     
@@ -474,7 +477,16 @@ int db_read(struct core_object *co, struct server_object *so, int type, void *ob
     {
         case USER:
         {
-            if (read_user(co, so, (User *) object) == -1)
+            int status;
+            
+            if (object_query)
+            {
+                status = read_user(co, so, *(User ***) object_dst, (const char *) object_query);
+            } else
+            {
+                status = read_online_users(co, so, (User ***) object_dst);
+            }
+            if (status  == -1)
             {
                 return -1;
             }
@@ -482,7 +494,7 @@ int db_read(struct core_object *co, struct server_object *so, int type, void *ob
         }
         case CHANNEL:
         {
-            if (read_channel(co, so, (Channel *) object) == -1)
+            if (read_channel(co, so, *(Channel ***) object_dst, (const char *) object_query) == -1)
             {
                 return -1;
             }
@@ -490,7 +502,7 @@ int db_read(struct core_object *co, struct server_object *so, int type, void *ob
         }
         case MESSAGE:
         {
-            if (read_message(co, so, (Message *) object) == -1)
+            if (read_messages(co, so, (Message ***) object_dst, *(int *) object_query) == -1)
             {
                 return -1;
             }
