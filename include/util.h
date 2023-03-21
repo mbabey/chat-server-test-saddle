@@ -27,5 +27,14 @@ int recv_parse_message(struct state *state, int socket_fd, struct dispatch *disp
  */
 int assemble_message_send(struct state *state, int socket_fd, struct dispatch *dispatch);
 
+/**
+ * free_body_tokens
+ * <p>
+ * Free body tokens in a null-terminated list of body tokens.
+ * </p>
+ * @param body_tokens the list of body tokens
+ * @param tracer tracer function
+ */
+void free_body_tokens(char **body_tokens, TRACER_FUNCTION_AS(tracer));
 
 #endif //CLIENT_TEST_SADDLE_UTIL_H

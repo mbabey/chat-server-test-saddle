@@ -194,3 +194,13 @@ static int count_tokens(uint16_t body_size, const char *body, void (*tracer)(con
     
     return count;
 }
+
+void free_body_tokens(char **body_tokens, TRACER_FUNCTION_AS(tracer))
+{
+    PRINT_STACK_TRACE(state->tracer);
+    
+    for (;*body_tokens != NULL; ++body_tokens)
+    {
+        mm_free(state->mm, *body_tokens);
+    }
+}

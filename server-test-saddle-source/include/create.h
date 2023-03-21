@@ -16,7 +16,6 @@
  */
 int handle_create(struct core_object *co, struct dispatch *dispatch, char **body_tokens);
 
-
 /**
  * handle_create_user
  * <p>
@@ -64,6 +63,5 @@ int handle_create_message(struct core_object *co, struct dispatch *dispatch, cha
  * @return 0 on success, -1 and set err on failure.
  */
 int handle_create_auth(struct core_object *co, struct dispatch *dispatch, char **body_tokens);
-
 
 #endif //SERVER_TEST_SADDLE_CREATE_H
