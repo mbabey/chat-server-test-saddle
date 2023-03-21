@@ -348,9 +348,9 @@ static int serialize_channel(struct core_object *co, uint8_t **serial_channel, c
     *serial_channel = mm_malloc(sizeof(channel->id)
                                 + strlen(channel->channel_name) + 1
                                 + strlen(channel->creator) + 1
-                                + channel->users_size
-                                + channel->administrators_size
-                                + channel->banned_users_size, co->mm);
+                                + channel->users_size_bytes
+                                + channel->administrators_size_bytes
+                                + channel->banned_users_size_bytes, co->mm);
     if (!*serial_channel)
     {
         SET_ERROR(co->err);

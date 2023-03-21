@@ -107,12 +107,15 @@ typedef struct
     int    id;
     char   *channel_name;
     char   *creator;
-    User   **users; // this is a null terminated list.
-    size_t users_size; // this is the number of bytes.
+    User   **users;          // This is a null terminated list.
+    size_t users_count;      // This is the number of users.
+    size_t users_size_bytes; // This is the number of bytes.
     User   **administrators;
-    size_t administrators_size;
+    size_t administrators_count;
+    size_t administrators_size_bytes;
     User   **banned_users;
-    size_t banned_users_size;
+    size_t banned_users_count;
+    size_t banned_users_size_bytes;
 } Channel;
 
 /**
@@ -122,7 +125,7 @@ typedef struct
 {
     int    id;
     int    user_id;
-    int   channel_id;
+    int    channel_id;
     char   *message_content;
     time_t timestamp;
 } Message;
