@@ -84,8 +84,8 @@ int handle_create_user(struct core_object *co, struct server_object *so, struct 
     return 0;
 }
 
-int
-handle_create_channel(struct core_object *co, struct server_object *so, struct dispatch *dispatch, char **body_tokens)
+int handle_create_channel(struct core_object *co, struct server_object *so, struct dispatch *dispatch,
+                          char **body_tokens)
 {
     PRINT_STACK_TRACE(co->tracer);
     
@@ -129,7 +129,7 @@ handle_create_channel(struct core_object *co, struct server_object *so, struct d
 }
 
 static int create_name_list(struct core_object *co, const char ***dst_list, char **src_list,
-        size_t count, size_t *byte_count)
+                            size_t count, size_t *byte_count)
 {
     PRINT_STACK_TRACE(co->tracer);
     
@@ -152,8 +152,8 @@ static int create_name_list(struct core_object *co, const char ***dst_list, char
     return 0;
 }
 
-int
-handle_create_message(struct core_object *co, struct server_object *so, struct dispatch *dispatch, char **body_tokens)
+int handle_create_message(struct core_object *co, struct server_object *so, struct dispatch *dispatch,
+                          char **body_tokens)
 {
     PRINT_STACK_TRACE(co->tracer);
     

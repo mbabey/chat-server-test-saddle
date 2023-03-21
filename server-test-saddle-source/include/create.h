@@ -38,8 +38,8 @@ int handle_create_user(struct core_object *co, struct server_object *so, struct 
  * @param body_tokens the tokenized dispatch body
  * @return 0 on success, -1 and set err on failure.
  */
-int
-handle_create_channel(struct core_object *co, struct server_object *so, struct dispatch *dispatch, char **body_tokens);
+int handle_create_channel(struct core_object *co, struct server_object *so, struct dispatch *dispatch,
+        char **body_tokens);
 
 /**
  * handle_create_message
@@ -51,8 +51,8 @@ handle_create_channel(struct core_object *co, struct server_object *so, struct d
  * @param body_tokens the tokenized dispatch body
  * @return 0 on success, -1 and set err on failure.
  */
-int
-handle_create_message(struct core_object *co, struct server_object *so, struct dispatch *dispatch, char **body_tokens);
+int handle_create_message(struct core_object *co, struct server_object *so, struct dispatch *dispatch,
+        char **body_tokens);
 
 /**
  * handle_create_auth
