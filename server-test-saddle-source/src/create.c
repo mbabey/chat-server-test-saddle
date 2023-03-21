@@ -51,12 +51,14 @@ int handle_create_user(struct core_object *co, struct server_object *so, char **
 {
     PRINT_STACK_TRACE(co->tracer);
     
-    User new_user;
+    User   new_user;
+    size_t offset;
     
+    offset = 0;
     new_user.id              = (int) strtol(*body_tokens, NULL, 10);
-    new_user.display_name    = *(body_tokens + 1);
-    new_user.privilege_level = (int) strtol(*(body_tokens + 2), NULL, 10);
-    new_user.online_status   = (int) strtol(*(body_tokens + 3), NULL, 10);
+    new_user.display_name    = *(body_tokens + ++offset);
+    new_user.privilege_level = (int) strtol(*(body_tokens + ++offset), NULL, 10);
+    new_user.online_status   = (int) strtol(*(body_tokens + ++offset), NULL, 10);
     
     if (db_create(co, so, USER, &new_user) == -1)
     {
@@ -66,18 +68,45 @@ int handle_create_user(struct core_object *co, struct server_object *so, char **
     return 0;
 }
 
-int
-handle_create_channel(struct core_object *co, struct server_object *so, char **body_tokens)
+int handle_create_channel(struct core_object *co, struct server_object *so, char **body_tokens)
 {
     PRINT_STACK_TRACE(co->tracer);
+    
+    Channel new_channel;
+    size_t  offset;
+    
+    offset = 0;
+    new_channel.id           = (int) strtol(*body_tokens, NULL, 10);
+    new_channel.channel_name = *(body_tokens + ++offset);
+    new_channel.creator      = *(body_tokens + ++offset);
+    // TODO: get channel lists, byte size
+    
+    if (db_create(co, so, CHANNEL, &new_channel) == -1)
+    {
+        return -1;
+    }
     
     return 0;
 }
 
-int
-handle_create_message(struct core_object *co, struct server_object *so, char **body_tokens)
+int handle_create_message(struct core_object *co, struct server_object *so, char **body_tokens)
 {
     PRINT_STACK_TRACE(co->tracer);
+    
+    Message new_message;
+    size_t  offset;
+    
+    offset = 0;
+    new_message.id              = (int) strtol(*body_tokens, NULL, 10);
+    new_message.user_id         = (int) strtol(*(body_tokens + ++offset), NULL, 10);
+    new_message.channel_id      = (int) strtol(*(body_tokens + ++offset), NULL, 10);
+    new_message.message_content = *(body_tokens + ++offset);
+    new_message.timestamp       = strtol(*(body_tokens + ++offset), NULL, 10);
+    
+    if (db_create(co, so, MESSAGE, &new_message) == -1)
+    {
+        return -1;
+    }
     
     return 0;
 }
@@ -85,6 +114,19 @@ handle_create_message(struct core_object *co, struct server_object *so, char **b
 int handle_create_auth(struct core_object *co, struct server_object *so, char **body_tokens)
 {
     PRINT_STACK_TRACE(co->tracer);
+    
+    Auth   new_auth;
+    size_t offset;
+    
+    offset = 0;
+    new_auth.user_id     = (int) strtol(*body_tokens, NULL, 10);
+    new_auth.login_token = *(body_tokens + ++offset);
+    new_auth.password    = *(body_tokens + ++offset);
+    
+    if (db_create(co, so, AUTH, &new_auth) == -1)
+    {
+        return -1;
+    }
     
     return 0;
 }
