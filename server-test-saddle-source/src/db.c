@@ -534,6 +534,7 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
     {
         (void) fprintf(stdout, "Database error occurred: Auth with ID \"%d\" already exists in Auth database.\n",
                        *(int *) key.dptr);
+        return 1;
     } else if (insert_status == -1)
     {
         print_db_error(dbm_error(so->auth_db));
