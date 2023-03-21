@@ -84,9 +84,10 @@ int handle_create_channel(struct core_object *co, struct server_object *so, char
     // as the names are collected, count the number of bytes
     
     new_channel.users_count = (size_t) strtol(*(body_tokens + ++offset), NULL, 10);
+    // do I malloc?
     for (size_t u = 0; u < new_channel.users_count; ++u)
     {
-        // copy each token into the list of users....
+        // copy each token into the list of names
     }
     
     new_channel.administrators_count = (size_t) strtol(*(body_tokens + ++offset), NULL, 10);
