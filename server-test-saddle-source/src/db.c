@@ -98,6 +98,20 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
 static int serialize_auth(struct core_object *co, uint8_t **serial_auth, const Auth *auth);
 
 /**
+ * read_user
+ * <p>
+ * Read a User from the database.
+ * </p>
+ * @param co the core object
+ * @param so the server object
+ * @param user the User to retrieve
+ * @return the User
+ */
+static User *read_user(struct core_object *co, struct server_object *so, User *user);
+static Channel *read_channel(struct core_object *co, struct server_object *so, Channel *channel);
+static Message *read_message(struct core_object *co, struct server_object *so, Message *message);
+
+/**
  * print_db_error
  * <p>
  * Print an error message based on the error code of passed.
@@ -200,7 +214,8 @@ static int serialize_user(struct core_object *co, uint8_t **serial_user, const U
     
     *serial_user = mm_malloc(sizeof(user->id)
                              + strlen(user->display_name) + 1
-                             + sizeof(user->privilege_level), co->mm);
+                             + sizeof(user->privilege_level)
+                             + sizeof(user->online_status), co->mm);
     if (!*serial_user)
     {
         SET_ERROR(co->err);
@@ -214,6 +229,8 @@ static int serialize_user(struct core_object *co, uint8_t **serial_user, const U
     memcpy(*(serial_user + byte_offset), user->display_name, strlen(user->display_name) + 1);
     byte_offset += strlen(user->display_name) + 1;
     memcpy(*(serial_user + byte_offset), &user->privilege_level, sizeof(user->privilege_level));
+    byte_offset += sizeof(user->privilege_level);
+    memcpy(*(serial_user + byte_offset), &user->online_status, sizeof(user->online_status));
     
     return 0;
 }
@@ -453,8 +470,41 @@ int db_read(struct core_object *co, struct server_object *so, int type, void *ob
 {
     PRINT_STACK_TRACE(co->tracer);
     
+    switch (type)
+    {
+        case USER:
+        {
+            if (read_user(co, so, (User *) object) == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case CHANNEL:
+        {
+            if (read_channel(co, so, (Channel *) object) == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case MESSAGE:
+        {
+            if (read_message(co, so, (Message *) object) == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        default:;
+    }
+    
     return 0;
 }
+
+static int read_user(struct core_object *co, struct server_object *so, User *user);
+static int read_channel(struct core_object *co, struct server_object *so, User *user);
+static int read_message(struct core_object *co, struct server_object *so, User *user);
 
 int db_update(struct core_object *co, struct server_object *so, int type, void *object)
 {

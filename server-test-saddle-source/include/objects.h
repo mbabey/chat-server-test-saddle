@@ -96,6 +96,7 @@ typedef struct
     int  id;
     char *display_name;
     int  privilege_level;
+    int  online_status;
 } User;
 
 /**
@@ -119,10 +120,10 @@ typedef struct
  */
 typedef struct
 {
-    int  id;
-    int  user_id;
-    int  channel_id;
-    char *message_content;
+    int    id;
+    int    user_id;
+    int    channel_id;
+    char   *message_content;
     time_t timestamp;
 } Message;
 
