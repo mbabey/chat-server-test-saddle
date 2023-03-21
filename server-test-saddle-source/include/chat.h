@@ -14,6 +14,7 @@
  * @param body_tokens the tokenized dispatch body
  * @return 0 on success, -1 and set err on failure
  */
-int perform_dispatch_operation(struct core_object *co, struct dispatch *dispatch, char **body_tokens);
+int perform_dispatch_operation(struct core_object *co, struct server_object *so, struct dispatch *dispatch,
+                               char **body_tokens);
 
 #endif //SERVER_TEST_SADDLE_CHAT_H

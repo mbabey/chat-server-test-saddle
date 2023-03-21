@@ -6,12 +6,13 @@
 /**
  * db_create
  * <p>
- * Add an object of a type to the database list.
+ * Insert an object into a database.
  * </p>
- * @param co
- * @param so
- * @param type
- * @return
+ * @param co the core object
+ * @param so the server object
+ * @param type the type of object to insert
+ * @param object the object to insert
+ * @return 0 on success, -1 and set err of failure
  */
 int db_create(struct core_object *co, struct server_object *so, int type, void *object);
 

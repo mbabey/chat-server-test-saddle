@@ -648,7 +648,7 @@ static int c_handle_network_dispatch(struct core_object *co, struct server_objec
         return -1;
     }
     
-    if (perform_dispatch_operation(co, &dispatch, body_tokens) == -1)
+    if (perform_dispatch_operation(co, so, &dispatch, body_tokens) == -1)
     {
         mm_free(co->mm, dispatch.body);
         dispatch.body      = strdup("500");

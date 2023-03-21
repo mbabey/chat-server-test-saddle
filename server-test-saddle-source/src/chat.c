@@ -16,7 +16,8 @@
  */
 static int handle_ping(struct core_object *co, struct dispatch *dispatch, char **body_tokens);
 
-int perform_dispatch_operation(struct core_object *co, struct dispatch *dispatch, char **body_tokens)
+int perform_dispatch_operation(struct core_object *co, struct server_object *so, struct dispatch *dispatch,
+                               char **body_tokens)
 {
     PRINT_STACK_TRACE(co->tracer);
     
@@ -24,7 +25,7 @@ int perform_dispatch_operation(struct core_object *co, struct dispatch *dispatch
     {
         case CREATE:
         {
-            handle_create(co, dispatch, body_tokens);
+            handle_create(co, so, dispatch, body_tokens);
             break;
         }
         case READ:
