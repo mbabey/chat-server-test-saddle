@@ -648,14 +648,15 @@ static int c_handle_network_dispatch(struct core_object *co, struct server_objec
         return -1;
     }
     
+    mm_free(co->mm, dispatch.body); // Free the body after tokenizing.
+    
     if (perform_dispatch_operation(co, so, &dispatch, body_tokens) == -1)
     {
-        mm_free(co->mm, dispatch.body);
         dispatch.body      = strdup("500");
         dispatch.body_size = strlen(dispatch.body);
     }
     
-    free_body_tokens(body_tokens, co->tracer);
+    free_body_tokens(body_tokens, co->tracer); // Free the body tokens after performing the operation.
     
     status = assemble_message_send((struct state *) co, child->client_fd_local, &dispatch);
     free(dispatch.body);

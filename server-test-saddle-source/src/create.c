@@ -69,17 +69,29 @@ int handle_create_user(struct core_object *co, struct server_object *so, struct 
     
     User   new_user;
     size_t offset;
+    int insert_status;
     
     offset = 0;
     new_user.id              = (int) strtol(*body_tokens, NULL, 10);
     new_user.display_name    = *(body_tokens + ++offset);
-    new_user.privilege_level = (int) strtol(*(body_tokens + ++offset), NULL, 10);
-    new_user.online_status   = (int) strtol(*(body_tokens + ++offset), NULL, 10);
+    new_user.privilege_level = 0;
+    new_user.online_status   = 0;
     
-    if (db_create(co, so, USER, &new_user) == -1)
+    // Validate fields
+    // If invalid, assemble 400
+    
+    insert_status = db_create(co, so, USER, &new_user);
+    if (insert_status == -1)
     {
         return -1;
     }
+    
+    if (insert_status == 1)
+    {
+        // assemble 409
+    }
+    
+    // assemble 201
     
     return 0;
 }

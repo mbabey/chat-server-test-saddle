@@ -4,12 +4,12 @@
 /**
  * insert_user
  * <p>
- * Insert a new User into the User database.
+ * Insert a new User into the User database. If a duplicate entry is found, will return 1.
  * </p>
  * @param co the core object
  * @param so the server object
  * @param user the User to insert
- * @return 0 on success, -1 and set err on failure.
+ * @return 0 on success, 1 if duplicate exists, -1 and set err on failure.
  */
 static int insert_user(struct core_object *co, struct server_object *so, User *user);
 
@@ -238,6 +238,18 @@ static int insert_user(struct core_object *co, struct server_object *so, User *u
     datum   key;
     datum   value;
     
+    // Determine if a user with the username already exists in the database.
+    if (find_by_name(co, so->user_db, so->user_db_sem, &serial_user, user->display_name) == -1)
+    {
+        return -1;
+    }
+    if (serial_user)
+    {
+        (void) fprintf(stdout, "Database error occurred: entry with name \"%s\" already exists in User database.\n",
+                       user->display_name);
+        return 1;
+    }
+    
     serial_user_size = serialize_user(co, &serial_user, user);
     if (serial_user_size == -1)
     {
@@ -261,8 +273,9 @@ static int insert_user(struct core_object *co, struct server_object *so, User *u
     
     if (insert_status == 1)
     {
-        (void) fprintf(stdout, "Database error occurred: entry with key \"%s\" already exists in User database.\n",
-                       (char *) key.dptr);
+        (void) fprintf(stdout, "Database error occurred: entry with ID \"%d\" already exists in User database.\n",
+                       *(int *) key.dptr);
+        return 1;
     } else if (insert_status == -1)
     {
         print_db_error(dbm_error(so->user_db));
@@ -357,8 +370,8 @@ static int serialize_channel(struct core_object *co, uint8_t **serial_channel, c
         return -1;
     }
     
-    size_t byte_offset;
-    const char   **list;
+    size_t     byte_offset;
+    const char **list;
     
     memcpy(*serial_channel, &channel->id, sizeof(channel->id));
     byte_offset = sizeof(channel->id);
@@ -619,7 +632,7 @@ static int find_by_name(struct core_object *co, DBM *db, sem_t *db_sem, uint8_t 
         return -1;
     }
     
-    key = dbm_firstkey(db); // Get first thing in the db
+    key   = dbm_firstkey(db); // Get first thing in the db
     value = dbm_fetch(db, key);
     
     sem_post(db_sem); // strcmps are done outside of db time.
@@ -633,7 +646,7 @@ static int find_by_name(struct core_object *co, DBM *db, sem_t *db_sem, uint8_t 
             return -1;
         }
         
-        key = dbm_nextkey(db);
+        key   = dbm_nextkey(db);
         value = dbm_fetch(db, key);
         
         sem_post(db_sem);
