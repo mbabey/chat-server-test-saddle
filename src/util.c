@@ -158,7 +158,6 @@ static int parse_body(struct state *state, char ***body_tokens, uint16_t body_si
     }
     
     token = strdup(body);
-    mm_add(state->mm, token);
     token = strtok( token, "\x03");
     **body_tokens = token;
     for (size_t i = 1; token; ++i)
@@ -172,7 +171,7 @@ static int parse_body(struct state *state, char ***body_tokens, uint16_t body_si
     
     *(*body_tokens + num_tokens) = NULL;
     
-    mm_free(state->mm, token);
+    free(token);
     
     return 0;
 }

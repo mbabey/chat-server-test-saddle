@@ -3,6 +3,22 @@
 
 #include <stdlib.h>
 
+/**
+ * create_name_list
+ * <p>
+ * Allocate memory for a list of count names. Fill the list with names from src_list up to count. Add a NULL
+ * terminating element. Record the number of bytes in the destination list.
+ * </p>
+ * @param co the core object
+ * @param dst_list the destination list
+ * @param src_list the source list
+ * @param count the number of items to copy
+ * @param byte_count the number of bytes copied
+ * @return 0 on success, -1 and set err on failure
+ */
+static int create_name_list(struct core_object *co, const char ***dst_list, char **src_list,
+                            size_t count, size_t *byte_count);
+
 int handle_create(struct core_object *co, struct server_object *so, struct dispatch *dispatch, char **body_tokens)
 {
     PRINT_STACK_TRACE(co->tracer);
@@ -79,25 +95,58 @@ int handle_create_channel(struct core_object *co, struct server_object *so, char
     new_channel.id           = (int) strtol(*body_tokens, NULL, 10);
     new_channel.channel_name = *(body_tokens + ++offset);
     new_channel.creator      = *(body_tokens + ++offset);
-    // TODO: get channel lists, byte size
-    // body tokens go count, name, name, name, name
-    // as the names are collected, count the number of bytes
     
     new_channel.users_count = (size_t) strtol(*(body_tokens + ++offset), NULL, 10);
-    // do I malloc?
-    for (size_t u = 0; u < new_channel.users_count; ++u)
+    if (create_name_list(co, &new_channel.users, (body_tokens + ++offset),
+                         new_channel.users_count, &new_channel.users_size_bytes) == -1)
     {
-        // copy each token into the list of names
+        return -1;
     }
+    offset += new_channel.users_count;
     
     new_channel.administrators_count = (size_t) strtol(*(body_tokens + ++offset), NULL, 10);
+    if (create_name_list(co, &new_channel.administrators, (body_tokens + ++offset),
+                         new_channel.administrators_count, &new_channel.administrators_size_bytes) == -1)
+    {
+        return -1;
+    }
+    offset += new_channel.administrators_count;
     
     new_channel.banned_users_count = (size_t) strtol(*(body_tokens + ++offset), NULL, 10);
+    if (create_name_list(co, &new_channel.banned_users, (body_tokens + ++offset),
+                         new_channel.banned_users_count, &new_channel.banned_users_size_bytes) == -1)
+    {
+        return -1;
+    }
     
     if (db_create(co, so, CHANNEL, &new_channel) == -1)
     {
         return -1;
     }
+    
+    return 0;
+}
+
+static int create_name_list(struct core_object *co, const char ***dst_list, char **src_list,
+        size_t count, size_t *byte_count)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    *dst_list = mm_malloc((count + 1) * sizeof(const char *), co->mm);
+    if (!*dst_list)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
+    
+    *byte_count = 0;
+    for (size_t i = 0; i < count; ++i)
+    {
+        *(*dst_list + i) = *(src_list + i);
+        *byte_count += strlen(*(src_list + i) + 1);
+    }
+    
+    *(*dst_list + count) = NULL;
     
     return 0;
 }
