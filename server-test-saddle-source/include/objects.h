@@ -122,7 +122,7 @@ typedef struct
 {
     int    id;
     int    user_id;
-    int    channel_id;
+    char   channel_id;
     char   *message_content;
     time_t timestamp;
 } Message;

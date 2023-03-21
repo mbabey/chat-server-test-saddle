@@ -100,20 +100,53 @@ static int serialize_auth(struct core_object *co, uint8_t **serial_auth, const A
 /**
  * read_user
  * <p>
- * Read a User from the database.
+ * Read a User from the database into the memory pointed to by user_get. Will fill with NULL if the User does
+ * not exist.
  * </p>
  * @param co the core object
  * @param so the server object
- * @param user the User to retrieve
- * @return the User
+ * @param user_get memory in which to store pointer to read User
+ * @param display_name name of the User for which to search
+ * @return 0 on success, -1 and set err on failure
  */
 static int read_user(struct core_object *co, struct server_object *so, User **user_get, const char *display_name);
 
+/**
+ * read_online_users
+ * <p>
+ * Read all online Users from the database into the memory pointed to by user_get.
+ * </p>
+ * @param co the core object
+ * @param so the server object
+ * @param users_get memory in which to store pointers to read Users
+ * @return 0 on success, -1 and set err on failure
+ */
 static int read_online_users(struct core_object *co, struct server_object *so, User ***users_get);
 
+/**
+ * read_channel
+ * <p>
+ * Read a Channel from the database into the memory pointed to by channel_get. Will fill with NULL if the Channel
+ * cannot be found.
+ * </p>
+ * @param co the core object
+ * @param so the server object
+ * @param channel_get the memory in which to store the pointer to the Channel.
+ * @param channel_name the name of the channel to search for
+ * @return 0 on success, -1 and set err on failure
+ */
 static int read_channel(struct core_object *co, struct server_object *so, Channel **channel_get, const char *channel_name);
 
-static int read_messages(struct core_object *co, struct server_object *so, Message ***messages_get, int num_messages);
+/**
+ * read_messages
+ * @param co the core object
+ * @param so the server object
+ * @param messages_get the memory in which to store pointers to the Messages
+ * @param num_messages the number of messages to read
+ * @param channel_id the channel in which to search for messages
+ * @return 0 on success, -1 and set err on failure
+ */
+static int read_messages(struct core_object *co, struct server_object *so, Message ***messages_get, int num_messages, int channel_id);
 
 /**
  * print_db_error
@@ -513,10 +546,6 @@ int db_read(struct core_object *co, struct server_object *so, int type, void ***
     
     return 0;
 }
-
-static int read_user(struct core_object *co, struct server_object *so, User *user);
-static int read_channel(struct core_object *co, struct server_object *so, User *user);
-static int read_message(struct core_object *co, struct server_object *so, User *user);
 
 int db_update(struct core_object *co, struct server_object *so, int type, void *object)
 {
