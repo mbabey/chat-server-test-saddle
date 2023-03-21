@@ -112,6 +112,17 @@ static int serialize_auth(struct core_object *co, uint8_t **serial_auth, const A
 static int read_user(struct core_object *co, struct server_object *so, User **user_get, const char *display_name);
 
 /**
+ * find_by_name
+ * @param co the core object
+ * @param db the database in which to search
+ * @param db_sem the semaphore for the database
+ * @param serial_object the array to store the result
+ * @param name
+ * @return
+ */
+static int find_by_name(struct core_object *co, DBM *db, sem_t *db_sem, uint8_t **serial_object, const char *name);
+
+/**
  * read_online_users
  * <p>
  * Read all online Users from the database into the memory pointed to by user_get.
@@ -135,7 +146,8 @@ static int read_online_users(struct core_object *co, struct server_object *so, U
  * @param channel_name the name of the channel to search for
  * @return 0 on success, -1 and set err on failure
  */
-static int read_channel(struct core_object *co, struct server_object *so, Channel **channel_get, const char *channel_name);
+static int read_channel(struct core_object *co, struct server_object *so, Channel **channel_get,
+                        const char *channel_name);
 
 /**
  * read_messages
@@ -146,7 +158,8 @@ static int read_channel(struct core_object *co, struct server_object *so, Channe
  * @param channel_id the channel in which to search for messages
  * @return 0 on success, -1 and set err on failure
  */
-static int read_messages(struct core_object *co, struct server_object *so, Message ***messages_get, int num_messages, int channel_id);
+static int read_messages(struct core_object *co, struct server_object *so, Message ***messages_get,
+                         int num_messages, int channel_id);
 
 /**
  * print_db_error
@@ -519,7 +532,7 @@ int db_read(struct core_object *co, struct server_object *so, int type, void ***
             {
                 status = read_online_users(co, so, (User ***) object_dst);
             }
-            if (status  == -1)
+            if (status == -1)
             {
                 return -1;
             }
@@ -535,7 +548,8 @@ int db_read(struct core_object *co, struct server_object *so, int type, void ***
         }
         case MESSAGE:
         {
-            if (read_messages(co, so, (Message ***) object_dst, *(int *) object_query) == -1)
+            if (read_messages(co, so, (Message ***) object_dst,
+                              *(int *) object_query, *((int *) object_query + 1)) == -1)
             {
                 return -1;
             }
@@ -543,6 +557,68 @@ int db_read(struct core_object *co, struct server_object *so, int type, void ***
         }
         default:;
     }
+    
+    return 0;
+}
+
+static int read_user(struct core_object *co, struct server_object *so, User **user_get, const char *display_name)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    uint8_t *serial_user;
+    
+    // read the database to find the serial user
+    if (find_by_name(co, so->user_db, so->user_db_sem, &serial_user, display_name) == -1)
+    {
+        return -1;
+    }
+    
+    // deserialize the user and put it in *user_get
+    *user_get = mm_malloc(sizeof(User), co->mm);
+    if (!*user_get)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
+    
+    
+    return 0;
+}
+
+static int find_by_name(struct core_object *co, DBM *db, sem_t *db_sem, uint8_t **serial_object, const char *name)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    datum key;
+    datum value;
+    
+    if (sem_wait(db_sem) == -1)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
+    
+    key = dbm_firstkey(db); // Get first thing in the db
+    value = dbm_fetch(db, key);
+    
+    sem_post(db_sem); // strcmps are done outside of db time.
+    
+    // Compare the display name to the name in the db
+    while (strcmp((char *) ((uint8_t *) value.dptr + sizeof(int)), name) != 0)
+    {
+        if (sem_wait(db_sem) == -1)
+        {
+            SET_ERROR(co->err);
+            return -1;
+        }
+        
+        key = dbm_nextkey(db);
+        value = dbm_fetch(db, key);
+        
+        sem_post(db_sem);
+    }
+    
+    *serial_object = value.dptr;
     
     return 0;
 }
