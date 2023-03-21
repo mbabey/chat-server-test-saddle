@@ -27,7 +27,7 @@ int handle_create(struct core_object *co, struct server_object *so, struct dispa
     {
         case USER:
         {
-            if (handle_create_user(co, so, body_tokens) == -1)
+            if (handle_create_user(co, so, dispatch, body_tokens) == -1)
             {
                 return -1;
             }
@@ -35,7 +35,7 @@ int handle_create(struct core_object *co, struct server_object *so, struct dispa
         }
         case CHANNEL:
         {
-            if (handle_create_channel(co, so, body_tokens) == -1)
+            if (handle_create_channel(co, so, dispatch, body_tokens) == -1)
             {
                 return -1;
             }
@@ -43,7 +43,7 @@ int handle_create(struct core_object *co, struct server_object *so, struct dispa
         }
         case MESSAGE:
         {
-            if (handle_create_message(co, so, body_tokens) == -1)
+            if (handle_create_message(co, so, dispatch, body_tokens) == -1)
             {
                 return -1;
             }
@@ -51,7 +51,7 @@ int handle_create(struct core_object *co, struct server_object *so, struct dispa
         }
         case AUTH:
         {
-            if (handle_create_auth(co, so, body_tokens) == -1)
+            if (handle_create_auth(co, so, dispatch, body_tokens) == -1)
             {
                 return -1;
             }
@@ -63,7 +63,7 @@ int handle_create(struct core_object *co, struct server_object *so, struct dispa
     return 0;
 }
 
-int handle_create_user(struct core_object *co, struct server_object *so, char **body_tokens)
+int handle_create_user(struct core_object *co, struct server_object *so, struct dispatch *dispatch, char **body_tokens)
 {
     PRINT_STACK_TRACE(co->tracer);
     
@@ -84,7 +84,8 @@ int handle_create_user(struct core_object *co, struct server_object *so, char **
     return 0;
 }
 
-int handle_create_channel(struct core_object *co, struct server_object *so, char **body_tokens)
+int
+handle_create_channel(struct core_object *co, struct server_object *so, struct dispatch *dispatch, char **body_tokens)
 {
     PRINT_STACK_TRACE(co->tracer);
     
@@ -151,7 +152,8 @@ static int create_name_list(struct core_object *co, const char ***dst_list, char
     return 0;
 }
 
-int handle_create_message(struct core_object *co, struct server_object *so, char **body_tokens)
+int
+handle_create_message(struct core_object *co, struct server_object *so, struct dispatch *dispatch, char **body_tokens)
 {
     PRINT_STACK_TRACE(co->tracer);
     
@@ -173,7 +175,7 @@ int handle_create_message(struct core_object *co, struct server_object *so, char
     return 0;
 }
 
-int handle_create_auth(struct core_object *co, struct server_object *so, char **body_tokens)
+int handle_create_auth(struct core_object *co, struct server_object *so, struct dispatch *dispatch, char **body_tokens)
 {
     PRINT_STACK_TRACE(co->tracer);
     
