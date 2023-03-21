@@ -113,14 +113,30 @@ static int read_user(struct core_object *co, struct server_object *so, User **us
 
 /**
  * find_by_name
+ * <p>
+ * Find an entry in the database by a string name. The name must be the second parameter of the object following an int.
+ * </p>
  * @param co the core object
  * @param db the database in which to search
  * @param db_sem the semaphore for the database
  * @param serial_object the array to store the result
- * @param name
- * @return
+ * @param name the
+ * @return 0 on success, -1 and set err on failure
  */
 static int find_by_name(struct core_object *co, DBM *db, sem_t *db_sem, uint8_t **serial_object, const char *name);
+
+/**
+ * deserialize_user
+ * <p>
+ * Deserialize a User into a User struct.
+ * </p>
+ * @param co the core object
+ * @param so the server object
+ * @param user_get the User struct
+ * @param serial_user the bytes to deserialize
+ * @return 0 on success, -1 and set err on failure
+ */
+static int deserialize_user(struct core_object *co, struct server_object *so, User **user_get, uint8_t *serial_user);
 
 /**
  * read_online_users
@@ -586,7 +602,10 @@ static int read_user(struct core_object *co, struct server_object *so, User **us
         SET_ERROR(co->err);
         return -1;
     }
-    
+    if (deserialize_user(co, so, user_get, serial_user) == -1)
+    {
+        return -1;
+    }
     
     return 0;
 }
@@ -631,6 +650,11 @@ static int find_by_name(struct core_object *co, DBM *db, sem_t *db_sem, uint8_t 
     *serial_object = value.dptr; // Will be null if not found.
     
     return 0;
+}
+
+static int deserialize_user(struct core_object *co, struct server_object *so, User **user_get, uint8_t *serial_user)
+{
+
 }
 
 int db_update(struct core_object *co, struct server_object *so, int type, void *object)
