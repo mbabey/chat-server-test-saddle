@@ -104,18 +104,20 @@ typedef struct
  */
 typedef struct
 {
-    int    id;
-    char   *channel_name;
-    char   *creator;
-    User   **users;          // This is a null terminated list.
-    size_t users_count;      // This is the number of users.
-    size_t users_size_bytes; // This is the number of bytes.
-    User   **administrators;
-    size_t administrators_count;
-    size_t administrators_size_bytes;
-    User   **banned_users;
-    size_t banned_users_count;
-    size_t banned_users_size_bytes;
+    int        id;
+    char       *channel_name;
+    char       *creator;
+    size_t     users_count;      // This is the number of users.
+    const char **users;          // This is a null terminated list of names.
+    size_t     users_size_bytes; // This is the number of bytes.
+    
+    size_t     administrators_count;
+    const char **administrators;
+    size_t     administrators_size_bytes;
+    
+    size_t     banned_users_count;
+    const char **banned_users;
+    size_t     banned_users_size_bytes;
 } Channel;
 
 /**

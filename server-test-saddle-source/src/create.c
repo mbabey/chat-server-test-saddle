@@ -80,6 +80,18 @@ int handle_create_channel(struct core_object *co, struct server_object *so, char
     new_channel.channel_name = *(body_tokens + ++offset);
     new_channel.creator      = *(body_tokens + ++offset);
     // TODO: get channel lists, byte size
+    // body tokens go count, name, name, name, name
+    // as the names are collected, count the number of bytes
+    
+    new_channel.users_count = (size_t) strtol(*(body_tokens + ++offset), NULL, 10);
+    for (size_t u = 0; u < new_channel.users_count; ++u)
+    {
+        // copy each token into the list of users....
+    }
+    
+    new_channel.administrators_count = (size_t) strtol(*(body_tokens + ++offset), NULL, 10);
+    
+    new_channel.banned_users_count = (size_t) strtol(*(body_tokens + ++offset), NULL, 10);
     
     if (db_create(co, so, CHANNEL, &new_channel) == -1)
     {
