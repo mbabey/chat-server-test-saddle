@@ -719,11 +719,18 @@ int db_read(struct core_object *co, struct server_object *so, int type, void ***
         case MESSAGE:
         {
             if (read_messages(co, so, (Message ***) object_dst,
-                              *(int *) object_query, *((int *) object_query + 1)) == -1)
+                              *(int *) object_query, *(((int *) object_query) + 1)) == -1)
             {
                 return -1;
             }
             break;
+        }
+        case AUTH:
+        {
+            if (read_auth(co, so, *(Auth ***) object_dst, (const char *) object_query) == -1)
+            {
+                return -1;
+            }
         }
         default:;
     }
