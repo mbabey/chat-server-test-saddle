@@ -145,8 +145,9 @@ static int parse_body(struct state *state, char ***body_tokens, uint16_t body_si
 {
     PRINT_STACK_TRACE(state->tracer);
     
-    int num_tokens;
+    int  num_tokens;
     char *token;
+    char *token_head;
     
     num_tokens = count_tokens(body_size, body, state->tracer);
     
@@ -157,21 +158,21 @@ static int parse_body(struct state *state, char ***body_tokens, uint16_t body_si
         return -1;
     }
     
-    token = strdup(body);
-    token = strtok( token, "\x03"); // NOLINT(concurrency-mt-unsafe) : No threads here
-    **body_tokens = token;
+    token_head = strdup(body);
+    token      = strtok(token_head, "\x03"); // NOLINT(concurrency-mt-unsafe) : No threads here
+    strcpy(**body_tokens, token);
     for (size_t i = 1; token; ++i)
     {
-        token = strtok( NULL, "\x03"); // NOLINT(concurrency-mt-unsafe) : No threads here
+        token = strtok(NULL, "\x03"); // NOLINT(concurrency-mt-unsafe) : No threads here
         if (token)
         {
-            *(*body_tokens + i) = token;
+            strcpy(*(*body_tokens + i), token);
         }
     }
     
     *(*body_tokens + num_tokens) = NULL;
     
-    free(token);
+    free(token_head);
     
     return 0;
 }
@@ -198,7 +199,7 @@ void free_body_tokens(struct state *state, char **body_tokens)
 {
     PRINT_STACK_TRACE(state->tracer);
     
-    for (;*body_tokens != NULL; ++body_tokens)
+    for (; *body_tokens != NULL; ++body_tokens)
     {
         mm_free(state->mm, *body_tokens);
     }
