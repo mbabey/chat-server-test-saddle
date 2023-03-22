@@ -192,6 +192,17 @@ static int read_messages(struct core_object *co, struct server_object *so, Messa
 static int read_auth(struct core_object *co, struct server_object *so, Auth **auth_get, const char *login_token);
 
 /**
+ * deserialize_auth
+ * <p>
+ * Store a byte string version of an Auth into an Auth struct
+ * </p>
+ * @param co the core object
+ * @param auth_get the auth in which to store the bytes
+ * @param serial_auth the bytes to convert
+ */
+static void deserialize_auth(struct core_object *co, Auth **auth_get, uint8_t *serial_auth);
+
+/**
  * delete_user
  * <p>
  * Delete a User from the User database.
@@ -764,6 +775,47 @@ static void deserialize_user(struct core_object *co, User **user_get, uint8_t *s
     memcpy(&(*user_get)->privilege_level, (serial_user + byte_offset), sizeof((*user_get)->privilege_level));
     byte_offset += sizeof((*user_get)->privilege_level);
     memcpy(&(*user_get)->online_status, (serial_user + byte_offset), sizeof((*user_get)->online_status));
+}
+
+static int read_auth(struct core_object *co, struct server_object *so, Auth **auth_get, const char *login_token)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    uint8_t *serial_auth;
+    
+    if (find_by_name(co, so->auth_db, so->auth_db_sem, &serial_auth, login_token) == -1)
+    {
+        return -1;
+    }
+    if (!serial_auth)
+    {
+        *auth_get = NULL;
+        return 0;
+    }
+    
+    *auth_get = mm_malloc(sizeof(Auth), co->mm);
+    if (!*auth_get)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
+    
+    deserialize_auth(co, auth_get, serial_auth);
+    
+    return 0;
+}
+
+static void deserialize_auth(struct core_object *co, Auth **auth_get, uint8_t *serial_auth)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    size_t byte_offset;
+    
+    memcpy(&(*auth_get)->user_id, serial_auth, sizeof((*auth_get)->user_id));
+    byte_offset = sizeof((*auth_get)->user_id);
+    strcpy((*auth_get)->login_token, (char *) (serial_auth + byte_offset));
+    byte_offset += strlen((*auth_get)->login_token);
+    strcpy((*auth_get)->password, (char *) (serial_auth + byte_offset));
 }
 
 int db_update(struct core_object *co, struct server_object *so, int type, void *object)

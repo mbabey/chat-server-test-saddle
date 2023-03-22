@@ -137,9 +137,9 @@ typedef struct
  */
 typedef struct
 {
-    int        user_id;
-    const char *login_token;
-    char       *password;
+    int  user_id;
+    char *login_token;
+    char *password;
 } Auth;
 
 #endif //PROCESS_SERVER_OBJECTS_H
