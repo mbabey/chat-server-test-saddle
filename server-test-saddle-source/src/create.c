@@ -148,14 +148,18 @@ int handle_create_user(struct core_object *co, struct server_object *so, struct 
         dispatch->body_size = strlen(dispatch->body);
     } else if (insert_status_user == 1)
     {
-        // TODO: remove the auth from the database.
-        
+        if (db_destroy(co, so, AUTH, &new_auth) == -1) // Remove the Auth from the database.
+        {
+            return -1;
+        }
         dispatch->body = strdup("409\x03""2\x03Display name already taken.\x03");
         dispatch->body_size = strlen(dispatch->body);
     } else if (insert_status_auth == 1)
     {
-        // TODO: remove the user from the database.
-        
+        if (db_destroy(co, so, USER, &new_user) == -1) // Remove the User from the database.
+        {
+            return -1;
+        }
         dispatch->body = strdup("409\x03""1\x03Login token already taken.\x03");
         dispatch->body_size = strlen(dispatch->body);
     } else
