@@ -287,11 +287,6 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
 {
     PRINT_STACK_TRACE(co->tracer);
     
-    Auth auth;
-    
-    auth.login_token = *body_tokens;
-    auth.password    = *(body_tokens + 1);
-    
     // validate auth fields
     if (!(VALIDATE_LOGIN_TOKEN(*body_tokens) && VALIDATE_PASSWORD(*(body_tokens + 1))))
     {
@@ -300,10 +295,46 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
         return 0;
     }
     
+    Auth *auth;
+    
     // read db for auth
-    if (db_read(co, so, AUTH, &auth, *body_tokens))
+    if (db_read(co, so, AUTH, &auth, *body_tokens) == -1)
+    {
+        return -1;
+    }
+    if (!auth) // No login token exists
+    {
+        dispatch->body      = strdup("400\x03Invalid fields\x03");
+        dispatch->body_size = strlen(dispatch->body);
+        return 0;
+    }
+    if (strcmp(auth->password, *(body_tokens + 1)) != 0) // Wrong password
+    {
+        dispatch->body      = strdup("403\x03Invalid fields\x03");
+        dispatch->body_size = strlen(dispatch->body);
+        return 0;
+    }
+    
+    datum user_key;
+    datum user_value;
+    
     // get user_id
-    // get user with id
+    user_key.dptr = &auth->user_id;
+    user_key.dsize = sizeof(auth->user_id);
+    
+    if (sem_wait(so->auth_db_sem) == -1)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
+    user_value = dbm_fetch(so->auth_db, user_key); // get user with id
+    sem_post(so->auth_db_sem);
+    
+    if (user_value.dptr == NULL) // This should never happen.
+    {
+        (void) fprintf(stdout, "Create-Auth: User with id \"%d\" not found in User database.\n", auth->user_id);
+    }
+    
     
     // update user online status
     // add user socket to server
