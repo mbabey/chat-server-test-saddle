@@ -4,6 +4,38 @@
 #include <stdlib.h>
 
 /**
+ * create_user_validate_fields
+ * <p>
+ * Validate the fields of a create user request.
+ * </p>
+ * @param login_token login_token to validate
+ * @param display_name display_name to validate
+ * @param password password to validate
+ * @return 0 if fields are valid, -1 otherwise
+ */
+static int create_user_validate_fields(const char *login_token, const char *display_name, const char *password);
+
+/**
+ * generate_user_id
+ * <p>
+ * Generate a unique ID for a new User.
+ * </p>
+ * @param tracer tracer function
+ * @return a unique ID
+ */
+static int generate_user_id(TRACER_FUNCTION_AS(tracer));
+
+/**
+ * generate_channel_id
+ * <p>
+ * Generate a unique ID for a new Channel.
+ * </p>
+ * @param tracer tracer function
+ * @return a unique ID
+ */
+static int generate_channel_id(TRACER_FUNCTION_AS(tracer));
+
+/**
  * create_name_list
  * <p>
  * Allocate memory for a list of count names. Fill the list with names from src_list up to count. Add a NULL
@@ -19,10 +51,14 @@
 static int create_name_list(struct core_object *co, const char ***dst_list, char **src_list,
                             size_t count, size_t *byte_count);
 
-static int generate_user_id(TRACER_FUNCTION_AS(tracer));
-
-static int generate_channel_id(TRACER_FUNCTION_AS(tracer));
-
+/**
+ * generate_message_id
+ * <p>
+ * Generate a unique ID for a new Message.
+ * </p>
+ * @param tracer tracer function
+ * @return a unique ID
+ */
 static int generate_message_id(TRACER_FUNCTION_AS(tracer));
 
 int handle_create(struct core_object *co, struct server_object *so, struct dispatch *dispatch, char **body_tokens)
@@ -76,16 +112,29 @@ int handle_create_user(struct core_object *co, struct server_object *so, struct 
     User   new_user;
     Auth   new_auth;
     size_t offset;
+    int    validation_status;
     int    insert_status;
     
     offset = 0;
-    new_user.id              = (int) strtol(*body_tokens, NULL, 10); // TODO: function to generate user ID
-    new_user.display_name    = *(body_tokens + ++offset);
-    new_user.privilege_level = 0;
-    new_user.online_status   = 0;
+    new_auth.login_token  = *body_tokens;
+    new_user.display_name = *(body_tokens + ++offset);
+    new_auth.password     = *(body_tokens + ++offset);
     
     // Validate fields
     // If invalid, assemble 400
+    validation_status = create_user_validate_fields(new_auth.login_token, new_user.display_name, new_auth.password);
+    if (validation_status)
+    {
+    
+    }
+    
+    new_user.privilege_level = 0;
+    new_user.online_status   = 0;
+    
+    // Create ID once the fields are validated.
+    new_user.id      = generate_user_id(co->tracer);
+    new_auth.user_id = new_user.id;
+    
     
     insert_status = db_create(co, so, USER, &new_user);
     if (insert_status == -1)
@@ -101,6 +150,11 @@ int handle_create_user(struct core_object *co, struct server_object *so, struct 
     // assemble 201
     
     return 0;
+}
+
+static int create_user_validate_fields(const char *login_token, const char *display_name, const char *password)
+{
+
 }
 
 static int generate_user_id(TRACER_FUNCTION_AS(tracer))
