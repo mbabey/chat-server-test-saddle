@@ -9,8 +9,9 @@
  * Read a message into a dispatch struct.
  * </p>
  * @param state the state object
- * @param client the client object
+ * @param socket_fd the socket on which to receive a message
  * @param dispatch the dispatch to receive into
+ * @param body_tokens pointer to array in which to store strings of body
  * @return 0 on success, -1 on set err failure
  */
 int recv_parse_message(struct state *state, int socket_fd, struct dispatch *dispatch, char ***body_tokens);
@@ -21,7 +22,7 @@ int recv_parse_message(struct state *state, int socket_fd, struct dispatch *disp
  * Assemble and send message .
  * </p>
  * @param state the state object
- * @param client the client object
+ * @param socket the socket on which to send a message
  * @param dispatch the dispatch to send
  * @return 0 on success, -1 on set err failure
  */

@@ -1,22 +1,21 @@
 #include "../../include/manager.h"
 #include "../../include/util.h"
 #include "../include/chat.h"
-#include "../include/objects.h"
-#include "../include/process-server.h"
 #include "../include/process-server-util.h"
+#include "../include/process-server.h"
 
 #include <arpa/inet.h>
 #include <errno.h>
 #include <netinet/in.h>
 #include <poll.h>
 #include <signal.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h> // back compatability
 #include <sys/types.h>  // back compatability
 #include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
-#include <stdlib.h>
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables): must be non-const
 /**

@@ -10,6 +10,7 @@
  * Switch on the Object of a CREATE Type Dispatch.
  * </p>
  * @param co the core object
+ * @param so the server object
  * @param dispatch the dispatch
  * @param body_tokens the tokenized dispatch body
  * @return 0 on success, -1 and set err on failure
@@ -22,6 +23,7 @@ int handle_create(struct core_object *co, struct server_object *so, struct dispa
  * Create a User account.
  * </p>
  * @param co the core object
+ * @param so the server object
  * @param dispatch the dispatch
  * @param body_tokens the tokenized dispatch body
  * @return 0 on success, -1 and set err on failure.
@@ -34,6 +36,7 @@ int handle_create_user(struct core_object *co, struct server_object *so, struct 
  * Create a Channel.
  * </p>
  * @param co the core object
+ * @param so the server object
  * @param dispatch the dispatch
  * @param body_tokens the tokenized dispatch body
  * @return 0 on success, -1 and set err on failure.
@@ -47,6 +50,7 @@ int handle_create_channel(struct core_object *co, struct server_object *so, stru
  * Create a Message in a Channel.
  * </p>
  * @param co the core object
+ * @param so the server object
  * @param dispatch the dispatch
  * @param body_tokens the tokenized dispatch body
  * @return 0 on success, -1 and set err on failure.
@@ -60,6 +64,7 @@ int handle_create_message(struct core_object *co, struct server_object *so, stru
  * Log a User in.
  * </p>
  * @param co the core object
+ * @param so the server object
  * @param dispatch the dispatch
  * @param body_tokens the tokenized dispatch body
  * @return 0 on success, -1 and set err on failure.

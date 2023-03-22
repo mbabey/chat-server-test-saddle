@@ -10,6 +10,7 @@
  * Perform the dispatch operation indicated by the dispatch passed to this function.
  * </p>
  * @param co the core object
+ * @param so the server object
  * @param dispatch the dispatch
  * @param body_tokens the tokenized dispatch body
  * @return 0 on success, -1 and set err on failure

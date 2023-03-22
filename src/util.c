@@ -89,7 +89,7 @@ int recv_parse_message(struct state *state, int socket_fd, struct dispatch *disp
         return -1;
     }
     
-    if (parse_body((struct state *) state, body_tokens, dispatch->body_size, dispatch->body) == -1)
+    if (parse_body(state, body_tokens, dispatch->body_size, dispatch->body) == -1)
     {
         return -1;
     }
@@ -158,11 +158,11 @@ static int parse_body(struct state *state, char ***body_tokens, uint16_t body_si
     }
     
     token = strdup(body);
-    token = strtok( token, "\x03");
+    token = strtok( token, "\x03"); // NOLINT(concurrency-mt-unsafe) : No threads here
     **body_tokens = token;
     for (size_t i = 1; token; ++i)
     {
-        token = strtok( NULL, "\x03");
+        token = strtok( NULL, "\x03"); // NOLINT(concurrency-mt-unsafe) : No threads here
         if (token)
         {
             *(*body_tokens + i) = token;
@@ -196,10 +196,10 @@ static int count_tokens(uint16_t body_size, const char *body, void (*tracer)(con
 
 void free_body_tokens(char **body_tokens, TRACER_FUNCTION_AS(tracer))
 {
-    PRINT_STACK_TRACE(state->tracer);
+    PRINT_STACK_TRACE(tracer);
     
     for (;*body_tokens != NULL; ++body_tokens)
     {
-        mm_free(state->mm, *body_tokens);
+        mm_free(mm, *body_tokens);
     }
 }

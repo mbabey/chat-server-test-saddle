@@ -342,7 +342,7 @@ static int insert_user(struct core_object *co, struct server_object *so, User *u
         return -1;
     }
     
-    insert_status = dbm_store(so->user_db, key, value, DBM_INSERT);
+    insert_status = dbm_store(so->user_db, key, value, DBM_INSERT); // NOLINT(concurrency-mt-unsafe) : Protected
     
     sem_post(so->user_db_sem);
     
@@ -351,7 +351,8 @@ static int insert_user(struct core_object *co, struct server_object *so, User *u
         (void) fprintf(stdout, "Database error occurred: User with ID \"%d\" already exists in User database.\n",
                        *(int *) key.dptr);
         return 1;
-    } else if (insert_status == -1)
+    }
+    if (insert_status == -1)
     {
         print_db_error(so->user_db);
     }
@@ -372,8 +373,9 @@ static int find_by_name(struct core_object *co, DBM *db, sem_t *db_sem, uint8_t 
         return -1;
     }
     
-    key   = dbm_firstkey(db); // Get first thing in the db
-    value = dbm_fetch(db, key);
+    // Get first thing in the db
+    key   = dbm_firstkey(db);   // NOLINT(concurrency-mt-unsafe) : Protected
+    value = dbm_fetch(db, key); // NOLINT(concurrency-mt-unsafe) : Protected
     
     sem_post(db_sem); // strcmps are done outside of db time.
     
@@ -386,13 +388,13 @@ static int find_by_name(struct core_object *co, DBM *db, sem_t *db_sem, uint8_t 
             return -1;
         }
         
-        key   = dbm_nextkey(db);
-        value = dbm_fetch(db, key);
+        key   = dbm_nextkey(db);    // NOLINT(concurrency-mt-unsafe) : Protected
+        value = dbm_fetch(db, key); // NOLINT(concurrency-mt-unsafe) : Protected
         
         sem_post(db_sem);
     }
     
-    if (!key.dptr && dbm_error(db))
+    if (!key.dptr && dbm_error(db)) // NOLINT(concurrency-mt-unsafe) : No threads here
     {
         print_db_error(db);
     }
@@ -468,7 +470,7 @@ static int insert_channel(struct core_object *co, struct server_object *so, Chan
         return -1;
     }
     
-    insert_status = dbm_store(so->channel_db, key, value, DBM_INSERT);
+    insert_status = dbm_store(so->channel_db, key, value, DBM_INSERT); // NOLINT(concurrency-mt-unsafe) : Protected
     
     sem_post(so->channel_db_sem);
     
@@ -559,7 +561,7 @@ static int insert_message(struct core_object *co, struct server_object *so, Mess
         return -1;
     }
     
-    insert_status = dbm_store(so->message_db, key, value, DBM_INSERT);
+    insert_status = dbm_store(so->message_db, key, value, DBM_INSERT); // NOLINT(concurrency-mt-unsafe) : Protected
     
     sem_post(so->message_db_sem);
     
@@ -644,7 +646,7 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
         return -1;
     }
     
-    insert_status = dbm_store(so->auth_db, key, value, DBM_INSERT);
+    insert_status = dbm_store(so->auth_db, key, value, DBM_INSERT); // NOLINT(concurrency-mt-unsafe) : Protected
     
     sem_post(so->auth_db_sem);
     
@@ -653,7 +655,8 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
         (void) fprintf(stdout, "Database error occurred: Auth with ID \"%d\" already exists in Auth database.\n",
                        *(int *) key.dptr);
         return 1;
-    } else if (insert_status == -1)
+    }
+    if (insert_status == -1)
     {
         print_db_error(so->auth_db);
     }
@@ -784,6 +787,29 @@ static void deserialize_user(struct core_object *co, User **user_get, uint8_t *s
     memcpy(&(*user_get)->online_status, (serial_user + byte_offset), sizeof((*user_get)->online_status));
 }
 
+static int read_online_users(struct core_object *co, struct server_object *so, User ***users_get)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    return 0;
+}
+
+static int read_channel(struct core_object *co, struct server_object *so, Channel **channel_get,
+                        const char *channel_name)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    return 0;
+}
+
+static int read_messages(struct core_object *co, struct server_object *so, Message ***messages_get,
+                         int num_messages, int channel_id)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    return 0;
+}
+
 static int read_auth(struct core_object *co, struct server_object *so, Auth **auth_get, const char *login_token)
 {
     PRINT_STACK_TRACE(co->tracer);
@@ -880,7 +906,7 @@ static int delete_user(struct core_object *co, struct server_object *so, User *u
         return -1;
     }
     
-    delete_status = dbm_delete(so->user_db, key);
+    delete_status = dbm_delete(so->user_db, key); // NOLINT(concurrency-mt-unsafe) : Protected
     
     sem_post(so->user_db_sem);
     
@@ -908,7 +934,7 @@ static int delete_channel(struct core_object *co, struct server_object *so, Chan
         return -1;
     }
     
-    delete_status = dbm_delete(so->channel_db, key);
+    delete_status = dbm_delete(so->channel_db, key); // NOLINT(concurrency-mt-unsafe) : Protected
     
     sem_post(so->channel_db_sem);
     
@@ -963,7 +989,7 @@ static int delete_auth(struct core_object *co, struct server_object *so, Auth *a
         return -1;
     }
     
-    delete_status = dbm_delete(so->auth_db, key);
+    delete_status = dbm_delete(so->auth_db, key); // NOLINT(concurrency-mt-unsafe) : Protected
     
     sem_post(so->auth_db_sem);
     
@@ -978,9 +1004,10 @@ static void print_db_error(DBM *db)
 {
     int err_code;
     
-    err_code = dbm_error(db);
-    dbm_clearerr(db);
+    err_code = dbm_error(db); // NOLINT(concurrency-mt-unsafe) : No threads here
+    dbm_clearerr(db);         // NOLINT(concurrency-mt-unsafe) : No threads here
     
+    // NOLINTBEGIN(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers) : Numbers fine here.
     switch (err_code)
     {
         case 1:
@@ -1042,4 +1069,5 @@ static void print_db_error(DBM *db)
         }
         default:;
     }
+    // NOLINTEND(cppcoreguidelines-avoid-magic-numbers,readability-magic-numbers)
 }

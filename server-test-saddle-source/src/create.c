@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 
+#define BASE 10 // Base for strtol calls, DO NOT CHANGE
+
 /**
  * generate_user_id
  * <p>
@@ -161,16 +163,6 @@ int handle_create_user(struct core_object *co, struct server_object *so, struct 
     return 0;
 }
 
-static int create_user_validate_fields(const char *login_token, const char *display_name, const char *password)
-{
-    if (VALIDATE_LOGIN_TOKEN(login_token) || VALIDATE_DISPLAY_NAME(display_name) || VALIDATE_PASSWORD(password))
-    {
-        return -1;
-    }
-    
-    return 0;
-}
-
 static int generate_user_id(TRACER_FUNCTION_AS(tracer))
 {
     PRINT_STACK_TRACE(tracer);
@@ -187,11 +179,11 @@ int handle_create_channel(struct core_object *co, struct server_object *so, stru
     size_t  offset;
     
     offset = 0;
-    new_channel.id           = (int) strtol(*body_tokens, NULL, 10);
+    new_channel.id           = (int) strtol(*body_tokens, NULL, BASE);
     new_channel.channel_name = *(body_tokens + ++offset);
     new_channel.creator      = *(body_tokens + ++offset);
     
-    new_channel.users_count = (size_t) strtol(*(body_tokens + ++offset), NULL, 10);
+    new_channel.users_count = (size_t) strtol(*(body_tokens + ++offset), NULL, BASE);
     if (create_name_list(co, &new_channel.users, (body_tokens + ++offset),
                          new_channel.users_count, &new_channel.users_size_bytes) == -1)
     {
@@ -199,7 +191,7 @@ int handle_create_channel(struct core_object *co, struct server_object *so, stru
     }
     offset += new_channel.users_count;
     
-    new_channel.administrators_count = (size_t) strtol(*(body_tokens + ++offset), NULL, 10);
+    new_channel.administrators_count = (size_t) strtol(*(body_tokens + ++offset), NULL, BASE);
     if (create_name_list(co, &new_channel.administrators, (body_tokens + ++offset),
                          new_channel.administrators_count, &new_channel.administrators_size_bytes) == -1)
     {
@@ -207,7 +199,7 @@ int handle_create_channel(struct core_object *co, struct server_object *so, stru
     }
     offset += new_channel.administrators_count;
     
-    new_channel.banned_users_count = (size_t) strtol(*(body_tokens + ++offset), NULL, 10);
+    new_channel.banned_users_count = (size_t) strtol(*(body_tokens + ++offset), NULL, BASE);
     if (create_name_list(co, &new_channel.banned_users, (body_tokens + ++offset),
                          new_channel.banned_users_count, &new_channel.banned_users_size_bytes) == -1)
     {
@@ -262,11 +254,11 @@ int handle_create_message(struct core_object *co, struct server_object *so, stru
     size_t  offset;
     
     offset = 0;
-    new_message.id              = (int) strtol(*body_tokens, NULL, 10);
-    new_message.user_id         = (int) strtol(*(body_tokens + ++offset), NULL, 10);
-    new_message.channel_id      = (int) strtol(*(body_tokens + ++offset), NULL, 10);
+    new_message.id              = (int) strtol(*body_tokens, NULL, BASE);
+    new_message.user_id         = (int) strtol(*(body_tokens + ++offset), NULL, BASE);
+    new_message.channel_id      = (int) strtol(*(body_tokens + ++offset), NULL, BASE);
     new_message.message_content = *(body_tokens + ++offset);
-    new_message.timestamp       = strtol(*(body_tokens + ++offset), NULL, 10);
+    new_message.timestamp       = strtol(*(body_tokens + ++offset), NULL, BASE);
     
     if (db_create(co, so, MESSAGE, &new_message) == -1)
     {
@@ -327,7 +319,8 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
         SET_ERROR(co->err);
         return -1;
     }
-    user_value = dbm_fetch(so->auth_db, user_key); // get user with id
+    // get user with id
+    user_value = dbm_fetch(so->auth_db, user_key); // NOLINT(concurrency-mt-unsafe) : Protected
     sem_post(so->auth_db_sem);
     
     if (user_value.dptr == NULL) // This should never happen.
@@ -335,9 +328,8 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
         (void) fprintf(stdout, "Create-Auth: User with id \"%d\" not found in User database.\n", auth->user_id);
     }
     
-    
-    // update user online status
-    // add user socket to server
+    // TODO: update user online status
+    // TODO: add user socket to server
     
     // assemble body with user info
     

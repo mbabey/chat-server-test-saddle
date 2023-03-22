@@ -1,8 +1,8 @@
 #include "../include/chat.h"
 #include "../include/create.h"
+#include "../include/destroy.h"
 #include "../include/read.h"
 #include "../include/update.h"
-#include "../include/destroy.h"
 
 /**
  * handle_ping
