@@ -1,0 +1,58 @@
+Parsing user
+    new_user.id              = (int) strtol(*body_tokens, NULL, 10); // TODO: function to generate user ID
+    new_user.display_name    = *(body_tokens + ++offset);
+    new_user.privilege_level = (int) strtol(*(body_tokens + ++offset), NULL, 10);
+    new_user.online_status   = (int) strtol(*(body_tokens + ++offset), NULL, 10);
+
+Parsing Channel
+    Channel new_channel;
+    size_t  offset;
+
+    offset = 0;
+    new_channel.id           = (int) strtol(*body_tokens, NULL, 10);
+    new_channel.channel_name = *(body_tokens + ++offset);
+    new_channel.creator      = *(body_tokens + ++offset);
+
+    new_channel.users_count = (size_t) strtol(*(body_tokens + ++offset), NULL, 10);
+    if (create_name_list(co, &new_channel.users, (body_tokens + ++offset),
+                         new_channel.users_count, &new_channel.users_size_bytes) == -1)
+    {
+        return -1;
+    }
+    offset += new_channel.users_count;
+
+    new_channel.administrators_count = (size_t) strtol(*(body_tokens + ++offset), NULL, 10);
+    if (create_name_list(co, &new_channel.administrators, (body_tokens + ++offset),
+                         new_channel.administrators_count, &new_channel.administrators_size_bytes) == -1)
+    {
+        return -1;
+    }
+    offset += new_channel.administrators_count;
+
+    new_channel.banned_users_count = (size_t) strtol(*(body_tokens + ++offset), NULL, 10);
+    if (create_name_list(co, &new_channel.banned_users, (body_tokens + ++offset),
+                         new_channel.banned_users_count, &new_channel.banned_users_size_bytes) == -1)
+    {
+        return -1;
+    }
+
+Parsing Message
+    Message new_message;
+    size_t  offset;
+
+    offset = 0;
+    new_message.id              = (int) strtol(*body_tokens, NULL, 10);
+    new_message.user_id         = (int) strtol(*(body_tokens + ++offset), NULL, 10);
+    new_message.channel_id      = (int) strtol(*(body_tokens + ++offset), NULL, 10);
+    new_message.message_content = *(body_tokens + ++offset);
+    new_message.timestamp       = strtol(*(body_tokens + ++offset), NULL, 10);
+
+
+Parsing Auth
+    Auth   new_auth;
+    size_t offset;
+
+    offset = 0;
+    new_auth.user_id     = (int) strtol(*body_tokens, NULL, 10);
+    new_auth.login_token = *(body_tokens + ++offset);
+    new_auth.password    = *(body_tokens + ++offset);

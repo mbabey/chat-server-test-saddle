@@ -19,6 +19,12 @@
 static int create_name_list(struct core_object *co, const char ***dst_list, char **src_list,
                             size_t count, size_t *byte_count);
 
+static int generate_user_id(TRACER_FUNCTION_AS(tracer));
+
+static int generate_channel_id(TRACER_FUNCTION_AS(tracer));
+
+static int generate_message_id(TRACER_FUNCTION_AS(tracer));
+
 int handle_create(struct core_object *co, struct server_object *so, struct dispatch *dispatch, char **body_tokens)
 {
     PRINT_STACK_TRACE(co->tracer);
@@ -68,11 +74,12 @@ int handle_create_user(struct core_object *co, struct server_object *so, struct 
     PRINT_STACK_TRACE(co->tracer);
     
     User   new_user;
+    Auth   new_auth;
     size_t offset;
-    int insert_status;
+    int    insert_status;
     
     offset = 0;
-    new_user.id              = (int) strtol(*body_tokens, NULL, 10);
+    new_user.id              = (int) strtol(*body_tokens, NULL, 10); // TODO: function to generate user ID
     new_user.display_name    = *(body_tokens + ++offset);
     new_user.privilege_level = 0;
     new_user.online_status   = 0;
@@ -94,6 +101,13 @@ int handle_create_user(struct core_object *co, struct server_object *so, struct 
     // assemble 201
     
     return 0;
+}
+
+static int generate_user_id(TRACER_FUNCTION_AS(tracer))
+{
+    PRINT_STACK_TRACE(tracer);
+    static int user_id = 1;
+    return user_id++;
 }
 
 int handle_create_channel(struct core_object *co, struct server_object *so, struct dispatch *dispatch,
@@ -138,6 +152,13 @@ int handle_create_channel(struct core_object *co, struct server_object *so, stru
     }
     
     return 0;
+}
+
+static int generate_channel_id(TRACER_FUNCTION_AS(tracer))
+{
+    PRINT_STACK_TRACE(tracer);
+    static int channel_id = 1;
+    return channel_id++;
 }
 
 static int create_name_list(struct core_object *co, const char ***dst_list, char **src_list,
@@ -185,6 +206,13 @@ int handle_create_message(struct core_object *co, struct server_object *so, stru
     }
     
     return 0;
+}
+
+static int generate_message_id(TRACER_FUNCTION_AS(tracer))
+{
+    PRINT_STACK_TRACE(tracer);
+    static int message_id = 1;
+    return message_id++;
 }
 
 int handle_create_auth(struct core_object *co, struct server_object *so, struct dispatch *dispatch, char **body_tokens)
