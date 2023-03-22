@@ -112,8 +112,8 @@ int handle_create_user(struct core_object *co, struct server_object *so, struct 
     User   new_user;
     Auth   new_auth;
     size_t offset;
-    int    validation_status;
-    int    insert_status;
+    int    insert_status_user;
+    int    insert_status_auth;
     
     offset = 0;
     new_auth.login_token  = *body_tokens;
@@ -122,39 +122,61 @@ int handle_create_user(struct core_object *co, struct server_object *so, struct 
     
     // Validate fields
     // If invalid, assemble 400
-    validation_status = create_user_validate_fields(new_auth.login_token, new_user.display_name, new_auth.password);
-    if (validation_status)
+    if (create_user_validate_fields(new_auth.login_token, new_user.display_name, new_auth.password) == -1)
     {
-    
+        dispatch->body      = strdup("400\x03Invalid fields\x03");
+        dispatch->body_size = strlen(dispatch->body);
+        return 0;
     }
     
+    // Create ID once the fields are validated.
+    new_user.id              = generate_user_id(co->tracer);
+    new_auth.user_id         = new_user.id;
     new_user.privilege_level = 0;
     new_user.online_status   = 0;
     
-    // Create ID once the fields are validated.
-    new_user.id      = generate_user_id(co->tracer);
-    new_auth.user_id = new_user.id;
-    
-    
-    insert_status = db_create(co, so, USER, &new_user);
-    if (insert_status == -1)
+    insert_status_user = db_create(co, so, USER, &new_user);
+    insert_status_auth = db_create(co, so, AUTH, &new_auth);
+    if (insert_status_user == -1 || insert_status_auth == -1)
     {
         return -1;
     }
     
-    if (insert_status == 1)
+    if (insert_status_user == 1 && insert_status_auth == 1)
     {
-        // assemble 409
+        dispatch->body = strdup("409\x03""3\x03Login token and display name already taken.\x03");
+        dispatch->body_size = strlen(dispatch->body);
+    } else if (insert_status_user == 1)
+    {
+        // TODO: remove the auth from the database.
+        
+        dispatch->body = strdup("409\x03""2\x03Display name already taken.\x03");
+        dispatch->body_size = strlen(dispatch->body);
+    } else if (insert_status_auth == 1)
+    {
+        // TODO: remove the user from the database.
+        
+        dispatch->body = strdup("409\x03""1\x03Login token already taken.\x03");
+        dispatch->body_size = strlen(dispatch->body);
+    } else
+    {
+        dispatch->body = strdup("201\x03"); // Success.
+        dispatch->body_size = strlen(dispatch->body);
     }
-    
-    // assemble 201
     
     return 0;
 }
 
 static int create_user_validate_fields(const char *login_token, const char *display_name, const char *password)
 {
-
+    if (strlen(login_token) > LOGIN_TOKEN_MAX_SIZE
+        || strlen(display_name) > DISPLAY_NAME_MAX_SIZE
+        || strlen(password) > PASSWORD_MAX_SIZE || strlen(password) < PASSWORD_MIN_SIZE)
+    {
+        return -1;
+    }
+    
+    return 0;
 }
 
 static int generate_user_id(TRACER_FUNCTION_AS(tracer))
