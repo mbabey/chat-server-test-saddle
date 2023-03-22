@@ -122,7 +122,9 @@ int handle_create_user(struct core_object *co, struct server_object *so, struct 
     
     // Validate fields
     // If invalid, assemble 400
-    if (create_user_validate_fields(new_auth.login_token, new_user.display_name, new_auth.password) == -1)
+    if (!(VALIDATE_LOGIN_TOKEN(new_auth.login_token)
+        && VALIDATE_DISPLAY_NAME(new_user.display_name)
+        && VALIDATE_PASSWORD(new_auth.password)))
     {
         dispatch->body      = strdup("400\x03Invalid fields\x03");
         dispatch->body_size = strlen(dispatch->body);
@@ -144,7 +146,7 @@ int handle_create_user(struct core_object *co, struct server_object *so, struct 
     
     if (insert_status_user == 1 && insert_status_auth == 1)
     {
-        dispatch->body = strdup("409\x03""3\x03Login token and display name already taken.\x03");
+        dispatch->body      = strdup("409\x03""3\x03Login token and display name already taken.\x03");
         dispatch->body_size = strlen(dispatch->body);
     } else if (insert_status_user == 1)
     {
@@ -152,7 +154,7 @@ int handle_create_user(struct core_object *co, struct server_object *so, struct 
         {
             return -1;
         }
-        dispatch->body = strdup("409\x03""2\x03Display name already taken.\x03");
+        dispatch->body      = strdup("409\x03""2\x03Display name already taken.\x03");
         dispatch->body_size = strlen(dispatch->body);
     } else if (insert_status_auth == 1)
     {
@@ -160,11 +162,11 @@ int handle_create_user(struct core_object *co, struct server_object *so, struct 
         {
             return -1;
         }
-        dispatch->body = strdup("409\x03""1\x03Login token already taken.\x03");
+        dispatch->body      = strdup("409\x03""1\x03Login token already taken.\x03");
         dispatch->body_size = strlen(dispatch->body);
     } else
     {
-        dispatch->body = strdup("201\x03"); // Success.
+        dispatch->body      = strdup("201\x03"); // Success.
         dispatch->body_size = strlen(dispatch->body);
     }
     
@@ -173,9 +175,7 @@ int handle_create_user(struct core_object *co, struct server_object *so, struct 
 
 static int create_user_validate_fields(const char *login_token, const char *display_name, const char *password)
 {
-    if (strlen(login_token) > LOGIN_TOKEN_MAX_SIZE
-        || strlen(display_name) > DISPLAY_NAME_MAX_SIZE
-        || strlen(password) > PASSWORD_MAX_SIZE || strlen(password) < PASSWORD_MIN_SIZE)
+    if (VALIDATE_LOGIN_TOKEN(login_token) || VALIDATE_DISPLAY_NAME(display_name) || VALIDATE_PASSWORD(password))
     {
         return -1;
     }
@@ -299,7 +299,19 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
 {
     PRINT_STACK_TRACE(co->tracer);
     
+    Auth auth;
     
+    // validate auth fields
+    create_auth_validate_fields()
+    
+    // read db for auth
+    // get user_id
+    // get user with id
+    
+    // update user online status
+    // add user socket to server
+    
+    // assemble body with user info
     
     return 0;
 }

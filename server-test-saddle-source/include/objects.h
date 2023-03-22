@@ -27,11 +27,6 @@
 #define MESSAGE_DB_NAME "/dbm_3fda69"      /** Message db name. */
 #define AUTH_DB_NAME "/dbau_3fda69"        /** Auth db name. */
 
-#define LOGIN_TOKEN_MAX_SIZE 20            /** Maximum size for login tokens. */
-#define DISPLAY_NAME_MAX_SIZE 20           /** Maximum size for display names. */
-#define PASSWORD_MIN_SIZE 6                /** Minimum size for passwords. */
-#define PASSWORD_MAX_SIZE 30               /** Maximum size for passwords. */
-
 #define FOR_EACH_CHILD_c_IN_CHILD_PIDS for (size_t c = 0; c < NUM_CHILD_PROCESSES; ++c) /** For each loop macro for looping over child processes. */
 #define FOR_EACH_SOCKET_POLLFD_p_IN_POLLFDS for (size_t p = 2; p < POLLFDS_SIZE; ++p)   /** For each loop macro for looping over socket pollfds. */
 
