@@ -36,6 +36,6 @@ int assemble_message_send(struct state *state, int socket_fd, struct dispatch *d
  * @param body_tokens the list of body tokens
  * @param tracer tracer function
  */
-void free_body_tokens(char **body_tokens, TRACER_FUNCTION_AS(tracer));
+void free_body_tokens(struct state *state, char **body_tokens);
 
 #endif //CLIENT_TEST_SADDLE_UTIL_H

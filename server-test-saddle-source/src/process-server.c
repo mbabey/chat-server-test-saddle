@@ -655,7 +655,7 @@ static int c_handle_network_dispatch(struct core_object *co, struct server_objec
         dispatch.body_size = strlen(dispatch.body);
     }
     
-    free_body_tokens(body_tokens, co->tracer); // Free the body tokens after performing the operation.
+    free_body_tokens((struct state *) co, body_tokens); // Free the body tokens after performing the operation.
     
     status = assemble_message_send((struct state *) co, child->client_fd_local, &dispatch);
     free(dispatch.body);

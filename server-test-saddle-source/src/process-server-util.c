@@ -160,7 +160,7 @@ int open_databases(struct core_object *co, struct server_object *so)
     so->channel_db = dbm_open(CHANNEL_DB_NAME, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
     so->message_db = dbm_open(MESSAGE_DB_NAME, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
     so->auth_db    = dbm_open(AUTH_DB_NAME, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
-    // NOLINTEND
+    // NOLINTEND(concurrency-mt-unsafe)
     if (so->user_db == (DBM*) 0 || so->channel_db == (DBM*) 0 || so->message_db == (DBM*) 0 || so->auth_db == (DBM*) 0)
     {
         SET_ERROR(co->err);
@@ -349,7 +349,7 @@ void close_databases(struct core_object *co, struct server_object *so)
     dbm_close(so->channel_db);
     dbm_close(so->message_db);
     dbm_close(so->auth_db);
-    // NOLINTEND
+    // NOLINTEND(concurrency-mt-unsafe)
 }
 
 void close_fd_report_undefined_error(int fd, const char *err_msg)
