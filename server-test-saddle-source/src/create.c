@@ -4,18 +4,6 @@
 #include <stdlib.h>
 
 /**
- * create_user_validate_fields
- * <p>
- * Validate the fields of a create user request.
- * </p>
- * @param login_token login_token to validate
- * @param display_name display_name to validate
- * @param password password to validate
- * @return 0 if fields are valid, -1 otherwise
- */
-static int create_user_validate_fields(const char *login_token, const char *display_name, const char *password);
-
-/**
  * generate_user_id
  * <p>
  * Generate a unique ID for a new User.
@@ -123,8 +111,8 @@ int handle_create_user(struct core_object *co, struct server_object *so, struct 
     // Validate fields
     // If invalid, assemble 400
     if (!(VALIDATE_LOGIN_TOKEN(new_auth.login_token)
-        && VALIDATE_DISPLAY_NAME(new_user.display_name)
-        && VALIDATE_PASSWORD(new_auth.password)))
+          && VALIDATE_DISPLAY_NAME(new_user.display_name)
+          && VALIDATE_PASSWORD(new_auth.password)))
     {
         dispatch->body      = strdup("400\x03Invalid fields\x03");
         dispatch->body_size = strlen(dispatch->body);
@@ -301,8 +289,17 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     
     Auth auth;
     
+    auth.login_token = *body_tokens;
+    auth.password    = *(body_tokens + 1);
+    
     // validate auth fields
-    create_auth_validate_fields()
+    if (!(VALIDATE_LOGIN_TOKEN(auth.login_token) && VALIDATE_PASSWORD(auth.password)))
+    {
+        dispatch->body      = strdup("400\x03Invalid fields\x03");
+        dispatch->body_size = strlen(dispatch->body);
+        return 0;
+    }
+    
     
     // read db for auth
     // get user_id
