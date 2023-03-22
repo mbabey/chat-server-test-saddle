@@ -293,15 +293,15 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     auth.password    = *(body_tokens + 1);
     
     // validate auth fields
-    if (!(VALIDATE_LOGIN_TOKEN(auth.login_token) && VALIDATE_PASSWORD(auth.password)))
+    if (!(VALIDATE_LOGIN_TOKEN(*body_tokens) && VALIDATE_PASSWORD(*(body_tokens + 1))))
     {
         dispatch->body      = strdup("400\x03Invalid fields\x03");
         dispatch->body_size = strlen(dispatch->body);
         return 0;
     }
     
-    
     // read db for auth
+    if (db_read(co, so, AUTH, &auth, *body_tokens))
     // get user_id
     // get user with id
     
