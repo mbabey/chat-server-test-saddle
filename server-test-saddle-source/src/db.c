@@ -165,6 +165,9 @@ static int read_channel(struct core_object *co, struct server_object *so, Channe
 
 /**
  * read_messages
+ * <p>
+ * Read a number of messages up to num_messages from the channel with channel_id.
+ * </p>
  * @param co the core object
  * @param so the server object
  * @param messages_get the memory in which to store pointers to the Messages
@@ -174,6 +177,19 @@ static int read_channel(struct core_object *co, struct server_object *so, Channe
  */
 static int read_messages(struct core_object *co, struct server_object *so, Message ***messages_get,
                          int num_messages, int channel_id);
+
+/**
+ * read_auth
+ * <p>
+ * Read an Authorization from the database with the parameter login token.
+ * </p>
+ * @param co the core object
+ * @param so the server object
+ * @param auth_get pointer in which to store the auth
+ * @param login_token the login token for which to search
+ * @return 0 on success, -1 and set err on failure
+ */
+static int read_auth(struct core_object *co, struct server_object *so, Auth **auth_get, const char *login_token);
 
 /**
  * delete_user
