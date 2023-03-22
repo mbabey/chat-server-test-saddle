@@ -299,18 +299,7 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
 {
     PRINT_STACK_TRACE(co->tracer);
     
-    Auth   new_auth;
-    size_t offset;
     
-    offset = 0;
-    new_auth.user_id     = (int) strtol(*body_tokens, NULL, 10);
-    new_auth.login_token = *(body_tokens + ++offset);
-    new_auth.password    = *(body_tokens + ++offset);
-    
-    if (db_create(co, so, AUTH, &new_auth) == -1)
-    {
-        return -1;
-    }
     
     return 0;
 }
