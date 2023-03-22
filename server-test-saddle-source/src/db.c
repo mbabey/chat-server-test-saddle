@@ -176,6 +176,54 @@ static int read_messages(struct core_object *co, struct server_object *so, Messa
                          int num_messages, int channel_id);
 
 /**
+ * delete_user
+ * <p>
+ * Delete a User from the User database.
+ * </p>
+ * @param co the core object
+ * @param so the server object
+ * @param user the user to delete
+ * @return 0 on success, -1 and set errno on failure
+ */
+static int delete_user(struct core_object *co, struct server_object *so, User *user);
+
+/**
+ * delete_channel
+ * <p>
+ * Delete a Channel from the Channel database.
+ * </p>
+ * @param co the core object
+ * @param so the server object
+ * @param user the Channel to delete
+ * @return 0 on success, -1 and set errno on failure
+ */
+static int delete_channel(struct core_object *co, struct server_object *so, Channel *channel);
+
+/**
+ * delete_message
+ * <p>
+ * Delete a Message from the Message database.
+ * </p>
+ * @param co the core object
+ * @param so the server object
+ * @param user the Message to delete
+ * @return 0 on success, -1 and set errno on failure
+ */
+static int delete_message(struct core_object *co, struct server_object *so, Message *message);
+
+/**
+ * delete_auth
+ * <p>
+ * Delete a Auth from the Auth database.
+ * </p>
+ * @param co the core object
+ * @param so the server object
+ * @param user the Auth to delete
+ * @return 0 on success, -1 and set errno on failure
+ */
+static int delete_auth(struct core_object *co, struct server_object *so, Auth *auth);
+
+/**
  * print_db_error
  * <p>
  * Print an error message based on the error code of passed.
@@ -280,6 +328,48 @@ static int insert_user(struct core_object *co, struct server_object *so, User *u
     {
         print_db_error(dbm_error(so->user_db));
     }
+    
+    return 0;
+}
+
+static int find_by_name(struct core_object *co, DBM *db, sem_t *db_sem, uint8_t **serial_object, const char *name)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    datum key;
+    datum value;
+    
+    if (sem_wait(db_sem) == -1)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
+    
+    key   = dbm_firstkey(db); // Get first thing in the db
+    value = dbm_fetch(db, key);
+    
+    sem_post(db_sem); // strcmps are done outside of db time.
+    
+    // Compare the display name to the name in the db
+    while (key.dptr && strcmp((char *) ((uint8_t *) value.dptr + sizeof(int)), name) != 0)
+    {
+        if (sem_wait(db_sem) == -1)
+        {
+            SET_ERROR(co->err);
+            return -1;
+        }
+        
+        key   = dbm_nextkey(db);
+        value = dbm_fetch(db, key);
+        
+        sem_post(db_sem);
+    }
+    
+    if (!key.dptr && dbm_error(db))
+    {
+        print_db_error(dbm_error(db));
+    }
+    *serial_object = value.dptr; // Will be null if not found.
     
     return 0;
 }
@@ -644,48 +734,6 @@ static int read_user(struct core_object *co, struct server_object *so, User **us
     return 0;
 }
 
-static int find_by_name(struct core_object *co, DBM *db, sem_t *db_sem, uint8_t **serial_object, const char *name)
-{
-    PRINT_STACK_TRACE(co->tracer);
-    
-    datum key;
-    datum value;
-    
-    if (sem_wait(db_sem) == -1)
-    {
-        SET_ERROR(co->err);
-        return -1;
-    }
-    
-    key   = dbm_firstkey(db); // Get first thing in the db
-    value = dbm_fetch(db, key);
-    
-    sem_post(db_sem); // strcmps are done outside of db time.
-    
-    // Compare the display name to the name in the db
-    while (key.dptr && strcmp((char *) ((uint8_t *) value.dptr + sizeof(int)), name) != 0)
-    {
-        if (sem_wait(db_sem) == -1)
-        {
-            SET_ERROR(co->err);
-            return -1;
-        }
-        
-        key   = dbm_nextkey(db);
-        value = dbm_fetch(db, key);
-        
-        sem_post(db_sem);
-    }
-    
-    if (!key.dptr && dbm_error(db))
-    {
-        print_db_error(dbm_error(db));
-    }
-    *serial_object = value.dptr; // Will be null if not found.
-    
-    return 0;
-}
-
 static void deserialize_user(struct core_object *co, User **user_get, uint8_t *serial_user)
 {
     PRINT_STACK_TRACE(co->tracer);
@@ -709,6 +757,58 @@ int db_update(struct core_object *co, struct server_object *so, int type, void *
 }
 
 int db_destroy(struct core_object *co, struct server_object *so, int type, void *object)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    switch(type)
+    {
+        case USER:
+        {
+            delete_user(co, so, (User *) object);
+            break;
+        }
+        case CHANNEL:
+        {
+            delete_channel(co, so, (Channel *) object);
+            break;
+        }
+        case MESSAGE:
+        {
+            delete_message(co, so, (Message *) object);
+            break;
+        }
+        case AUTH:
+        {
+            delete_auth(co, so, (Auth *) object);
+            break;
+        }
+        default:;
+    }
+    
+    return 0;
+}
+
+static int delete_user(struct core_object *co, struct server_object *so, User *user)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    
+    
+    return 0;
+}
+static int delete_channel(struct core_object *co, struct server_object *so, Channel *channel)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    return 0;
+}
+static int delete_message(struct core_object *co, struct server_object *so, Message *message)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    return 0;
+}
+static int delete_auth(struct core_object *co, struct server_object *so, Auth *auth)
 {
     PRINT_STACK_TRACE(co->tracer);
     
