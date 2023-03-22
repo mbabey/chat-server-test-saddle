@@ -17,7 +17,7 @@ set(SOURCE_LIST
         ../${SOURCE_DIR}/util.c
         ../${SOURCE_DIR}/manager.c
         #=vvvv= SOURCE FOR DUMMY MAIN =vvvv=#
-#        ${SOURCE_DIR}/test-main.c
+        ${SOURCE_DIR}/test-main.c
         )
 set(HEADER_LIST
         ${INCLUDE_DIR}/client-objects.h
@@ -149,38 +149,37 @@ set(CMAKE_C_CLANG_TIDY clang-tidy -checks=${CLANG_TIDY_CHECKS};--quiet)
 
 #========= vvv COMPILE AS LIBRARY vvv =========#
 
-add_library(client-test-saddle SHARED ${SOURCE_LIST} ${HEADER_LIST})
-target_include_directories(client-test-saddle PRIVATE include/client-test-saddle)
-target_include_directories(client-test-saddle PRIVATE /usr/local/include)
-target_link_directories(client-test-saddle PRIVATE /usr/local/lib)
-
-if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    target_include_directories(client-test-saddle PRIVATE /usr/include)
-endif ()
-
-set_target_properties(client-test-saddle PROPERTIES
-        VERSION ${PROJECT_VERSION}
-        SOVERSION ${PROJECT_VERSION_MAJOR})
-
-get_property(LIB64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
-
-if ("${LIB64}" STREQUAL "TRUE")
-    set(LIBSUFFIX 64)
-else()
-    set(LIBSUFFIX "")
-endif()
-
-set(INSTALL_LIB_DIR lib${LIBSUFFIX} CACHE PATH "Installation directory for libraries")
-mark_as_advanced(INSTALL_LIB_DIR)
-
-install(TARGETS client-test-saddle LIBRARY DESTINATION ${INSTALL_LIB_DIR})
-install(FILES ${HEADER_LIST} DESTINATION include/client-test-saddle)
+#add_library(client-test-saddle SHARED ${SOURCE_LIST} ${HEADER_LIST})
+#target_include_directories(client-test-saddle PRIVATE include/client-test-saddle)
+#target_include_directories(client-test-saddle PRIVATE /usr/local/include)
+#target_link_directories(client-test-saddle PRIVATE /usr/local/lib)
+#
+#if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+#    target_include_directories(client-test-saddle PRIVATE /usr/include)
+#endif ()
+#
+#set_target_properties(client-test-saddle PROPERTIES
+#        VERSION ${PROJECT_VERSION}
+#        SOVERSION ${PROJECT_VERSION_MAJOR})
+#
+#get_property(LIB64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
+#
+#if ("${LIB64}" STREQUAL "TRUE")
+#    set(LIBSUFFIX 64)
+#else()
+#    set(LIBSUFFIX "")
+#endif()
+#
+#set(INSTALL_LIB_DIR lib${LIBSUFFIX} CACHE PATH "Installation directory for libraries")
+#mark_as_advanced(INSTALL_LIB_DIR)
+#
+#install(TARGETS client-test-saddle LIBRARY DESTINATION ${INSTALL_LIB_DIR})
+#install(FILES ${HEADER_LIST} DESTINATION include/client-test-saddle)
 
 #========= ^^^ COMPILE AS LIBRARY ^^^ =========#
 #========= vvv COMPILE AS EXECUTABLE vvv =========#
 
-#add_executable(client-test-saddle ${SOURCE_LIST})
-#target_include_directories(client-test-saddle PRIVATE /usr/local/include)
+add_executable(client-test-saddle ${SOURCE_LIST})
 
 #========= ^^^ COMPILE AS EXECUTABLE ^^^ =========#
 

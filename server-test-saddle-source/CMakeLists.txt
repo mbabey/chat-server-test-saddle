@@ -166,26 +166,26 @@ set(CMAKE_C_CLANG_TIDY clang-tidy -checks=${CLANG_TIDY_CHECKS};--quiet)
 #target_include_directories(server-test-saddle PRIVATE include/server-test-saddle)
 #target_include_directories(server-test-saddle PRIVATE /usr/local/include)
 #target_link_directories(server-test-saddle PRIVATE /usr/local/lib)
-
+#
 #if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 #    target_include_directories(server-test-saddle PRIVATE /usr/include)
 #endif ()
-
+#
 #set_target_properties(server-test-saddle PROPERTIES
 #        VERSION ${PROJECT_VERSION}
 #        SOVERSION ${PROJECT_VERSION_MAJOR})
-
+#
 #get_property(LIB64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
-
+#
 #if ("${LIB64}" STREQUAL "TRUE")
 #    set(LIBSUFFIX 64)
 #else()
 #    set(LIBSUFFIX "")
 #endif()
-
+#
 #set(INSTALL_LIB_DIR lib${LIBSUFFIX} CACHE PATH "Installation directory for libraries")
 #mark_as_advanced(INSTALL_LIB_DIR)
-
+#
 #install(TARGETS server-test-saddle LIBRARY DESTINATION ${INSTALL_LIB_DIR})
 #install(FILES ${HEADER_LIST} DESTINATION include/server-test-saddle)
 

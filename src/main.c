@@ -25,12 +25,12 @@ int main(int argc, char **argv)
         {
             case SETUP:
             {
-                next_state = (setup_saddle(&state, NULL, argc, argv) == -1) ? ERROR : RUN;
+                next_state = (setup_saddle(&state, &library, argc, argv) == -1) ? ERROR : RUN;
                 break;
             }
             case RUN:
             {
-                next_state = (run_saddle(&state, NULL) == -1) ? ERROR : EXIT;
+                next_state = (run_saddle(&state, &library) == -1) ? ERROR : EXIT;
                 break;
             }
             case ERROR:

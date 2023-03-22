@@ -20,7 +20,7 @@ static void trace_reporter(const char *file, const char *func, size_t line);
  */
 int main(int argc, char **argv)
 {
-    struct state_minor state;
+    struct client_state state;
     in_port_t port_number;
     
     inet_pton(AF_INET, argv[1], &state.addr.sin_addr.s_addr);
@@ -35,6 +35,7 @@ int main(int argc, char **argv)
     
     if (lib_main(&state) == -1)
     {
+        GET_ERROR(state.err);
         return EXIT_FAILURE;
     }
     
