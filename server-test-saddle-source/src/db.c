@@ -230,7 +230,7 @@ static int delete_auth(struct core_object *co, struct server_object *so, Auth *a
  * </p>
  * @param err_code the error code
  */
-static void print_db_error(int err_code);
+static void print_db_error(DBM *db);
 
 int db_create(struct core_object *co, struct server_object *so, int type, void *object)
 {
@@ -326,7 +326,7 @@ static int insert_user(struct core_object *co, struct server_object *so, User *u
         return 1;
     } else if (insert_status == -1)
     {
-        print_db_error(dbm_error(so->user_db));
+        print_db_error(so->user_db);
     }
     
     return 0;
@@ -367,7 +367,7 @@ static int find_by_name(struct core_object *co, DBM *db, sem_t *db_sem, uint8_t 
     
     if (!key.dptr && dbm_error(db))
     {
-        print_db_error(dbm_error(db));
+        print_db_error(db);
     }
     *serial_object = value.dptr; // Will be null if not found.
     
@@ -418,7 +418,8 @@ static int insert_channel(struct core_object *co, struct server_object *so, Chan
     }
     if (serial_channel)
     {
-        (void) fprintf(stdout, "Database error occurred: Channel with name \"%s\" already exists in Channel database.\n",
+        (void) fprintf(stdout,
+                       "Database error occurred: Channel with name \"%s\" already exists in Channel database.\n",
                        channel->channel_name);
         return 1;
     }
@@ -450,7 +451,7 @@ static int insert_channel(struct core_object *co, struct server_object *so, Chan
                        *(int *) key.dptr);
     } else if (insert_status == -1)
     {
-        print_db_error(dbm_error(so->channel_db));
+        print_db_error(so->channel_db);
     }
     
     return 0;
@@ -541,7 +542,7 @@ static int insert_message(struct core_object *co, struct server_object *so, Mess
                        *(int *) key.dptr);
     } else if (insert_status == -1)
     {
-        print_db_error(dbm_error(so->message_db));
+        print_db_error(so->message_db);
     }
     
     return 0;
@@ -627,7 +628,7 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
         return 1;
     } else if (insert_status == -1)
     {
-        print_db_error(dbm_error(so->auth_db));
+        print_db_error(so->auth_db);
     }
     
     return 0;
@@ -760,7 +761,7 @@ int db_destroy(struct core_object *co, struct server_object *so, int type, void 
 {
     PRINT_STACK_TRACE(co->tracer);
     
-    switch(type)
+    switch (type)
     {
         case USER:
         {
@@ -792,22 +793,45 @@ static int delete_user(struct core_object *co, struct server_object *so, User *u
 {
     PRINT_STACK_TRACE(co->tracer);
     
+    // delete from the database
+    datum key;
+    int delete_status;
     
+    key.dptr  = &user->id;
+    key.dsize = sizeof(user->id);
+    
+    if(sem_wait(so->user_db_sem) == -1)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
+    
+    delete_status = dbm_delete(so->user_db, key);
+    
+    sem_post(so->user_db_sem);
+    
+    if (delete_status == -1)
+    {
+    
+    }
     
     return 0;
 }
+
 static int delete_channel(struct core_object *co, struct server_object *so, Channel *channel)
 {
     PRINT_STACK_TRACE(co->tracer);
     
     return 0;
 }
+
 static int delete_message(struct core_object *co, struct server_object *so, Message *message)
 {
     PRINT_STACK_TRACE(co->tracer);
     
     return 0;
 }
+
 static int delete_auth(struct core_object *co, struct server_object *so, Auth *auth)
 {
     PRINT_STACK_TRACE(co->tracer);
@@ -815,8 +839,13 @@ static int delete_auth(struct core_object *co, struct server_object *so, Auth *a
     return 0;
 }
 
-static void print_db_error(int err_code)
+static void print_db_error(DBM *db)
 {
+    int err_code;
+    
+    err_code = dbm_error(db);
+    dbm_clearerr(db);
+    
     switch (err_code)
     {
         case 1:
