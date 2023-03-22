@@ -155,7 +155,7 @@ static int open_semaphores(struct core_object *co, struct server_object *so)
 int open_databases(struct core_object *co, struct server_object *so)
 {
     PRINT_STACK_TRACE(co->tracer);
-    // NOLINTNBEGIN(concurrency-mt-unsafe) : No threads here
+    // NOLINTBEGIN(concurrency-mt-unsafe) : No threads here
     so->user_db    = dbm_open(USER_DB_NAME, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
     so->channel_db = dbm_open(CHANNEL_DB_NAME, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
     so->message_db = dbm_open(MESSAGE_DB_NAME, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
@@ -344,7 +344,7 @@ void close_databases(struct core_object *co, struct server_object *so)
 {
     PRINT_STACK_TRACE(co->tracer);
     
-    // NOLINTNBEGIN(concurrency-mt-unsafe) : No threads here
+    // NOLINTBEGIN(concurrency-mt-unsafe) : No threads here
     dbm_close(so->user_db);
     dbm_close(so->channel_db);
     dbm_close(so->message_db);
