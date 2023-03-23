@@ -239,10 +239,10 @@ void print_dispatch(struct state *state, struct dispatch *dispatch, const char *
     
     (void) fprintf(stdout, "\n--- Dispatch %s ---\n"
                            "Version:\t%d\n"
-                           "Type:\t%d (%s)\n"
-                           "Object:\t%d (%s)\n"
+                           "Type:\t\t%d (%s)\n"
+                           "Object:\t\t%d (%s)\n"
                            "Body size:\t%d Bytes\n"
-                           "Body:\t%s\n",
+                           "Body:\t\t%s\n\n",
                            req_res_str,
                            dispatch->version,
                            dispatch->type, type_string,
