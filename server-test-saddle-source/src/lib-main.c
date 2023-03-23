@@ -13,7 +13,6 @@ int lib_main(void *args)
     
     PRINT_STACK_TRACE(co->tracer);
     
-    
     run        = 1;
     next_state = INITIALIZE_SERVER;
     while (run)
@@ -57,6 +56,8 @@ int lib_main(void *args)
             }
         }
     }
+    
+    PRINT_STACK_TRACE(co->tracer);
     
     return next_state;
 }

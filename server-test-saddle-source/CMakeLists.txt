@@ -7,6 +7,8 @@ project(server-test-saddle
 
 set(CMAKE_C_STANDARD 17)
 
+set(ASLIB false)
+
 set(SOURCE_DIR src)
 set(INCLUDE_DIR include)
 set(SOURCE_LIST
@@ -160,6 +162,7 @@ set(CLANG_TIDY_CHECKS "${CLANG_TIDY_CHECKS},-clang-analyzer-security.insecureAPI
 set(CLANG_TIDY_CHECKS "${CLANG_TIDY_CHECKS},-android-cloexec-accept")
 set(CMAKE_C_CLANG_TIDY clang-tidy -checks=${CLANG_TIDY_CHECKS};--quiet)
 
+if(${ASLIB})
 #========= vvv COMPILE AS LIBRARY vvv =========#
 
 add_library(server-test-saddle SHARED ${SOURCE_LIST} ${HEADER_LIST})
@@ -190,10 +193,12 @@ install(TARGETS server-test-saddle LIBRARY DESTINATION ${INSTALL_LIB_DIR})
 install(FILES ${HEADER_LIST} DESTINATION include/server-test-saddle)
 
 #========= ^^^ COMPILE AS LIBRARY ^^^ =========#
+else()
 #========= vvv COMPILE AS EXECUTABLE vvv =========#
 
-#add_executable(server-test-saddle ${SOURCE_LIST})
+add_executable(server-test-saddle ${SOURCE_LIST})
 
 #========= ^^^ COMPILE AS EXECUTABLE ^^^ =========#
+endif()
 
 add_dependencies(server-test-saddle doxygen)

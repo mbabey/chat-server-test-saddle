@@ -329,7 +329,6 @@ void p_destroy_parent_state(struct core_object *co, struct server_object *so, st
     sem_unlink(CHANNEL_SEM_NAME);
     sem_unlink(MESSAGE_SEM_NAME);
     sem_unlink(AUTH_SEM_NAME);
-    
 }
 
 void c_destroy_child_state(struct core_object *co, struct server_object *so, struct child *child)

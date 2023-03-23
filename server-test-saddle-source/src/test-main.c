@@ -60,6 +60,8 @@ int main(int argc, char **argv)
         }
     }
     
+    PRINT_STACK_TRACE(co.tracer);
+    
     destroy_core_object(&co);
     
     return next_state;
