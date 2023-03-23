@@ -105,10 +105,12 @@ int handle_create_user(struct core_object *co, struct server_object *so, struct 
     int    insert_status_user;
     int    insert_status_auth;
     
+    // TODO: check that a dispatch has the correct number of tokens
+    
     offset = 0;
     new_auth.login_token  = *body_tokens;
     new_user.display_name = *(body_tokens + ++offset);
-    new_auth.password     = *(body_tokens + ++offset);
+    new_auth.password     = *(body_tokens + ++offset); // is garbage when 2 tokens
     
     // Validate fields
     // If invalid, assemble 400

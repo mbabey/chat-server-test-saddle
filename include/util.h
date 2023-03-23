@@ -17,6 +17,18 @@
 int recv_parse_message(struct state *state, int socket_fd, struct dispatch *dispatch, char ***body_tokens);
 
 /**
+ * count_tokens
+ * <p>
+ * Count the number of ETX characters in the body.
+ * </p>
+ * @param body_size the number of bytes in the body
+ * @param body the body
+ * @param tracer tracer function
+ * @return the number of ETX tokens
+ */
+int count_tokens(uint16_t body_size, const char *body, void (*tracer)(const char *, const char *, size_t));
+
+/**
  * assemble_message_send
  * <p>
  * Assemble and send message .

@@ -29,18 +29,6 @@
 static int parse_body(struct state *state, char ***body_tokens, uint16_t body_size, char *body);
 
 /**
- * count_tokens
- * <p>
- * Count the number of ETX characters in the body.
- * </p>
- * @param body_size the number of bytes in the body
- * @param body the body
- * @param tracer tracer function
- * @return the number of ETX tokens
- */
-static int count_tokens(uint16_t body_size, const char *body, void (*tracer)(const char *, const char *, size_t));
-
-/**
  * object_to_string
  * <p>
  * Convert a Object numeric value to its string equivalent. If unknown Object, will return "unknown".
@@ -118,6 +106,63 @@ int recv_parse_message(struct state *state, int socket_fd, struct dispatch *disp
     return 0;
 }
 
+static int parse_body(struct state *state, char ***body_tokens, uint16_t body_size, char *body)
+{
+    PRINT_STACK_TRACE(state->tracer);
+    
+    int  num_tokens;
+    char *token;
+    char *token_head;
+    
+    num_tokens = count_tokens(body_size, body, state->tracer);
+    
+    *body_tokens = mm_malloc((num_tokens + 1) * sizeof(char *), state->mm);
+    if (!*body_tokens)
+    {
+        SET_ERROR(state->err);
+        return -1;
+    }
+    
+    token_head = strdup(body);
+    token      = strtok(token_head, "\x03"); // NOLINT(concurrency-mt-unsafe) : No threads here
+    
+    **body_tokens = strdup(token);
+    mm_add(state->mm, **body_tokens);
+    for (size_t i = 1; token; ++i)
+    {
+        token = strtok(NULL, "\x03"); // NOLINT(concurrency-mt-unsafe) : No threads here
+        if (token)
+        {
+            *(*body_tokens + i) = strdup(token);
+            mm_add(state->mm, *(*body_tokens + i));
+        }
+    }
+    
+    *(*body_tokens + num_tokens) = NULL;
+    
+    free(token_head);
+    
+    return 0;
+}
+
+int count_tokens(uint16_t body_size, const char *body, void (*tracer)(const char *, const char *, size_t))
+{
+    PRINT_STACK_TRACE(tracer);
+    
+    int count;
+    
+    count = 0;
+    for (size_t i = 0; i < body_size; ++i)
+    {
+        if (*(body + i) == '\x03')
+        {
+            ++count;
+        }
+    }
+    
+    return count;
+}
+
 int assemble_message_send(struct state *state, int socket_fd, struct dispatch *dispatch)
 {
     PRINT_STACK_TRACE(state->tracer);
@@ -160,62 +205,6 @@ int assemble_message_send(struct state *state, int socket_fd, struct dispatch *d
     }
     
     return 0;
-}
-
-static int parse_body(struct state *state, char ***body_tokens, uint16_t body_size, char *body)
-{
-    PRINT_STACK_TRACE(state->tracer);
-    
-    int  num_tokens;
-    char *token;
-    char *token_head;
-    
-    num_tokens = count_tokens(body_size, body, state->tracer);
-    
-    *body_tokens = mm_malloc((num_tokens + 1) * sizeof(char *), state->mm);
-    if (!*body_tokens)
-    {
-        SET_ERROR(state->err);
-        return -1;
-    }
-    
-    token_head = strdup(body);
-    token      = strtok(token_head, "\x03"); // NOLINT(concurrency-mt-unsafe) : No threads here
-    **body_tokens = strdup(token);
-    mm_add(state->mm, **body_tokens);
-    for (size_t i = 1; token; ++i)
-    {
-        token = strtok(NULL, "\x03"); // NOLINT(concurrency-mt-unsafe) : No threads here
-        if (token)
-        {
-            *(*body_tokens + i) = strdup(token);
-            mm_add(state->mm, *(*body_tokens + i));
-        }
-    }
-    
-    *(*body_tokens + num_tokens) = NULL;
-    
-    free(token_head);
-    
-    return 0;
-}
-
-static int count_tokens(uint16_t body_size, const char *body, void (*tracer)(const char *, const char *, size_t))
-{
-    PRINT_STACK_TRACE(tracer);
-    
-    int count;
-    
-    count = 0;
-    for (size_t i = 0; i < body_size; ++i)
-    {
-        if (*(body + i) == '\x03')
-        {
-            ++count;
-        }
-    }
-    
-    return count;
 }
 
 void free_body_tokens(struct state *state, char **body_tokens)
