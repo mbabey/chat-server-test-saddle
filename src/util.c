@@ -60,6 +60,7 @@ static const char *object_to_string(uint8_t object);
  */
 static const char *type_to_string(uint8_t type);
 
+// TODO: this function crashes when the packet is in the wrong format; check bytes_read not 0
 int recv_parse_message(struct state *state, int socket_fd, struct dispatch *dispatch, char ***body_tokens)
 {
     PRINT_STACK_TRACE(state->tracer);
