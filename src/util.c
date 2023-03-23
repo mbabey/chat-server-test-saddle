@@ -40,6 +40,26 @@ static int parse_body(struct state *state, char ***body_tokens, uint16_t body_si
  */
 static int count_tokens(uint16_t body_size, const char *body, void (*tracer)(const char *, const char *, size_t));
 
+/**
+ * object_to_string
+ * <p>
+ * Convert a Object numeric value to its string equivalent. If unknown Object, will return "unknown".
+ * </p>
+ * @param type the Object numeric to convert
+ * @return the string equivalent.
+ */
+static const char *object_to_string(uint8_t object);
+
+/**
+ * type_to_string
+ * <p>
+ * Convert a Type numeric value to its string equivalent. If unknown Type, will return "unknown".
+ * </p>
+ * @param type the Type numeric to convert
+ * @return the string equivalent.
+ */
+static const char *type_to_string(uint8_t type);
+
 int recv_parse_message(struct state *state, int socket_fd, struct dispatch *dispatch, char ***body_tokens)
 {
     PRINT_STACK_TRACE(state->tracer);
@@ -205,4 +225,113 @@ void free_body_tokens(struct state *state, char **body_tokens)
     {
         mm_free(state->mm, *body_tokens);
     }
+}
+
+void print_dispatch(struct state *state, struct dispatch *dispatch)
+{
+    PRINT_STACK_TRACE(state->tracer);
+    
+    // print version number
+    // print type (number and type)
+    // print object (number and object)
+    // print body
+    // print body tokens
+    
+    const char *type_string;
+    const char *object_string;
+    
+    type_string = type_to_string(dispatch->type);
+    object_string = object_to_string(dispatch->object);
+    
+    (void) fprintf(stdout, "\n--- Dispatch ---\n"
+                           "Version:\t%d\n"
+                           "Type:\t%d (%s)\n"
+                           "Object:\t%d (%s)\n"
+                           "Body size:\t%d Bytes\n"
+                           "Body:\t%s\n",
+                           dispatch->version,
+                           dispatch->type, type_string,
+                           dispatch->object, object_string,
+                           dispatch->body_size,
+                           dispatch->body);
+}
+
+static const char *type_to_string(uint8_t type)
+{
+    const char *type_string;
+    
+    switch (type)
+    {
+        case CREATE:
+        {
+            type_string = "create";
+            break;
+        }
+        case READ:
+        {
+            type_string = "read";
+            break;
+        }
+        case UPDATE:
+        {
+            type_string = "update";
+            break;
+        }
+        case DESTROY:
+        {
+            type_string = "destroy";
+            break;
+        }
+        case PINGUSER:
+        {
+            type_string = "ping - user";
+            break;
+        }
+        case PINGCHANNEL:
+        {
+            type_string = "ping - channel";
+            break;
+        }
+        default:
+        {
+            type_string = "unknown";
+        }
+    }
+    
+    return type_string;
+}
+
+static const char *object_to_string(uint8_t object)
+{
+    const char *object_string;
+    
+    switch(object)
+    {
+        case USER:
+        {
+            object_string = "user";
+            break;
+        }
+        case CHANNEL:
+        {
+            object_string = "channel";
+            break;
+        }
+        case MESSAGE:
+        {
+            object_string = "message";
+            break;
+        }
+        case AUTH:
+        {
+            object_string = "auth";
+            break;
+        }
+        default:
+        {
+            object_string = "unknown";
+        }
+    }
+    
+    return object_string;
 }

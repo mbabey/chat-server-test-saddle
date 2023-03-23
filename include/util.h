@@ -38,4 +38,14 @@ int assemble_message_send(struct state *state, int socket_fd, struct dispatch *d
  */
 void free_body_tokens(struct state *state, char **body_tokens);
 
+/**
+ * print_dispatch
+ * <p>
+ * Print a dispatch's contents to stdout.
+ * </p>
+ * @param state the state object
+ * @param dispatch the dispatch to print
+ */
+void print_dispatch(struct state *state, struct dispatch *dispatch);
+
 #endif //CLIENT_TEST_SADDLE_UTIL_H
