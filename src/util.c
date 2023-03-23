@@ -29,6 +29,18 @@
 static int parse_body(struct state *state, char ***body_tokens, uint16_t body_size, char *body);
 
 /**
+ * count_tokens
+ * <p>
+ * Count the number of ETX characters in the body.
+ * </p>
+ * @param body_size the number of bytes in the body
+ * @param body the body
+ * @param tracer tracer function
+ * @return the number of ETX tokens
+ */
+static int count_tokens(uint16_t body_size, const char *body, void (*tracer)(const char *, const char *, size_t));
+
+/**
  * object_to_string
  * <p>
  * Convert a Object numeric value to its string equivalent. If unknown Object, will return "unknown".
@@ -145,7 +157,7 @@ static int parse_body(struct state *state, char ***body_tokens, uint16_t body_si
     return 0;
 }
 
-int count_tokens(uint16_t body_size, const char *body, void (*tracer)(const char *, const char *, size_t))
+static int count_tokens(uint16_t body_size, const char *body, void (*tracer)(const char *, const char *, size_t))
 {
     PRINT_STACK_TRACE(tracer);
     

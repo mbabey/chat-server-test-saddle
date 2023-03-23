@@ -13,6 +13,11 @@
 #define VALIDATE_PASSWORD(password) (strlen(password) >= PASSWORD_MIN_SIZE && strlen(password) <= PASSWORD_MAX_SIZE)
 
 /**
+ * Count the number of tokens in a NULL-terminated list of pointers. Modifies the pointer passed.
+ */
+#define COUNT_TOKENS(count, tokens) for (; *tokens; ++tokens, ++count)
+
+/**
  * db_create
  * <p>
  * Insert an object into a database.

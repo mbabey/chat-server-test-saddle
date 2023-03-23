@@ -1,9 +1,19 @@
+#include "../../include/util.h"
 #include "../include/create.h"
 #include "../include/db.h"
 
 #include <stdlib.h>
 
 #define BASE 10 // Base for strtol calls, DO NOT CHANGE
+
+/** Number of tokens that should be present in Create Type Dispatches. */
+enum BodyTokenSizes
+{
+    CREATE_USER_BODY_TOKEN_SIZE = 3,
+    CREATE_CHANNEL_BODY_TOKEN_SIZE = 3,
+    CREATE_MESSAGE_BODY_TOKEN_SIZE = 4,
+    CREATE_AUTH_BODY_TOKEN_SIZE = 2
+};
 
 /**
  * generate_user_id
@@ -104,8 +114,18 @@ int handle_create_user(struct core_object *co, struct server_object *so, struct 
     size_t offset;
     int    insert_status_user;
     int    insert_status_auth;
+    size_t count;
+    char   **body_tokens_cpy;
     
-    // TODO: check that a dispatch has the correct number of tokens
+    count = 0;
+    body_tokens_cpy = body_tokens;
+    COUNT_TOKENS(count, body_tokens_cpy);
+    if (count < CREATE_USER_BODY_TOKEN_SIZE)
+    {
+        dispatch->body      = strdup("400\x03Missing fields\x03");
+        dispatch->body_size = strlen(dispatch->body);
+        return 0;
+    }
     
     offset = 0;
     new_auth.login_token  = *body_tokens;
@@ -281,6 +301,19 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
 {
     PRINT_STACK_TRACE(co->tracer);
     
+    size_t count;
+    char   **body_tokens_cpy;
+    
+    count = 0;
+    body_tokens_cpy = body_tokens;
+    COUNT_TOKENS(count, body_tokens_cpy);
+    if (count < CREATE_AUTH_BODY_TOKEN_SIZE)
+    {
+        dispatch->body      = strdup("400\x03Missing fields\x03");
+        dispatch->body_size = strlen(dispatch->body);
+        return 0;
+    }
+    
     // validate auth fields
     if (!(VALIDATE_LOGIN_TOKEN(*body_tokens) && VALIDATE_PASSWORD(*(body_tokens + 1))))
     {
@@ -313,7 +346,7 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     datum user_value;
     
     // get user_id
-    user_key.dptr = &auth->user_id;
+    user_key.dptr  = &auth->user_id;
     user_key.dsize = sizeof(auth->user_id);
     
     if (sem_wait(so->auth_db_sem) == -1)
