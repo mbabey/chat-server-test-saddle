@@ -419,14 +419,10 @@ static int serialize_user(struct core_object *co, uint8_t **serial_user, const U
     
     size_t byte_offset;
     
-    printf("%d, %s, %d, %d\n", user->id, user->display_name, user->privilege_level, user->online_status);
-    
     memcpy(*serial_user, &user->id, sizeof(user->id));
     byte_offset = sizeof(user->id);
-    printf("%zu\n", byte_offset);
     memcpy((*serial_user + byte_offset), user->display_name, strlen(user->display_name) + 1);
     byte_offset += strlen(user->display_name) + 1;
-    printf("%zu\n%s\n%zu\n", serial_user, user->display_name, byte_offset);
     memcpy((*serial_user + byte_offset), &user->privilege_level, sizeof(user->privilege_level));
     byte_offset += sizeof(user->privilege_level);
     memcpy((*serial_user + byte_offset), &user->online_status, sizeof(user->online_status));
