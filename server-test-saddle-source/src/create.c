@@ -327,9 +327,8 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     {
         (void) fprintf(stdout, "Create-Auth: User with id \"%d\" not found in User database.\n", auth->user_id);
     }
-    
-    // TODO: update user online status
-    // TODO: add user socket to server
+    // update user online status
+    // add user socket to server
     
     // assemble body with user info
     

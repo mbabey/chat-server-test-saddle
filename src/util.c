@@ -160,13 +160,15 @@ static int parse_body(struct state *state, char ***body_tokens, uint16_t body_si
     
     token_head = strdup(body);
     token      = strtok(token_head, "\x03"); // NOLINT(concurrency-mt-unsafe) : No threads here
-    strcpy(**body_tokens, token);
+    **body_tokens = strdup(token);
+    mm_add(state->mm, **body_tokens);
     for (size_t i = 1; token; ++i)
     {
         token = strtok(NULL, "\x03"); // NOLINT(concurrency-mt-unsafe) : No threads here
         if (token)
         {
-            strcpy(*(*body_tokens + i), token);
+            *(*body_tokens + i) = strdup(token);
+            mm_add(state->mm, *(*body_tokens + i));
         }
     }
     

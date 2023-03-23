@@ -419,13 +419,17 @@ static int serialize_user(struct core_object *co, uint8_t **serial_user, const U
     
     size_t byte_offset;
     
+    printf("%d, %s, %d, %d\n", user->id, user->display_name, user->privilege_level, user->online_status);
+    
     memcpy(*serial_user, &user->id, sizeof(user->id));
     byte_offset = sizeof(user->id);
-    memcpy(*(serial_user + byte_offset), user->display_name, strlen(user->display_name) + 1);
+    printf("%zu\n", byte_offset);
+    memcpy((*serial_user + byte_offset), user->display_name, strlen(user->display_name) + 1);
     byte_offset += strlen(user->display_name) + 1;
-    memcpy(*(serial_user + byte_offset), &user->privilege_level, sizeof(user->privilege_level));
+    printf("%zu\n%s\n%zu\n", serial_user, user->display_name, byte_offset);
+    memcpy((*serial_user + byte_offset), &user->privilege_level, sizeof(user->privilege_level));
     byte_offset += sizeof(user->privilege_level);
-    memcpy(*(serial_user + byte_offset), &user->online_status, sizeof(user->online_status));
+    memcpy((*serial_user + byte_offset), &user->online_status, sizeof(user->online_status));
     
     return 0;
 }
@@ -507,27 +511,27 @@ static int serialize_channel(struct core_object *co, uint8_t **serial_channel, c
     
     memcpy(*serial_channel, &channel->id, sizeof(channel->id));
     byte_offset = sizeof(channel->id);
-    memcpy(*(serial_channel + byte_offset), channel->channel_name, strlen(channel->channel_name) + 1);
+    memcpy((*serial_channel + byte_offset), channel->channel_name, strlen(channel->channel_name) + 1);
     byte_offset += strlen(channel->channel_name) + 1;
-    memcpy(*(serial_channel + byte_offset), channel->creator, strlen(channel->creator) + 1);
+    memcpy((*serial_channel + byte_offset), channel->creator, strlen(channel->creator) + 1);
     byte_offset += strlen(channel->creator) + 1;
     
     list = channel->users;
     for (; *list != NULL; ++list)
     {
-        memcpy(*(serial_channel + byte_offset), *list, strlen(*list) + 1);
+        memcpy((*serial_channel + byte_offset), *list, strlen(*list) + 1);
         byte_offset += strlen(*list) + 1;
     }
     list = channel->administrators;
     for (; *list != NULL; ++list)
     {
-        memcpy(*(serial_channel + byte_offset), *list, strlen(*list) + 1);
+        memcpy((*serial_channel + byte_offset), *list, strlen(*list) + 1);
         byte_offset += strlen(*list) + 1;
     }
     list = channel->banned_users;
     for (; *list != NULL; ++list)
     {
-        memcpy(*(serial_channel + byte_offset), *list, strlen(*list) + 1);
+        memcpy((*serial_channel + byte_offset), *list, strlen(*list) + 1);
         byte_offset += strlen(*list) + 1;
     }
     
@@ -596,13 +600,13 @@ static int serialize_message(struct core_object *co, uint8_t **serial_message, c
     
     memcpy(*serial_message, &message->id, sizeof(message->id));
     byte_offset = sizeof(message->id);
-    memcpy(*(serial_message + byte_offset), &message->user_id, sizeof(message->user_id));
+    memcpy((*serial_message + byte_offset), &message->user_id, sizeof(message->user_id));
     byte_offset += sizeof(message->user_id);
-    memcpy(*(serial_message + byte_offset), &message->channel_id, sizeof(message->channel_id));
+    memcpy((*serial_message + byte_offset), &message->channel_id, sizeof(message->channel_id));
     byte_offset += sizeof(message->channel_id);
-    memcpy(*(serial_message + byte_offset), message->message_content, strlen(message->message_content) + 1);
+    memcpy((*serial_message + byte_offset), message->message_content, strlen(message->message_content) + 1);
     byte_offset += strlen(message->message_content) + 1;
-    memcpy(*(serial_message + byte_offset), &message->timestamp, sizeof(message->timestamp));
+    memcpy((*serial_message + byte_offset), &message->timestamp, sizeof(message->timestamp));
     
     return 0;
 }
@@ -681,9 +685,9 @@ static int serialize_auth(struct core_object *co, uint8_t **serial_auth, const A
     
     memcpy(*serial_auth, &auth->user_id, sizeof(auth->user_id));
     byte_offset = sizeof(auth->user_id);
-    memcpy(*(serial_auth + byte_offset), auth->login_token, strlen(auth->login_token) + 1);
+    memcpy((*serial_auth + byte_offset), auth->login_token, strlen(auth->login_token) + 1);
     byte_offset += strlen(auth->login_token) + 1;
-    memcpy(*(serial_auth + byte_offset), auth->password, strlen(auth->password) + 1); // TODO: hash this lol
+    memcpy((*serial_auth + byte_offset), auth->password, strlen(auth->password) + 1); // TODO: hash this lol
     
     return 0;
 }
