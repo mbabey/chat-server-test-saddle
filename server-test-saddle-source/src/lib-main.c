@@ -11,6 +11,9 @@ int lib_main(void *args)
     int                run;
     struct core_object *co = (struct core_object *) args;
     
+    PRINT_STACK_TRACE(co->tracer);
+    
+    
     run        = 1;
     next_state = INITIALIZE_SERVER;
     while (run)

@@ -18,6 +18,7 @@ struct state {
     struct error_saver err;
     TRACER_FUNCTION_AS(tracer);
     struct memory_manager *mm;
+    void *stiff;
 };
 
 /**

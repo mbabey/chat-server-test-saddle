@@ -37,9 +37,7 @@ struct core_object
 {
     struct sockaddr_in listen_addr;
     struct error_saver err;
-    
     TRACER_FUNCTION_AS(tracer);
-    
     struct memory_manager *mm;
     
     struct server_object *so;
