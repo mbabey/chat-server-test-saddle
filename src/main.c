@@ -42,7 +42,7 @@ int main(int argc, char **argv)
             }
             case EXIT:
             {
-                exit_saddle(&state, NULL);
+                exit_saddle(&state, &library);
                 run = 0;
                 break;
             }
