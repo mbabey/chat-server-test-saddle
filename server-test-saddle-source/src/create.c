@@ -120,9 +120,9 @@ int handle_create_user(struct core_object *co, struct server_object *so, struct 
     count = 0;
     body_tokens_cpy = body_tokens;
     COUNT_TOKENS(count, body_tokens_cpy);
-    if (count < CREATE_USER_BODY_TOKEN_SIZE)
+    if (count != CREATE_USER_BODY_TOKEN_SIZE)
     {
-        dispatch->body      = strdup("400\x03Missing fields\x03");
+        dispatch->body      = strdup("400\x03Invalid number of fields\x03");
         dispatch->body_size = strlen(dispatch->body);
         return 0;
     }
@@ -307,9 +307,9 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     count = 0;
     body_tokens_cpy = body_tokens;
     COUNT_TOKENS(count, body_tokens_cpy);
-    if (count < CREATE_AUTH_BODY_TOKEN_SIZE)
+    if (count != CREATE_AUTH_BODY_TOKEN_SIZE)
     {
-        dispatch->body      = strdup("400\x03Missing fields\x03");
+        dispatch->body      = strdup("400\x03Invalid number of fields\x03");
         dispatch->body_size = strlen(dispatch->body);
         return 0;
     }
