@@ -445,7 +445,7 @@ static int insert_channel(struct core_object *co, struct server_object *so, Chan
     datum   value;
     
     // Determine if a channel with the channel name already exists in the database.
-    if (find_by_name(co, so->user_db, so->user_db_sem, &serial_channel, channel->channel_name) == -1)
+    if (find_by_name(co, so->channel_db, so->channel_db_sem, &serial_channel, channel->channel_name) == -1)
     {
         return -1;
     }
@@ -622,7 +622,7 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
     datum   value;
     
     // Determine if an auth with the login token already exists in the database.
-    if (find_by_name(co, so->user_db, so->user_db_sem, &serial_auth, auth->login_token) == -1)
+    if (find_by_name(co, so->auth_db, so->auth_db_sem, &serial_auth, auth->login_token) == -1)
     {
         return -1;
     }
