@@ -21,6 +21,8 @@ int create_user_test(struct client_state *state)
     dispatch.body      = strdup("bigdog69\x03thedog\x03password1234@!\x03");
     dispatch.body_size = strlen(dispatch.body);
     
+    print_dispatch((struct state *) state, &dispatch, "Request");
+    
     status = assemble_message_send((struct state *) state, state->socket_fd, &dispatch);
     free(dispatch.body);
     if (status == -1)
@@ -33,21 +35,7 @@ int create_user_test(struct client_state *state)
         return -1;
     }
     
-    // TODO in all: make this attach to a struct for printing later.
-    if (dispatch.version != (unsigned int) 1)
-    {
-        printf("Test failed: bad version number\n");
-    }
-    if (dispatch.type != (unsigned int) CREATE)
-    {
-        printf("Test failed: bad type\n");
-    }
-    if (dispatch.object != (unsigned int) USER)
-    {
-        printf("Test failed: bad object\n");
-    }
-    
-    // TODO in all: test the body somehow
+    print_dispatch((struct state *) state, &dispatch, "Response");
     
     return 0;
 }

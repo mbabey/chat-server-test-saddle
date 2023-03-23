@@ -227,15 +227,9 @@ void free_body_tokens(struct state *state, char **body_tokens)
     }
 }
 
-void print_dispatch(struct state *state, struct dispatch *dispatch)
+void print_dispatch(struct state *state, struct dispatch *dispatch, const char *req_res_str)
 {
     PRINT_STACK_TRACE(state->tracer);
-    
-    // print version number
-    // print type (number and type)
-    // print object (number and object)
-    // print body
-    // print body tokens
     
     const char *type_string;
     const char *object_string;
@@ -243,12 +237,13 @@ void print_dispatch(struct state *state, struct dispatch *dispatch)
     type_string = type_to_string(dispatch->type);
     object_string = object_to_string(dispatch->object);
     
-    (void) fprintf(stdout, "\n--- Dispatch ---\n"
+    (void) fprintf(stdout, "\n--- Dispatch %s ---\n"
                            "Version:\t%d\n"
                            "Type:\t%d (%s)\n"
                            "Object:\t%d (%s)\n"
                            "Body size:\t%d Bytes\n"
                            "Body:\t%s\n",
+                           req_res_str,
                            dispatch->version,
                            dispatch->type, type_string,
                            dispatch->object, object_string,

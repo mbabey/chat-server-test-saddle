@@ -46,6 +46,6 @@ void free_body_tokens(struct state *state, char **body_tokens);
  * @param state the state object
  * @param dispatch the dispatch to print
  */
-void print_dispatch(struct state *state, struct dispatch *dispatch);
+void print_dispatch(struct state *state, struct dispatch *dispatch, const char *req_res_str);
 
 #endif //CLIENT_TEST_SADDLE_UTIL_H
