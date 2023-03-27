@@ -7,8 +7,6 @@ project(server-test-saddle
 
 set(CMAKE_C_STANDARD 17)
 
-set(ASLIB false)
-
 set(SOURCE_DIR src)
 set(INCLUDE_DIR include)
 set(SOURCE_LIST
@@ -45,6 +43,7 @@ set(HEADER_LIST
         ${INCLUDE_DIR}/core.h
         )
 
+set(COMPILE_AS_LIBRARY FALSE)
 set(SANITIZE TRUE)
 
 add_compile_definitions(_POSIX_C_SOURCE=200809L)
@@ -162,43 +161,35 @@ set(CLANG_TIDY_CHECKS "${CLANG_TIDY_CHECKS},-clang-analyzer-security.insecureAPI
 set(CLANG_TIDY_CHECKS "${CLANG_TIDY_CHECKS},-android-cloexec-accept")
 set(CMAKE_C_CLANG_TIDY clang-tidy -checks=${CLANG_TIDY_CHECKS};--quiet)
 
-if(${ASLIB})
-#========= vvv COMPILE AS LIBRARY vvv =========#
+if(${COMPILE_AS_LIBRARY})
+    add_library(server-test-saddle SHARED ${SOURCE_LIST} ${HEADER_LIST})
+    target_include_directories(server-test-saddle PRIVATE include/server-test-saddle)
+    target_include_directories(server-test-saddle PRIVATE /usr/local/include)
+    target_link_directories(server-test-saddle PRIVATE /usr/local/lib)
 
-add_library(server-test-saddle SHARED ${SOURCE_LIST} ${HEADER_LIST})
-target_include_directories(server-test-saddle PRIVATE include/server-test-saddle)
-target_include_directories(server-test-saddle PRIVATE /usr/local/include)
-target_link_directories(server-test-saddle PRIVATE /usr/local/lib)
+    if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+        target_include_directories(server-test-saddle PRIVATE /usr/include)
+    endif ()
 
-if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-    target_include_directories(server-test-saddle PRIVATE /usr/include)
-endif ()
+    set_target_properties(server-test-saddle PROPERTIES
+            VERSION ${PROJECT_VERSION}
+            SOVERSION ${PROJECT_VERSION_MAJOR})
 
-set_target_properties(server-test-saddle PROPERTIES
-        VERSION ${PROJECT_VERSION}
-        SOVERSION ${PROJECT_VERSION_MAJOR})
+    get_property(LIB64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
 
-get_property(LIB64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
+    if ("${LIB64}" STREQUAL "TRUE")
+        set(LIBSUFFIX 64)
+    else()
+        set(LIBSUFFIX "")
+    endif()
 
-if ("${LIB64}" STREQUAL "TRUE")
-    set(LIBSUFFIX 64)
+    set(INSTALL_LIB_DIR lib${LIBSUFFIX} CACHE PATH "Installation directory for libraries")
+    mark_as_advanced(INSTALL_LIB_DIR)
+
+    install(TARGETS server-test-saddle LIBRARY DESTINATION ${INSTALL_LIB_DIR})
+    install(FILES ${HEADER_LIST} DESTINATION include/server-test-saddle)
 else()
-    set(LIBSUFFIX "")
-endif()
-
-set(INSTALL_LIB_DIR lib${LIBSUFFIX} CACHE PATH "Installation directory for libraries")
-mark_as_advanced(INSTALL_LIB_DIR)
-
-install(TARGETS server-test-saddle LIBRARY DESTINATION ${INSTALL_LIB_DIR})
-install(FILES ${HEADER_LIST} DESTINATION include/server-test-saddle)
-
-#========= ^^^ COMPILE AS LIBRARY ^^^ =========#
-else()
-#========= vvv COMPILE AS EXECUTABLE vvv =========#
-
-add_executable(server-test-saddle ${SOURCE_LIST})
-
-#========= ^^^ COMPILE AS EXECUTABLE ^^^ =========#
+    add_executable(server-test-saddle ${SOURCE_LIST})
 endif()
 
 add_dependencies(server-test-saddle doxygen)
