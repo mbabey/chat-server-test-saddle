@@ -70,17 +70,26 @@ int recv_parse_message(struct state *state, int socket_fd, struct dispatch *disp
     // Get version and type (4 bits each).
     uint8_t version_and_type;
     bytes_read = recv(socket_fd, &version_and_type, sizeof(version_and_type), 0);
+    if (bytes_read == 0 || errno == ECONNRESET)
+    {
+        return 1;
+    }
     if (bytes_read == -1)
     {
         SET_ERROR(state->err);
         return -1;
     }
+
     dispatch->type = version_and_type & MASK_b1111;
     version_and_type >>= (unsigned int) 4; // Bit shift right 4.
     dispatch->version = version_and_type & MASK_b1111;
     
     // Get the object (8 bits).
     bytes_read = recv(socket_fd, &dispatch->object, sizeof(dispatch->object), 0);
+    if (bytes_read == 0 || errno == ECONNRESET)
+    {
+        return 1;
+    }
     if (bytes_read == -1)
     {
         SET_ERROR(state->err);
@@ -89,13 +98,17 @@ int recv_parse_message(struct state *state, int socket_fd, struct dispatch *disp
     
     // Get the body size (16 bits).
     bytes_read = recv(socket_fd, &dispatch->body_size, sizeof(dispatch->body_size), 0);
+    if (bytes_read == 0 || errno == ECONNRESET)
+    {
+        return 1;
+    }
     if (bytes_read == -1)
     {
         SET_ERROR(state->err);
         return -1;
     }
     dispatch->body_size = ntohs(dispatch->body_size);
-    
+    PRINT_STACK_TRACE(state->tracer);
     // Get the body.
     dispatch->body = (char *) mm_calloc(1, dispatch->body_size + 1, state->mm);
     if (!dispatch->body)
@@ -103,18 +116,26 @@ int recv_parse_message(struct state *state, int socket_fd, struct dispatch *disp
         SET_ERROR(state->err);
         return -1;
     }
+    PRINT_STACK_TRACE(state->tracer);
+    
     bytes_read = recv(socket_fd, dispatch->body, dispatch->body_size, 0);
+    if (bytes_read == 0 || errno == ECONNRESET)
+    {
+        return 1;
+    }
     if (bytes_read == -1)
     {
         SET_ERROR(state->err);
         return -1;
     }
     
+    PRINT_STACK_TRACE(state->tracer);
     if (parse_body(state, body_tokens, dispatch->body_size, dispatch->body) == -1)
     {
         return -1;
     }
     
+    PRINT_STACK_TRACE(state->tracer);
     return 0;
 }
 
@@ -137,7 +158,7 @@ static int parse_body(struct state *state, char ***body_tokens, uint16_t body_si
     
     token_head = strdup(body);
     token      = strtok(token_head, "\x03"); // NOLINT(concurrency-mt-unsafe) : No threads here
-    
+    printf("%s\n", token);
     **body_tokens = strdup(token);
     mm_add(state->mm, **body_tokens);
     for (size_t i = 1; token; ++i)

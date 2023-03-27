@@ -30,12 +30,15 @@ int create_user_test(struct client_state *state)
         return -1;
     }
     
-    if (recv_parse_message((struct state *) state, state->socket_fd, &dispatch, &body_tokens) == -1)
+    status = recv_parse_message((struct state *) state, state->socket_fd, &dispatch, &body_tokens);
+    if (status == -1)
     {
         return -1;
     }
-    
-    print_dispatch((struct state *) state, &dispatch, "Response");
+    if (status == 0)
+    {
+        print_dispatch((struct state *) state, &dispatch, "Response");
+    }
     
     return 0;
 }
