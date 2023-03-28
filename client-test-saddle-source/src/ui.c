@@ -29,16 +29,30 @@
     "|3.\tCreate Message Test                                                    |\n"\
     "|4.\tCreate Auth Test                                                       |\n"\
     "|5.\tRead User Test                                                         |\n"\
-    "|6.\tRead Channel Test                                                      |\n"\
-    "|7.\tRead Message Test                                                      |\n"\
-    "|8.\tUpdate User Test                                                       |\n"\
-    "|9.\tUpdate Channel Test                                                    |\n"\
-    "|10.\tUpdate Message Test                                                    |\n"\
-    "|11.\tUpdate Auth Test                                                       |\n"\
-    "|12.\tDestroy User Test                                                      |\n"\
-    "|13.\tDestroy Channel Test                                                   |\n"\
-    "|14.\tDestroy Message Test                                                   |\n"\
-    "|15.\tDestroy Auth Test                                                      |\n"\
+    "|6.\tRead All Online User Test                                              |\n"\
+    "|7.\tRead Channel Test                                                      |\n"   \
+    "|8.\tRead Channel Users Test                                                |\n"\
+    "|9.\tRead Channel Administrators Test                                       |\n"\
+    "|10.\tRead Channel Banned Users Test                                         |\n"\
+    "|11.\tRead Channel All Test                                                  |\n"\
+    "|12.\tRead Message Test                                                      |\n"\
+    "|13.\tUpdate User Display Name Test                                          |\n"   \
+    "|14.\tUpdate User Display Name Reset                                         |\n"\
+    "|15.\tUpdate User Privilege Level Test                                       |\n"\
+    "|16.\tUpdate User Privilege Level Reset                                      |\n"\
+    "|17.\tUpdate User Online Status Test                                         |\n"\
+    "|18.\tUpdate User Online Status Reset                                        |\n"\
+    "|19.\tUpdate User All Test                                                   |\n"\
+    "|20.\tUpdate User All Reset                                                  |\n"\
+    "|21.\tUpdate Channel Test                                                    |\n"\
+    "|22.\tUpdate Message Test                                                    |\n"\
+    "|23.\tUpdate Auth Test                                                       |\n"\
+    "|24.\tUpdate Auth No Password Test                                           |\n"\
+    "|25.\tDestroy User Test                                                      |\n"\
+    "|26.\tDestroy User No Password Test                                          |\n"\
+    "|27.\tDestroy Channel Test                                                   |\n"\
+    "|28.\tDestroy Message Test                                                   |\n"\
+    "|29.\tDestroy Auth Test                                                      |\n"\
     "+------------------------------------------------------------------------------+\n"\
     "Enter number or type \"q\" to quit:\n"
 
