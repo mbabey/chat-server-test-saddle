@@ -454,22 +454,35 @@ int update_user_all_test_reset(struct client_state *state)
     return 0;
 }
 
-int update_channel_test(struct client_state *state)
+int update_channel_name_test(struct client_state *state)
 {
     printf("\nupdate_channel_test not yet implemented.\n");
     
-//    struct dispatch dispatch;
-//
-//    dispatch.version = (unsigned int) 1;
-//    dispatch.type = (unsigned int) UPDATE;
-//    dispatch.object = (unsigned int) CHANNEL;
-//    dispatch.body = strdup("");
-//    dispatch.body_size = strlen(dispatch.body);
-//
-//    if (test_dispatch(state, &dispatch) == -1)
-//    {
-//        return -1;
-//    }
+    struct dispatch dispatch;
+
+    /*
+     * update-channel-req-body = channel-name ETX
+                                change-name ETX [new-channel-name]
+                                change-publicity ETX [new-publicity]
+                                alter-users ETX
+                                [users-to-add] [users-to-remove]
+                                alter-admins ETX
+                                [admins-to-add] [admins-to-remove]
+                                alter-bans ETX
+                                [bans-to-add] [bans-to-remove]
+
+     */
+    
+    dispatch.version = (unsigned int) 1;
+    dispatch.type = (unsigned int) UPDATE;
+    dispatch.object = (unsigned int) CHANNEL;
+    dispatch.body = strdup("the doghouse\x03""1\x03the catpad\x03""0\x03""0\x03""0\x03");
+    dispatch.body_size = strlen(dispatch.body);
+
+    if (test_dispatch(state, &dispatch) == -1)
+    {
+        return -1;
+    }
     
     return 0;
 }

@@ -91,7 +91,7 @@ int run_client_saddle(struct client_state *state)
             case UPDATE_USER_ONLINE_STATUS_RESET:
             case UPDATE_USER_ALL:
             case UPDATE_USER_ALL_RESET:
-            case UPDATE_CHANNEL:
+            case UPDATE_CHANNEL_NAME:
             case UPDATE_MESSAGE:
             case UPDATE_AUTH:
             case UPDATE_AUTH_NO_PASSWORD:
@@ -318,9 +318,9 @@ static int run_update_test(struct client_state *state)
             }
             break;
         }
-        case UPDATE_CHANNEL:
+        case UPDATE_CHANNEL_NAME:
         {
-            if (update_channel_test(state) == -1)
+            if (update_channel_name_test(state) == -1)
             {
                 return -1;
             }
