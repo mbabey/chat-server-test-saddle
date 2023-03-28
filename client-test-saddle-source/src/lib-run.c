@@ -202,7 +202,7 @@ static int run_update_test(struct client_state *state)
     {
         case UPDATE_USER:
         {
-            if (update_user_test(state) == -1)
+            if (update_user_display_name_test(state) == -1)
             {
                 return -1;
             }

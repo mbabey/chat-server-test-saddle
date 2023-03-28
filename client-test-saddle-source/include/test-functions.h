@@ -27,7 +27,21 @@ int read_channel_get_users_test(struct client_state *state);
 
 int read_message_test(struct client_state *state);
 
-int update_user_test(struct client_state *state);
+int update_user_display_name_test(struct client_state *state);
+
+int update_user_display_name_test_reset(struct client_state *state);
+
+int update_user_privilege_level_test(struct client_state *state);
+
+int update_user_privilege_level_test_reset(struct client_state *state);
+
+int update_user_online_status_test(struct client_state *state);
+
+int update_user_online_status_test_reset(struct client_state *state);
+
+int update_user_all_test(struct client_state *state);
+
+int update_user_all_test_reset(struct client_state *state);
 
 int update_channel_test(struct client_state *state);
 
