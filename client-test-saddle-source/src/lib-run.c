@@ -69,7 +69,12 @@ int run_client_saddle(struct client_state *state)
                 break;
             }
             case READ_USER:
+            case READ_USER_ALL:
             case READ_CHANNEL:
+            case READ_CHANNEL_USERS:
+            case READ_CHANNEL_ADMINS:
+            case READ_CHANNEL_BANNED_USERS:
+            case READ_CHANNEL_ALL:
             case READ_MESSAGE:
             {
                 if (run_read_test(state) == -1)
@@ -78,10 +83,18 @@ int run_client_saddle(struct client_state *state)
                 }
                 break;
             }
-            case UPDATE_USER:
+            case UPDATE_USER_DISPLAY_NAME:
+            case UPDATE_USER_DISPLAY_NAME_RESET:
+            case UPDATE_USER_PRIVILEGE_LEVEL:
+            case UPDATE_USER_PRIVILEGE_LEVEL_RESET:
+            case UPDATE_USER_ONLINE_STATUS:
+            case UPDATE_USER_ONLINE_STATUS_RESET:
+            case UPDATE_USER_ALL:
+            case UPDATE_USER_ALL_RESET:
             case UPDATE_CHANNEL:
             case UPDATE_MESSAGE:
             case UPDATE_AUTH:
+            case UPDATE_AUTH_NO_PASSWORD:
             {
                 if (run_update_test(state) == -1)
                 {
@@ -90,6 +103,7 @@ int run_client_saddle(struct client_state *state)
                 break;
             }
             case DESTROY_USER:
+            case DESTROY_USER_NO_PASSWORD:
             case DESTROY_CHANNEL:
             case DESTROY_MESSAGE:
             case DESTROY_AUTH:
@@ -106,7 +120,7 @@ int run_client_saddle(struct client_state *state)
                 break;
             }
         }
-    
+        
         if (state->test_number != STOP)
         {
             display_results(state);
@@ -173,9 +187,49 @@ static int run_read_test(struct client_state *state)
             }
             break;
         }
+        case READ_USER_ALL:
+        {
+            if (read_user_all_test(state) == -1)
+            {
+                return -1;
+            }
+            break;
+        }
         case READ_CHANNEL:
         {
             if (read_channel_test(state) == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case READ_CHANNEL_USERS:
+        {
+            if (read_channel_users_test(state) == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case READ_CHANNEL_ADMINS:
+        {
+            if (read_channel_admins_test(state) == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case READ_CHANNEL_BANNED_USERS:
+        {
+            if (read_channel_banned_users_test(state) == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case READ_CHANNEL_ALL:
+        {
+            if (read_channel_all_test(state) == -1)
             {
                 return -1;
             }
@@ -200,9 +254,65 @@ static int run_update_test(struct client_state *state)
     
     switch (state->test_number)
     {
-        case UPDATE_USER:
+        case UPDATE_USER_DISPLAY_NAME:
         {
             if (update_user_display_name_test(state) == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case UPDATE_USER_DISPLAY_NAME_RESET:
+        {
+            if (update_user_display_name_test_reset(state) == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case UPDATE_USER_PRIVILEGE_LEVEL:
+        {
+            if (update_user_privilege_level_test(state) == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case UPDATE_USER_PRIVILEGE_LEVEL_RESET:
+        {
+            if (update_user_privilege_level_test_reset(state) == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case UPDATE_USER_ONLINE_STATUS:
+        {
+            if (update_user_online_status_test(state) == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case UPDATE_USER_ONLINE_STATUS_RESET:
+        {
+            if (update_user_online_status_test_reset(state) == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case UPDATE_USER_ALL:
+        {
+            if (update_user_all_test(state) == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case UPDATE_USER_ALL_RESET:
+        {
+            if (update_user_all_test_reset(state) == -1)
             {
                 return -1;
             }
@@ -232,6 +342,14 @@ static int run_update_test(struct client_state *state)
             }
             break;
         }
+        case UPDATE_AUTH_NO_PASSWORD:
+        {
+            if (update_auth_no_password_test_reset(state) == -1)
+            {
+                return -1;
+            }
+            break;
+        }
     }
     
     return 0;
@@ -246,6 +364,14 @@ static int run_destroy_test(struct client_state *state)
         case DESTROY_USER:
         {
             if (destroy_user_test(state) == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case DESTROY_USER_NO_PASSWORD:
+        {
+            if (destroy_user_no_password_test(state) == -1)
             {
                 return -1;
             }

@@ -154,7 +154,7 @@ int read_user_test(struct client_state *state)
     return 0;
 }
 
-int read_all_user_test(struct client_state *state)
+int read_user_all_test(struct client_state *state)
 {
     printf("\nReading all online users.\n");
     
@@ -194,7 +194,7 @@ int read_channel_test(struct client_state *state)
     return 0;
 }
 
-int read_channel_get_users_test(struct client_state *state)
+int read_channel_users_test(struct client_state *state)
 {
     printf("\nReading users in channel \"the doghouse\".\n");
     
@@ -214,7 +214,7 @@ int read_channel_get_users_test(struct client_state *state)
     return 0;
 }
 
-int read_channel_get_admins_test(struct client_state *state)
+int read_channel_admins_test(struct client_state *state)
 {
     printf("\nReading administrators in channel \"the doghouse\".\n");
     
@@ -234,7 +234,7 @@ int read_channel_get_admins_test(struct client_state *state)
     return 0;
 }
 
-int read_channel_get_banned_users_test(struct client_state *state)
+int read_channel_banned_users_test(struct client_state *state)
 {
     printf("\nReading banned users in channel \"the doghouse\".\n");
     
@@ -254,7 +254,7 @@ int read_channel_get_banned_users_test(struct client_state *state)
     return 0;
 }
 
-int read_channel_get_all_test(struct client_state *state)
+int read_channel_all_test(struct client_state *state)
 {
     printf("\nReading all values in channel \"the doghouse\".\n");
     
