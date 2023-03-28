@@ -22,7 +22,7 @@ int recv_parse_message(struct state *state, int socket_fd, struct dispatch *disp
  * Assemble and send message .
  * </p>
  * @param state the state object
- * @param socket the socket on which to send a message
+ * @param socket_fd the socket on which to send a message
  * @param dispatch the dispatch to send
  * @return 0 on success, -1 on set err failure
  */
@@ -33,8 +33,8 @@ int assemble_message_send(struct state *state, int socket_fd, struct dispatch *d
  * <p>
  * Free body tokens in a null-terminated list of body tokens.
  * </p>
+ * @param state the state object
  * @param body_tokens the list of body tokens
- * @param tracer tracer function
  */
 void free_body_tokens(struct state *state, char **body_tokens);
 
@@ -45,6 +45,7 @@ void free_body_tokens(struct state *state, char **body_tokens);
  * </p>
  * @param state the state object
  * @param dispatch the dispatch to print
+ * @param req_res_str a string "Request" or "Response" to print as the type of Dispatch
  */
 void print_dispatch(struct state *state, struct dispatch *dispatch, const char *req_res_str);
 
