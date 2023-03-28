@@ -47,7 +47,7 @@ static int insert_channel(struct core_object *co, struct server_object *so, Chan
  * @param user the Channel to serialize
  * @return 0 on success, -1 and set err on failure
  */
-static int serialize_channel(struct core_object *co, uint8_t **serial_channel, const Channel *channel);
+static unsigned long serialize_channel(struct core_object *co, uint8_t **serial_channel, const Channel *channel);
 
 /**
  * insert_message
@@ -71,7 +71,7 @@ static int insert_message(struct core_object *co, struct server_object *so, Mess
  * @param user the Message to serialize
  * @return 0 on success, -1 and set err on failure
  */
-static int serialize_message(struct core_object *co, uint8_t **serial_message, const Message *message);
+static unsigned long serialize_message(struct core_object *co, uint8_t **serial_message, const Message *message);
 
 /**
  * insert_auth
@@ -95,7 +95,7 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
  * @param user the Auth to serialize
  * @return 0 on success, -1 and set err on failure
  */
-static int serialize_auth(struct core_object *co, uint8_t **serial_auth, const Auth *auth);
+static unsigned long serialize_auth(struct core_object *co, uint8_t **serial_auth, const Auth *auth);
 
 /**
  * read_user
@@ -381,16 +381,8 @@ static int find_by_name(struct core_object *co, DBM *db, sem_t *db_sem, uint8_t 
     
     sem_post(db_sem);
     
-    printf("key: %p, value: %p\n", key.dptr, value.dptr);
-    
-    if (key.dptr)
-    {
-        printf("key.dptr: %d, key.dsize %lu\n", *(int *) key.dptr, key.dsize);
-        printf("%lu\n", value.dsize);
-    }
     // Compare the display name to the name in the db
-    while (key.dptr && strcmp((char *) (((int *) value.dptr) + 1), name) !=
-                       0) // strcmps are done outside of db time. TODO: segv here
+    while (key.dptr && strcmp((char *) (((int *) value.dptr) + 1), name) != 0) // strcmps are done outside of db time.
     {
         printf("name %s\n", (char *) (((int *) value.dptr) + 1));
         if (sem_wait(db_sem) == -1)
@@ -418,10 +410,12 @@ static unsigned long serialize_user(struct core_object *co, uint8_t **serial_use
 {
     PRINT_STACK_TRACE(co->tracer);
     
-    unsigned long serial_user_size = sizeof(user->id)
-                                     + strlen(user->display_name) + 1
-                                     + sizeof(user->privilege_level)
-                                     + sizeof(user->online_status);
+    unsigned long serial_user_size;
+    
+    serial_user_size = sizeof(user->id)
+                       + strlen(user->display_name) + 1
+                       + sizeof(user->privilege_level)
+                       + sizeof(user->online_status);
     
     *serial_user = mm_malloc(serial_user_size, co->mm);
     if (!*serial_user)
@@ -447,11 +441,11 @@ static int insert_channel(struct core_object *co, struct server_object *so, Chan
 {
     PRINT_STACK_TRACE(co->tracer);
     
-    uint8_t *serial_channel;
-    int     serial_channel_size;
-    int     insert_status;
-    datum   key;
-    datum   value;
+    uint8_t       *serial_channel;
+    unsigned long serial_channel_size;
+    int           insert_status;
+    datum         key;
+    datum         value;
     
     // Determine if a channel with the channel name already exists in the database.
     if (find_by_name(co, so->channel_db, so->channel_db_sem, &serial_channel, channel->channel_name) == -1)
@@ -467,7 +461,7 @@ static int insert_channel(struct core_object *co, struct server_object *so, Chan
     }
     
     serial_channel_size = serialize_channel(co, &serial_channel, channel);
-    if (serial_channel_size == -1)
+    if (serial_channel_size == 0)
     {
         return -1;
     }
@@ -499,16 +493,20 @@ static int insert_channel(struct core_object *co, struct server_object *so, Chan
     return 0;
 }
 
-static int serialize_channel(struct core_object *co, uint8_t **serial_channel, const Channel *channel)
+static unsigned long serialize_channel(struct core_object *co, uint8_t **serial_channel, const Channel *channel)
 {
     PRINT_STACK_TRACE(co->tracer);
     
-    *serial_channel = mm_malloc(sizeof(channel->id)
-                                + strlen(channel->channel_name) + 1
-                                + strlen(channel->creator) + 1
-                                + channel->users_size_bytes
-                                + channel->administrators_size_bytes
-                                + channel->banned_users_size_bytes, co->mm);
+    unsigned long serial_channel_size;
+    
+    serial_channel_size = sizeof(channel->id)
+                          + strlen(channel->channel_name) + 1
+                          + strlen(channel->creator) + 1
+                          + channel->users_size_bytes
+                          + channel->administrators_size_bytes
+                          + channel->banned_users_size_bytes;
+    
+    *serial_channel = mm_malloc(serial_channel_size, co->mm);
     if (!*serial_channel)
     {
         SET_ERROR(co->err);
@@ -544,21 +542,21 @@ static int serialize_channel(struct core_object *co, uint8_t **serial_channel, c
         byte_offset += strlen(*list) + 1;
     }
     
-    return 0;
+    return serial_channel_size;
 }
 
 static int insert_message(struct core_object *co, struct server_object *so, Message *message)
 {
     PRINT_STACK_TRACE(co->tracer);
     
-    uint8_t *serial_message;
-    int     serial_message_size;
-    int     insert_status;
-    datum   key;
-    datum   value;
+    uint8_t       *serial_message;
+    unsigned long serial_message_size;
+    int           insert_status;
+    datum         key;
+    datum         value;
     
     serial_message_size = serialize_message(co, &serial_message, message);
-    if (serial_message_size == -1)
+    if (serial_message_size == 0)
     {
         return -1;
     }
@@ -590,19 +588,23 @@ static int insert_message(struct core_object *co, struct server_object *so, Mess
     return 0;
 }
 
-static int serialize_message(struct core_object *co, uint8_t **serial_message, const Message *message)
+static unsigned long serialize_message(struct core_object *co, uint8_t **serial_message, const Message *message)
 {
     PRINT_STACK_TRACE(co->tracer);
     
-    *serial_message = mm_malloc(sizeof(message->id)
-                                + sizeof(message->user_id)
-                                + sizeof(message->channel_id)
-                                + strlen(message->message_content) + 1
-                                + sizeof(message->timestamp), co->mm);
+    unsigned long serial_message_size;
+    
+    serial_message_size = sizeof(message->id)
+                          + sizeof(message->user_id)
+                          + sizeof(message->channel_id)
+                          + strlen(message->message_content) + 1
+                          + sizeof(message->timestamp);
+    
+    *serial_message = mm_malloc(serial_message_size, co->mm);
     if (!*serial_message)
     {
         SET_ERROR(co->err);
-        return -1;
+        return 0;
     }
     
     size_t byte_offset;
@@ -617,18 +619,18 @@ static int serialize_message(struct core_object *co, uint8_t **serial_message, c
     byte_offset += strlen(message->message_content) + 1;
     memcpy((*serial_message + byte_offset), &message->timestamp, sizeof(message->timestamp));
     
-    return 0;
+    return serial_message_size;
 }
 
 static int insert_auth(struct core_object *co, struct server_object *so, Auth *auth)
 {
     PRINT_STACK_TRACE(co->tracer);
     
-    uint8_t *serial_auth;
-    int     serial_auth_size;
-    int     insert_status;
-    datum   key;
-    datum   value;
+    uint8_t       *serial_auth;
+    unsigned long serial_auth_size;
+    int           insert_status;
+    datum         key;
+    datum         value;
     
     // Determine if an auth with the login token already exists in the database.
     if (find_by_name(co, so->auth_db, so->auth_db_sem, &serial_auth, auth->login_token) == -1)
@@ -643,7 +645,7 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
     }
     
     serial_auth_size = serialize_auth(co, &serial_auth, auth);
-    if (serial_auth_size == -1)
+    if (serial_auth_size == 0)
     {
         return -1;
     }
@@ -677,9 +679,15 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
     return 0;
 }
 
-static int serialize_auth(struct core_object *co, uint8_t **serial_auth, const Auth *auth)
+static unsigned long serialize_auth(struct core_object *co, uint8_t **serial_auth, const Auth *auth)
 {
     PRINT_STACK_TRACE(co->tracer);
+    
+    unsigned long serial_auth_size;
+    
+    serial_auth_size = sizeof(auth->user_id)
+                       * strlen(auth->login_token) + 1
+                       + strlen(auth->password) + 1;
     
     *serial_auth = mm_malloc(sizeof(auth->user_id)
                              * strlen(auth->login_token) + 1
@@ -687,7 +695,7 @@ static int serialize_auth(struct core_object *co, uint8_t **serial_auth, const A
     if (!*serial_auth)
     {
         SET_ERROR(co->err);
-        return -1;
+        return 0;
     }
     
     size_t byte_offset;
@@ -698,7 +706,7 @@ static int serialize_auth(struct core_object *co, uint8_t **serial_auth, const A
     byte_offset += strlen(auth->login_token) + 1;
     memcpy((*serial_auth + byte_offset), auth->password, strlen(auth->password) + 1); // TODO: hash this lol
     
-    return 0;
+    return serial_auth_size;
 }
 
 int db_read(struct core_object *co, struct server_object *so, int type, void *object_dst, void *object_query)
