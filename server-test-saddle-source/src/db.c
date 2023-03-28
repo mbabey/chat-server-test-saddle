@@ -263,44 +263,37 @@ int db_create(struct core_object *co, struct server_object *so, int type, void *
 {
     PRINT_STACK_TRACE(co->tracer);
     
+    int insert_status;
+    
     switch (type)
     {
         case USER:
         {
-            if (insert_user(co, so, (User *) object) == -1)
-            {
-                return -1;
-            }
+            insert_status = insert_user(co, so, (User *) object);
             break;
         }
         case CHANNEL:
         {
-            if (insert_channel(co, so, (Channel *) object) == -1)
-            {
-                return -1;
-            }
+            insert_status = insert_channel(co, so, (Channel *) object);
             break;
         }
         case MESSAGE:
         {
-            if (insert_message(co, so, (Message *) object) == -1)
-            {
-                return -1;
-            }
+            insert_status = insert_message(co, so, (Message *) object);
             break;
         }
         case AUTH:
         {
-            if (insert_auth(co, so, (Auth *) object) == -1)
-            {
-                return -1;
-            }
+            insert_status = insert_auth(co, so, (Auth *) object);
             break;
         }
-        default:;
+        default:
+        {
+            insert_status = -1;
+        }
     }
     
-    return 0;
+    return insert_status;
 }
 
 static int insert_user(struct core_object *co, struct server_object *so, User *user)
