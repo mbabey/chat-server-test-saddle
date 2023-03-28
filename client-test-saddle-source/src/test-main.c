@@ -3,19 +3,17 @@
 #include "../include/client-objects.h"
 
 #include <arpa/inet.h>
+#include <ctype.h>
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <getopt.h>
-#include <ctype.h>
 
 #define OPTS_LIST "i:p:t"
-#define USAGE_MESSAGE                                                                           \
-    "usage: http-server -i <ip address> -p <port number> [-t]\n"                                \
-    "-i <ip address>, if server selected for -l, will run the server at this ip address.\n"     \
-    "\tif client selected for -l, will connect to a server at this ip address.\n"               \
-    "-p <port number>, if server selected for -l, will run the server at this port number.\n"   \
-    "\tif client selected for -l, will connect to a server at this port number.\n"              \
-    "[-t], optionally trace the execution of the program.\n"
+#define USAGE_MESSAGE                                                          \
+    "\nusage: ./client-test-saddle -i <ip address> -p <port number> [-t]\n"      \
+    "\t-i <ip address>, connect to a server at this ip address.\n"               \
+    "\t-p <port number>, connect to a server at this port number.\n"             \
+    "\t[-t], optionally trace the execution of the program.\n\n"
 
 /**
  * parse_args
@@ -91,25 +89,22 @@ static int validate_ip(struct sockaddr_in *addr, const char *ip_addr_str, TRACER
 int main(int argc, char **argv)
 {
     struct client_state state;
-    in_port_t port_number;
     
-    state.mm = init_mem_manager();
+    state.tracer = NULL;
     
     if (parse_args(&state, argc, argv) == -1)
     {
-        SET_ERROR(state.err);
-        GET_ERROR(state.err);
         return EXIT_FAILURE;
     }
+    
+    state.mm = init_mem_manager();
 //
 //    inet_pton(AF_INET, argv[1], &state.addr.sin_addr.s_addr);
 //    port_number = strtol(argv[2], NULL, 10);
 //    state.addr.sin_port   = htons(port_number);
 //    state.addr.sin_family = AF_INET;
 //
-//    state.tracer = trace_reporter;
-////    state.tracer = NULL;
-    
+
     if (lib_main(&state) == -1)
     {
         GET_ERROR(state.err);
