@@ -18,7 +18,7 @@ static int test_dispatch(struct client_state *state, struct dispatch *dispatch);
 
 int create_user_test(struct client_state *state)
 {
-    printf("create user test\n");
+    printf("\nCreating user \"thedog\"\n");
     
     struct dispatch dispatch;
     
@@ -69,7 +69,7 @@ static int test_dispatch(struct client_state *state, struct dispatch *dispatch)
 
 int create_channel_test(struct client_state *state)
 {
-    printf("create channel test.\n");
+    printf("\nCreating channel \"the doghouse\".\n");
     
     struct dispatch dispatch;
 //    const char      *channel_name;
@@ -92,7 +92,7 @@ int create_channel_test(struct client_state *state)
 
 int create_message_test(struct client_state *state)
 {
-    printf("create message test.\n");
+    printf("\nCreating message in channel \"the doghouse\".\n");
     
     struct dispatch dispatch;
 //    const char      *display_name;
@@ -103,7 +103,7 @@ int create_message_test(struct client_state *state)
     dispatch.version   = (unsigned int) 1;
     dispatch.type      = (unsigned int) CREATE;
     dispatch.object    = (unsigned int) MESSAGE;
-    dispatch.body      = strdup("thedog\x03the doghouse\x03yo what's up its me the dog\x03""1678347396""\x03");
+    dispatch.body      = strdup("thedog\x03the doghouse\x03yo what's up its me the dog\x03""0000000064228f8a""\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -116,14 +116,14 @@ int create_message_test(struct client_state *state)
 
 int create_auth_test(struct client_state *state)
 {
-    printf("create_auth_test not yet implemented.\n");
+    printf("\nLogging in user with login token \nbigdog69\n.\n");
     
     struct dispatch dispatch;
     
     dispatch.version = (unsigned int) 1;
     dispatch.type = (unsigned int) CREATE;
     dispatch.object = (unsigned int) AUTH;
-    dispatch.body = strdup("thedog\x03password1234@!\x03");
+    dispatch.body = strdup("bigdog69\x03password1234@!\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -136,7 +136,7 @@ int create_auth_test(struct client_state *state)
 
 int read_user_test(struct client_state *state)
 {
-    printf("read_user_test not yet implemented.\n");
+    printf("\nReading user \"thedog\".\n");
     
     struct dispatch dispatch;
     
@@ -156,7 +156,7 @@ int read_user_test(struct client_state *state)
 
 int read_all_user_test(struct client_state *state)
 {
-    printf("read_user_test not yet implemented.\n");
+    printf("\nReading all online users.\n");
     
     struct dispatch dispatch;
     
@@ -176,7 +176,7 @@ int read_all_user_test(struct client_state *state)
 
 int read_channel_test(struct client_state *state)
 {
-    printf("read_channel_test not yet implemented.\n");
+    printf("\nReading channel \"the doghouse\".\n");
     
     struct dispatch dispatch;
     
@@ -196,7 +196,7 @@ int read_channel_test(struct client_state *state)
 
 int read_channel_get_users_test(struct client_state *state)
 {
-    printf("read_channel_test not yet implemented.\n");
+    printf("\nReading users in channel \"the doghouse\".\n");
     
     struct dispatch dispatch;
     
@@ -216,7 +216,7 @@ int read_channel_get_users_test(struct client_state *state)
 
 int read_channel_get_admins_test(struct client_state *state)
 {
-    printf("read_channel_test not yet implemented.\n");
+    printf("\nReading administrators in channel \"the doghouse\".\n");
     
     struct dispatch dispatch;
     
@@ -236,7 +236,7 @@ int read_channel_get_admins_test(struct client_state *state)
 
 int read_channel_get_banned_users_test(struct client_state *state)
 {
-    printf("read_channel_test not yet implemented.\n");
+    printf("\nReading banned users in channel \"the doghouse\".\n");
     
     struct dispatch dispatch;
     
@@ -256,7 +256,7 @@ int read_channel_get_banned_users_test(struct client_state *state)
 
 int read_channel_get_all_test(struct client_state *state)
 {
-    printf("read_channel_test not yet implemented.\n");
+    printf("\nReading all values in channel \"the doghouse\".\n");
     
     struct dispatch dispatch;
     
@@ -276,7 +276,7 @@ int read_channel_get_all_test(struct client_state *state)
 
 int read_message_test(struct client_state *state)
 {
-    printf("read_message_test not yet implemented.\n");
+    printf("\nReading 10 messages from the channel \"the doghouse\".\n");
     
     struct dispatch dispatch;
     
@@ -456,7 +456,7 @@ int update_user_all_test_reset(struct client_state *state)
 
 int update_channel_test(struct client_state *state)
 {
-    printf("update_channel_test not yet implemented.\n");
+    printf("\nupdate_channel_test not yet implemented.\n");
     
 //    struct dispatch dispatch;
 //
@@ -476,7 +476,7 @@ int update_channel_test(struct client_state *state)
 
 int update_message_test(struct client_state *state)
 {
-    printf("update_message_test not yet implemented.\n");
+    printf("\nupdate_message_test not yet implemented.\n");
 //
 //    struct dispatch dispatch;
 //
@@ -496,7 +496,7 @@ int update_message_test(struct client_state *state)
 
 int update_auth_test(struct client_state *state)
 {
-    printf("Changing password to \"!@4321drowssap\".\n");
+    printf("\nChanging password to \"!@4321drowssap\".\n");
     
     struct dispatch dispatch;
     
@@ -516,7 +516,7 @@ int update_auth_test(struct client_state *state)
 
 int update_auth_no_password_test_reset(struct client_state *state)
 {
-    printf("Changing password to \"password1234@!\" without providing old password.\n");
+    printf("\nChanging password to \"password1234@!\" without providing old password.\n");
     
     struct dispatch dispatch;
     
@@ -536,7 +536,7 @@ int update_auth_no_password_test_reset(struct client_state *state)
 
 int destroy_user_test(struct client_state *state)
 {
-    printf("destroy_user_test not yet implemented.\n");
+    printf("\nDestroying user \"thedog\".\n");
     
     struct dispatch dispatch;
     
@@ -556,7 +556,7 @@ int destroy_user_test(struct client_state *state)
 
 int destroy_user_no_password_test(struct client_state *state)
 {
-    printf("destroy_user_test not yet implemented.\n");
+    printf("\nDestroying user \"thedog\" with no password.\n");
     
     struct dispatch dispatch;
     
@@ -576,7 +576,7 @@ int destroy_user_no_password_test(struct client_state *state)
 
 int destroy_channel_test(struct client_state *state)
 {
-    printf("destroy_channel_test not yet implemented.\n");
+    printf("\nDestroying channel \"the doghouse\".\n");
     
     struct dispatch dispatch;
     
@@ -596,7 +596,7 @@ int destroy_channel_test(struct client_state *state)
 
 int destroy_message_test(struct client_state *state)
 {
-    printf("destroy_message_test not yet implemented.\n");
+    printf("\ndestroy_message_test not yet implemented.\n");
     
 //    struct dispatch dispatch;
 //
@@ -616,7 +616,7 @@ int destroy_message_test(struct client_state *state)
 
 int destroy_auth_test(struct client_state *state)
 {
-    printf("destroy_auth_test not yet implemented.\n");
+    printf("\nRequesting logout of \"thedog\".\n");
     
     struct dispatch dispatch;
     
