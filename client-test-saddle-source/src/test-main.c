@@ -98,12 +98,6 @@ int main(int argc, char **argv)
     }
     
     state.mm = init_mem_manager();
-//
-//    inet_pton(AF_INET, argv[1], &state.addr.sin_addr.s_addr);
-//    port_number = strtol(argv[2], NULL, 10);
-//    state.addr.sin_port   = htons(port_number);
-//    state.addr.sin_family = AF_INET;
-//
 
     if (lib_main(&state) == -1)
     {
