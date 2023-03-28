@@ -158,7 +158,7 @@ static int parse_body(struct state *state, char ***body_tokens, uint16_t body_si
     
     token_head = strdup(body);
     token      = strtok(token_head, "\x03"); // NOLINT(concurrency-mt-unsafe) : No threads here
-    printf("%s\n", token);
+    
     **body_tokens = strdup(token);
     mm_add(state->mm, **body_tokens);
     for (size_t i = 1; token; ++i)
