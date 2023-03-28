@@ -380,7 +380,7 @@ static int find_by_name(struct core_object *co, DBM *db, sem_t *db_sem, uint8_t 
     sem_post(db_sem); // strcmps are done outside of db time.
     
     // Compare the display name to the name in the db
-    printf("%s, %s", (char *) key.dptr, (char *) value.dptr);
+    printf("%s, %s", (char *) (((int *) value.dptr) + 1), (char *) (((int *) value.dptr) + 1));
     int count = 0;
     while (key.dptr && strcmp((char *) (((int *) value.dptr) + 1), name) != 0) // TODO: segv here
     {

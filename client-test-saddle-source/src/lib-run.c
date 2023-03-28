@@ -148,7 +148,7 @@ static int run_create_test(struct client_state *state)
         }
         case CREATE_AUTH:
         {
-            if (create_auth_test() == -1)
+            if (create_auth_test(state) == -1)
             {
                 return -1;
             }
@@ -167,7 +167,7 @@ static int run_read_test(struct client_state *state)
     {
         case READ_USER:
         {
-            if (read_user_test() == -1)
+            if (read_user_test(state) == -1)
             {
                 return -1;
             }
@@ -175,7 +175,7 @@ static int run_read_test(struct client_state *state)
         }
         case READ_CHANNEL:
         {
-            if (read_channel_test() == -1)
+            if (read_channel_test(state) == -1)
             {
                 return -1;
             }
@@ -183,7 +183,7 @@ static int run_read_test(struct client_state *state)
         }
         case READ_MESSAGE:
         {
-            if (read_message_test() == -1)
+            if (read_message_test(state) == -1)
             {
                 return -1;
             }
@@ -202,7 +202,7 @@ static int run_update_test(struct client_state *state)
     {
         case UPDATE_USER:
         {
-            if (update_user_test() == -1)
+            if (update_user_test(state) == -1)
             {
                 return -1;
             }
@@ -210,7 +210,7 @@ static int run_update_test(struct client_state *state)
         }
         case UPDATE_CHANNEL:
         {
-            if (update_channel_test() == -1)
+            if (update_channel_test(state) == -1)
             {
                 return -1;
             }
@@ -218,7 +218,7 @@ static int run_update_test(struct client_state *state)
         }
         case UPDATE_MESSAGE:
         {
-            if (update_message_test() == -1)
+            if (update_message_test(state) == -1)
             {
                 return -1;
             }
@@ -226,7 +226,7 @@ static int run_update_test(struct client_state *state)
         }
         case UPDATE_AUTH:
         {
-            if (update_auth_test() == -1)
+            if (update_auth_test(state) == -1)
             {
                 return -1;
             }
@@ -245,7 +245,7 @@ static int run_destroy_test(struct client_state *state)
     {
         case DESTROY_USER:
         {
-            if (destroy_user_test() == -1)
+            if (destroy_user_test(state) == -1)
             {
                 return -1;
             }
@@ -253,7 +253,7 @@ static int run_destroy_test(struct client_state *state)
         }
         case DESTROY_CHANNEL:
         {
-            if (destroy_channel_test() == -1)
+            if (destroy_channel_test(state) == -1)
             {
                 return -1;
             }
@@ -261,7 +261,7 @@ static int run_destroy_test(struct client_state *state)
         }
         case DESTROY_MESSAGE:
         {
-            if (destroy_message_test() == -1)
+            if (destroy_message_test(state) == -1)
             {
                 return -1;
             }
@@ -269,7 +269,7 @@ static int run_destroy_test(struct client_state *state)
         }
         case DESTROY_AUTH:
         {
-            if (destroy_auth_test() == -1)
+            if (destroy_auth_test(state) == -1)
             {
                 return -1;
             }
