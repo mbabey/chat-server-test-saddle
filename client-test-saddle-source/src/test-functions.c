@@ -543,7 +543,27 @@ int destroy_user_test(struct client_state *state)
     dispatch.version = (unsigned int) 1;
     dispatch.type = (unsigned int) DESTROY;
     dispatch.object = (unsigned int) USER;
-    dispatch.body = strdup();
+    dispatch.body = strdup("thedog\x03bigdog69\x03password1234@!\x03");
+    dispatch.body_size = strlen(dispatch.body);
+    
+    if (test_dispatch(state, &dispatch) == -1)
+    {
+        return -1;
+    }
+    
+    return 0;
+}
+
+int destroy_user_no_password_test(struct client_state *state)
+{
+    printf("destroy_user_test not yet implemented.\n");
+    
+    struct dispatch dispatch;
+    
+    dispatch.version = (unsigned int) 1;
+    dispatch.type = (unsigned int) DESTROY;
+    dispatch.object = (unsigned int) USER;
+    dispatch.body = strdup("thedog\x03bigdog69\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -563,7 +583,7 @@ int destroy_channel_test(struct client_state *state)
     dispatch.version = (unsigned int) 1;
     dispatch.type = (unsigned int) DESTROY;
     dispatch.object = (unsigned int) CHANNEL;
-    dispatch.body = strdup();
+    dispatch.body = strdup("the doghouse\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -578,18 +598,18 @@ int destroy_message_test(struct client_state *state)
 {
     printf("destroy_message_test not yet implemented.\n");
     
-    struct dispatch dispatch;
-    
-    dispatch.version = (unsigned int) 1;
-    dispatch.type = (unsigned int) DESTROY;
-    dispatch.object = (unsigned int) MESSAGE;
-    dispatch.body = strdup();
-    dispatch.body_size = strlen(dispatch.body);
-    
-    if (test_dispatch(state, &dispatch) == -1)
-    {
-        return -1;
-    }
+//    struct dispatch dispatch;
+//
+//    dispatch.version = (unsigned int) 1;
+//    dispatch.type = (unsigned int) DESTROY;
+//    dispatch.object = (unsigned int) MESSAGE;
+//    dispatch.body = strdup();
+//    dispatch.body_size = strlen(dispatch.body);
+//
+//    if (test_dispatch(state, &dispatch) == -1)
+//    {
+//        return -1;
+//    }
     
     return 0;
 }
@@ -603,7 +623,7 @@ int destroy_auth_test(struct client_state *state)
     dispatch.version = (unsigned int) 1;
     dispatch.type = (unsigned int) DESTROY;
     dispatch.object = (unsigned int) AUTH;
-    dispatch.body = strdup();
+    dispatch.body = strdup("thedog\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)

@@ -53,6 +53,8 @@ int update_auth_no_password_test_reset(struct client_state *state);
 
 int destroy_user_test(struct client_state *state);
 
+int destroy_user_no_password_test(struct client_state *state);
+
 int destroy_channel_test(struct client_state *state);
 
 int destroy_message_test(struct client_state *state);
