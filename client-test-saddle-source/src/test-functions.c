@@ -18,7 +18,7 @@ static int test_dispatch(struct client_state *state, struct dispatch *dispatch);
 
 int create_user_test(struct client_state *state)
 {
-    printf("create_user_test\n");
+    printf("create user test\n");
     
     struct dispatch dispatch;
     
@@ -69,11 +69,9 @@ static int test_dispatch(struct client_state *state, struct dispatch *dispatch)
 
 int create_channel_test(struct client_state *state)
 {
-    printf("create_channel_test not yet implemented.\n");
+    printf("create channel test.\n");
     
     struct dispatch dispatch;
-    int             status;
-    char            **body_tokens;
 //    const char      *channel_name;
 //    const char      *display_name;
 //    const char      *publicity;
@@ -94,9 +92,9 @@ int create_channel_test(struct client_state *state)
 
 int create_message_test(struct client_state *state)
 {
+    printf("create message test.\n");
+    
     struct dispatch dispatch;
-    int             status;
-    char            **body_tokens;
 //    const char      *display_name;
 //    const char      *channel_name;
 //    const char      *message_content;
@@ -116,86 +114,242 @@ int create_message_test(struct client_state *state)
     return 0;
 }
 
-int create_auth_test(void)
+int create_auth_test(struct state *state)
 {
     printf("create_auth_test not yet implemented.\n");
     
+    struct dispatch dispatch;
+    
+    dispatch.version = (unsigned int) 1;
+    dispatch.type = (unsigned int) ;
+    dispatch.object = (unsigned int) ;
+    dispatch.body = strdup();
+    dispatch.body_size = strlen(dispatch.body);
+    
+    if (test_dispatch(state, &dispatch) == -1)
+    {
+        return -1;
+    }
+    
     return 0;
 }
 
-int read_user_test(void)
+int read_user_test(struct state *state)
 {
     printf("read_user_test not yet implemented.\n");
     
+    struct dispatch dispatch;
+    
+    dispatch.version = (unsigned int) 1;
+    dispatch.type = (unsigned int) ;
+    dispatch.object = (unsigned int) ;
+    dispatch.body = strdup();
+    dispatch.body_size = strlen(dispatch.body);
+    
+    if (test_dispatch(state, &dispatch) == -1)
+    {
+        return -1;
+    }
+    
     return 0;
 }
 
-int read_channel_test(void)
+int read_channel_test(struct state *state)
 {
     printf("read_channel_test not yet implemented.\n");
     
+    struct dispatch dispatch;
+    
+    dispatch.version = (unsigned int) 1;
+    dispatch.type = (unsigned int) ;
+    dispatch.object = (unsigned int) ;
+    dispatch.body = strdup();
+    dispatch.body_size = strlen(dispatch.body);
+    
+    if (test_dispatch(state, &dispatch) == -1)
+    {
+        return -1;
+    }
+    
     return 0;
 }
 
-int read_message_test(void)
+int read_message_test(struct state *state)
 {
     printf("read_message_test not yet implemented.\n");
     
+    struct dispatch dispatch;
+    
+    dispatch.version = (unsigned int) 1;
+    dispatch.type = (unsigned int) ;
+    dispatch.object = (unsigned int) ;
+    dispatch.body = strdup();
+    dispatch.body_size = strlen(dispatch.body);
+    
+    if (test_dispatch(state, &dispatch) == -1)
+    {
+        return -1;
+    }
+    
     return 0;
 }
 
-int update_user_test(void)
+int update_user_test(struct state *state)
 {
     printf("update_user_test not yet implemented.\n");
     
+    struct dispatch dispatch;
+    
+    dispatch.version = (unsigned int) 1;
+    dispatch.type = (unsigned int) ;
+    dispatch.object = (unsigned int) ;
+    dispatch.body = strdup();
+    dispatch.body_size = strlen(dispatch.body);
+    
+    if (test_dispatch(state, &dispatch) == -1)
+    {
+        return -1;
+    }
+    
     return 0;
 }
 
-int update_channel_test(void)
+int update_channel_test(struct state *state)
 {
     printf("update_channel_test not yet implemented.\n");
     
+    struct dispatch dispatch;
+    
+    dispatch.version = (unsigned int) 1;
+    dispatch.type = (unsigned int) ;
+    dispatch.object = (unsigned int) ;
+    dispatch.body = strdup();
+    dispatch.body_size = strlen(dispatch.body);
+    
+    if (test_dispatch(state, &dispatch) == -1)
+    {
+        return -1;
+    }
+    
     return 0;
 }
 
-int update_message_test(void)
+int update_message_test(struct state *state)
 {
     printf("update_message_test not yet implemented.\n");
     
+    struct dispatch dispatch;
+    
+    dispatch.version = (unsigned int) 1;
+    dispatch.type = (unsigned int) ;
+    dispatch.object = (unsigned int) ;
+    dispatch.body = strdup();
+    dispatch.body_size = strlen(dispatch.body);
+    
+    if (test_dispatch(state, &dispatch) == -1)
+    {
+        return -1;
+    }
+    
     return 0;
 }
 
-int update_auth_test(void)
+int update_auth_test(struct state *state)
 {
     printf("update_auth_test not yet implemented.\n");
     
+    struct dispatch dispatch;
+    
+    dispatch.version = (unsigned int) 1;
+    dispatch.type = (unsigned int) ;
+    dispatch.object = (unsigned int) ;
+    dispatch.body = strdup();
+    dispatch.body_size = strlen(dispatch.body);
+    
+    if (test_dispatch(state, &dispatch) == -1)
+    {
+        return -1;
+    }
+    
     return 0;
 }
 
-int destroy_user_test(void)
+int destroy_user_test(struct state *state)
 {
     printf("destroy_user_test not yet implemented.\n");
     
+    struct dispatch dispatch;
+    
+    dispatch.version = (unsigned int) 1;
+    dispatch.type = (unsigned int) ;
+    dispatch.object = (unsigned int) ;
+    dispatch.body = strdup();
+    dispatch.body_size = strlen(dispatch.body);
+    
+    if (test_dispatch(state, &dispatch) == -1)
+    {
+        return -1;
+    }
+    
     return 0;
 }
 
-int destroy_channel_test(void)
+int destroy_channel_test(struct state *state)
 {
     printf("destroy_channel_test not yet implemented.\n");
     
-    return 0;
-}
-
-int destroy_message_test(void)
-{
-    printf("destroy_message_test not yet implemented.\n");
+    struct dispatch dispatch;
+    
+    dispatch.version = (unsigned int) 1;
+    dispatch.type = (unsigned int) ;
+    dispatch.object = (unsigned int) ;
+    dispatch.body = strdup();
+    dispatch.body_size = strlen(dispatch.body);
+    
+    if (test_dispatch(state, &dispatch) == -1)
+    {
+        return -1;
+    }
     
     return 0;
 }
 
-int destroy_auth_test(void)
+int destroy_message_test(struct state *state)
+{
+    printf("destroy_message_test not yet implemented.\n");
+    
+    struct dispatch dispatch;
+    
+    dispatch.version = (unsigned int) 1;
+    dispatch.type = (unsigned int) ;
+    dispatch.object = (unsigned int) ;
+    dispatch.body = strdup();
+    dispatch.body_size = strlen(dispatch.body);
+    
+    if (test_dispatch(state, &dispatch) == -1)
+    {
+        return -1;
+    }
+    
+    return 0;
+}
+
+int destroy_auth_test(struct state *state)
 {
     printf("destroy_auth_test not yet implemented.\n");
+    
+    struct dispatch dispatch;
+    
+    dispatch.version = (unsigned int) 1;
+    dispatch.type = (unsigned int) ;
+    dispatch.object = (unsigned int) ;
+    dispatch.body = strdup();
+    dispatch.body_size = strlen(dispatch.body);
+    
+    if (test_dispatch(state, &dispatch) == -1)
+    {
+        return -1;
+    }
     
     return 0;
 }

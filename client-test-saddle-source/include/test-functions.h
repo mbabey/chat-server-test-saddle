@@ -41,7 +41,7 @@ int create_message_test(struct client_state *state);
  *
  * @return 0 on success, -1 and set errno on failure
  */
-int create_auth_test(void);
+int create_auth_test(struct client_state *state);
 
 /**
  *
@@ -51,7 +51,7 @@ int create_auth_test(void);
  *
  * @return 0 on success, -1 and set errno on failure
  */
-int read_user_test(void);
+int read_user_test(struct client_state *state);
 
 /**
  *
@@ -61,7 +61,7 @@ int read_user_test(void);
  *
  * @return 0 on success, -1 and set errno on failure
  */
-int read_channel_test(void);
+int read_channel_test(struct client_state *state);
 
 /**
  *
@@ -71,7 +71,7 @@ int read_channel_test(void);
  *
  * @return 0 on success, -1 and set errno on failure
  */
-int read_message_test(void);
+int read_message_test(struct client_state *state);
 
 /**
  *
@@ -81,7 +81,7 @@ int read_message_test(void);
  *
  * @return 0 on success, -1 and set errno on failure
  */
-int update_user_test(void);
+int update_user_test(struct client_state *state);
 
 /**
  *
@@ -91,7 +91,7 @@ int update_user_test(void);
  *
  * @return 0 on success, -1 and set errno on failure
  */
-int update_channel_test(void);
+int update_channel_test(struct client_state *state);
 
 /**
  *
@@ -101,7 +101,7 @@ int update_channel_test(void);
  *
  * @return 0 on success, -1 and set errno on failure
  */
-int update_message_test(void);
+int update_message_test(struct client_state *state);
 
 /**
  *
@@ -111,7 +111,7 @@ int update_message_test(void);
  *
  * @return 0 on success, -1 and set errno on failure
  */
-int update_auth_test(void);
+int update_auth_test(struct client_state *state);
 
 /**
  *
@@ -121,7 +121,7 @@ int update_auth_test(void);
  *
  * @return 0 on success, -1 and set errno on failure
  */
-int destroy_user_test(void);
+int destroy_user_test(struct client_state *state);
 
 /**
  *
@@ -131,7 +131,7 @@ int destroy_user_test(void);
  *
  * @return 0 on success, -1 and set errno on failure
  */
-int destroy_channel_test(void);
+int destroy_channel_test(struct client_state *state);
 
 /**
  *
@@ -141,7 +141,7 @@ int destroy_channel_test(void);
  *
  * @return 0 on success, -1 and set errno on failure
  */
-int destroy_message_test(void);
+int destroy_message_test(struct client_state *state);
 
 /**
  *
@@ -151,6 +151,6 @@ int destroy_message_test(void);
  *
  * @return 0 on success, -1 and set errno on failure
  */
-int destroy_auth_test(void);
+int destroy_auth_test(struct client_state *state);
 
 #endif //CHAT_TEST_SADDLE_TEST_FUNCTIONS_H
