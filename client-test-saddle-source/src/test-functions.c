@@ -54,6 +54,8 @@ static int test_dispatch(struct client_state *state, struct dispatch *dispatch)
         return -1;
     }
     
+    memset(dispatch, 0, sizeof(struct dispatch));
+    
     status = recv_parse_message((struct state *) state, state->socket_fd, dispatch, &body_tokens);
     if (status == -1)
     {
