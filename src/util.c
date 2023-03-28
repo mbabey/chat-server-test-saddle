@@ -226,7 +226,10 @@ int assemble_message_send(struct state *state, int socket_fd, struct dispatch *d
     memcpy(data + 2, &body_size_network_order, sizeof(body_size_network_order));
     
     // Pack the body.
-    memcpy(data + 4, dispatch->body, dispatch->body_size);
+    if (dispatch->body_size)
+    {
+        memcpy(data + 4, dispatch->body, dispatch->body_size);
+    }
     
     // Send the dispatch.
     bytes_sent = send(socket_fd, data, DATA_SIZE(dispatch->body_size), 0);

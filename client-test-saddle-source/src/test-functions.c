@@ -164,7 +164,7 @@ int read_user_all_test(struct client_state *state)
     dispatch.type = (unsigned int) READ;
     dispatch.object = (unsigned int) USER;
     dispatch.body = strdup("");
-    dispatch.body_size = strlen(dispatch.body);
+    dispatch.body_size = 0;
     
     if (test_dispatch(state, &dispatch) == -1)
     {
