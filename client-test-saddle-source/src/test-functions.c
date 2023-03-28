@@ -458,18 +458,18 @@ int update_channel_test(struct client_state *state)
 {
     printf("update_channel_test not yet implemented.\n");
     
-    struct dispatch dispatch;
-    
-    dispatch.version = (unsigned int) 1;
-    dispatch.type = (unsigned int) UPDATE;
-    dispatch.object = (unsigned int) CHANNEL;
-    dispatch.body = strdup();
-    dispatch.body_size = strlen(dispatch.body);
-    
-    if (test_dispatch(state, &dispatch) == -1)
-    {
-        return -1;
-    }
+//    struct dispatch dispatch;
+//
+//    dispatch.version = (unsigned int) 1;
+//    dispatch.type = (unsigned int) UPDATE;
+//    dispatch.object = (unsigned int) CHANNEL;
+//    dispatch.body = strdup("");
+//    dispatch.body_size = strlen(dispatch.body);
+//
+//    if (test_dispatch(state, &dispatch) == -1)
+//    {
+//        return -1;
+//    }
     
     return 0;
 }
@@ -477,13 +477,33 @@ int update_channel_test(struct client_state *state)
 int update_message_test(struct client_state *state)
 {
     printf("update_message_test not yet implemented.\n");
+//
+//    struct dispatch dispatch;
+//
+//    dispatch.version = (unsigned int) 1;
+//    dispatch.type = (unsigned int) UPDATE;
+//    dispatch.object = (unsigned int) MESSAGE;
+//    dispatch.body = strdup("thedog\x03the doghouse\x03""0000000064228f8a\x03wtf haha this is a message\x03");
+//    dispatch.body_size = strlen(dispatch.body);
+//
+//    if (test_dispatch(state, &dispatch) == -1)
+//    {
+//        return -1;
+//    }
+    
+    return 0;
+}
+
+int update_auth_test(struct client_state *state)
+{
+    printf("Changing password to \"!@4321drowssap\".\n");
     
     struct dispatch dispatch;
     
     dispatch.version = (unsigned int) 1;
     dispatch.type = (unsigned int) UPDATE;
-    dispatch.object = (unsigned int) MESSAGE;
-    dispatch.body = strdup();
+    dispatch.object = (unsigned int) AUTH;
+    dispatch.body = strdup("thedog\x03password1234@!\x03!@4321drowssap\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -494,16 +514,16 @@ int update_message_test(struct client_state *state)
     return 0;
 }
 
-int update_auth_test(struct client_state *state)
+int update_auth_no_password_test_reset(struct client_state *state)
 {
-    printf("update_auth_test not yet implemented.\n");
+    printf("Changing password to \"password1234@!\" without providing old password.\n");
     
     struct dispatch dispatch;
     
     dispatch.version = (unsigned int) 1;
     dispatch.type = (unsigned int) UPDATE;
     dispatch.object = (unsigned int) AUTH;
-    dispatch.body = strdup();
+    dispatch.body = strdup("thedog\x03password1234@!\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
