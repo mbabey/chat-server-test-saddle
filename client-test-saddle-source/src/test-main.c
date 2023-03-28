@@ -5,6 +5,7 @@
 #include <arpa/inet.h>
 #include <ctype.h>
 #include <getopt.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
