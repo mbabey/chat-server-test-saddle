@@ -14,6 +14,20 @@
 static int insert_user(struct core_object *co, struct server_object *so, User *user);
 
 /**
+ * find_by_name
+ * <p>
+ * Find an entry in the database by a string name. The name must be the second parameter of the object following an int.
+ * </p>
+ * @param co the core object
+ * @param db the database in which to search
+ * @param db_sem the semaphore for the database
+ * @param serial_object the array to store the result
+ * @param name the
+ * @return 0 on success, -1 and set err on failure
+ */
+static int find_by_name(struct core_object *co, DBM *db, sem_t *db_sem, uint8_t **serial_object, const char *name);
+
+/**
  * serialize_user
  * <p>
  * Serialize a User struct.
@@ -45,7 +59,7 @@ static int insert_channel(struct core_object *co, struct server_object *so, Chan
  * @param co the core object
  * @param serial_channel the buffer into which to serialize the Channel
  * @param user the Channel to serialize
- * @return 0 on success, -1 and set err on failure
+ * @return size of Channel in bytes on success, 0 and set err on failure
  */
 static unsigned long serialize_channel(struct core_object *co, uint8_t **serial_channel, const Channel *channel);
 
@@ -69,7 +83,7 @@ static int insert_message(struct core_object *co, struct server_object *so, Mess
  * @param co the core object
  * @param serial_message the buffer into which to serialize the Message
  * @param user the Message to serialize
- * @return 0 on success, -1 and set err on failure
+ * @return size of Message in bytes on success, 0 and set err on failure
  */
 static unsigned long serialize_message(struct core_object *co, uint8_t **serial_message, const Message *message);
 
@@ -93,7 +107,7 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
  * @param co the core object
  * @param serial_auth the buffer into which to serialize the Auth
  * @param user the Auth to serialize
- * @return 0 on success, -1 and set err on failure
+ * @return size of Auth in bytes on success, 0 and set err on failure
  */
 static unsigned long serialize_auth(struct core_object *co, uint8_t **serial_auth, const Auth *auth);
 
@@ -110,20 +124,6 @@ static unsigned long serialize_auth(struct core_object *co, uint8_t **serial_aut
  * @return 0 on success, -1 and set err on failure
  */
 static int read_user(struct core_object *co, struct server_object *so, User **user_get, const char *display_name);
-
-/**
- * find_by_name
- * <p>
- * Find an entry in the database by a string name. The name must be the second parameter of the object following an int.
- * </p>
- * @param co the core object
- * @param db the database in which to search
- * @param db_sem the semaphore for the database
- * @param serial_object the array to store the result
- * @param name the
- * @return 0 on success, -1 and set err on failure
- */
-static int find_by_name(struct core_object *co, DBM *db, sem_t *db_sem, uint8_t **serial_object, const char *name);
 
 /**
  * deserialize_user
