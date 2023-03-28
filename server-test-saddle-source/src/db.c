@@ -21,9 +21,9 @@ static int insert_user(struct core_object *co, struct server_object *so, User *u
  * @param co the core object
  * @param serial_user the buffer into which to serialize the User
  * @param user the User to serialize
- * @return 0 on success, -1 and set err on failure
+ * @return size of User in bytes on success, 0 and set err on failure
  */
-static int serialize_user(struct core_object *co, uint8_t **serial_user, const User *user);
+static unsigned long serialize_user(struct core_object *co, uint8_t **serial_user, const User *user);
 
 /**
  * insert_channel
@@ -307,11 +307,11 @@ static int insert_user(struct core_object *co, struct server_object *so, User *u
 {
     PRINT_STACK_TRACE(co->tracer);
     
-    uint8_t *serial_user;
-    int     serial_user_size;
-    int     insert_status;
-    datum   key;
-    datum   value;
+    uint8_t       *serial_user;
+    unsigned long serial_user_size;
+    int           insert_status;
+    datum         key;
+    datum         value;
     
     // Determine if a user with the username already exists in the database.
     if (find_by_name(co, so->user_db, so->user_db_sem, &serial_user, user->display_name) == -1)
@@ -326,10 +326,12 @@ static int insert_user(struct core_object *co, struct server_object *so, User *u
     }
     
     serial_user_size = serialize_user(co, &serial_user, user);
-    if (serial_user_size == -1)
+    if (serial_user_size == 0)
     {
         return -1;
     }
+    
+    printf("serial_user_size: %lu\n", serial_user_size);
     
     key.dptr    = serial_user;
     key.dsize   = sizeof(user->id);
@@ -377,12 +379,18 @@ static int find_by_name(struct core_object *co, DBM *db, sem_t *db_sem, uint8_t 
     key   = dbm_firstkey(db);   // NOLINT(concurrency-mt-unsafe) : Protected
     value = dbm_fetch(db, key); // NOLINT(concurrency-mt-unsafe) : Protected
     
-    sem_post(db_sem); // strcmps are done outside of db time.
+    sem_post(db_sem);
     
+    printf("key: %p, value: %p\n", key.dptr, value.dptr);
+    
+    if (key.dptr)
+    {
+        printf("key.dptr: %d, key.dsize %lu\n", *(int *) key.dptr, key.dsize);
+        printf("%lu\n", value.dsize);
+    }
     // Compare the display name to the name in the db
-    printf("%s, %s", (char *) (((int *) value.dptr) + 1), (char *) (((int *) value.dptr) + 1));
-    int count = 0;
-    while (key.dptr && strcmp((char *) (((int *) value.dptr) + 1), name) != 0) // TODO: segv here
+    while (key.dptr && strcmp((char *) (((int *) value.dptr) + 1), name) !=
+                       0) // strcmps are done outside of db time. TODO: segv here
     {
         printf("name %s\n", (char *) (((int *) value.dptr) + 1));
         if (sem_wait(db_sem) == -1)
@@ -406,18 +414,20 @@ static int find_by_name(struct core_object *co, DBM *db, sem_t *db_sem, uint8_t 
     return 0;
 }
 
-static int serialize_user(struct core_object *co, uint8_t **serial_user, const User *user)
+static unsigned long serialize_user(struct core_object *co, uint8_t **serial_user, const User *user)
 {
     PRINT_STACK_TRACE(co->tracer);
     
-    *serial_user = mm_malloc(sizeof(user->id)
-                             + strlen(user->display_name) + 1
-                             + sizeof(user->privilege_level)
-                             + sizeof(user->online_status), co->mm);
+    unsigned long serial_user_size = sizeof(user->id)
+                                     + strlen(user->display_name) + 1
+                                     + sizeof(user->privilege_level)
+                                     + sizeof(user->online_status);
+    
+    *serial_user = mm_malloc(serial_user_size, co->mm);
     if (!*serial_user)
     {
         SET_ERROR(co->err);
-        return -1;
+        return 0;
     }
     
     size_t byte_offset;
@@ -430,7 +440,7 @@ static int serialize_user(struct core_object *co, uint8_t **serial_user, const U
     byte_offset += sizeof(user->privilege_level);
     memcpy((*serial_user + byte_offset), &user->online_status, sizeof(user->online_status));
     
-    return 0;
+    return serial_user_size;
 }
 
 static int insert_channel(struct core_object *co, struct server_object *so, Channel *channel)
@@ -898,12 +908,12 @@ static int delete_user(struct core_object *co, struct server_object *so, User *u
     PRINT_STACK_TRACE(co->tracer);
     
     datum key;
-    int delete_status;
+    int   delete_status;
     
     key.dptr  = &user->id;
     key.dsize = sizeof(user->id);
     
-    if(sem_wait(so->user_db_sem) == -1)
+    if (sem_wait(so->user_db_sem) == -1)
     {
         SET_ERROR(co->err);
         return -1;
@@ -926,12 +936,12 @@ static int delete_channel(struct core_object *co, struct server_object *so, Chan
     PRINT_STACK_TRACE(co->tracer);
     
     datum key;
-    int delete_status;
+    int   delete_status;
     
     key.dptr  = &channel->id;
     key.dsize = sizeof(channel->id);
     
-    if(sem_wait(so->channel_db_sem) == -1)
+    if (sem_wait(so->channel_db_sem) == -1)
     {
         SET_ERROR(co->err);
         return -1;
@@ -954,12 +964,12 @@ static int delete_message(struct core_object *co, struct server_object *so, Mess
     PRINT_STACK_TRACE(co->tracer);
     
     datum key;
-    int delete_status;
+    int   delete_status;
     
     key.dptr  = &message->id;
     key.dsize = sizeof(message->id);
     
-    if(sem_wait(so->message_db_sem) == -1)
+    if (sem_wait(so->message_db_sem) == -1)
     {
         SET_ERROR(co->err);
         return -1;
@@ -981,12 +991,12 @@ static int delete_auth(struct core_object *co, struct server_object *so, Auth *a
 {
     PRINT_STACK_TRACE(co->tracer);
     datum key;
-    int delete_status;
+    int   delete_status;
     
     key.dptr  = &auth->user_id;
     key.dsize = sizeof(auth->user_id);
     
-    if(sem_wait(so->auth_db_sem) == -1)
+    if (sem_wait(so->auth_db_sem) == -1)
     {
         SET_ERROR(co->err);
         return -1;
