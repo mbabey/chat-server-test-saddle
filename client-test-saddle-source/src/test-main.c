@@ -11,7 +11,7 @@
 
 #define OPTS_LIST "i:p:t"
 #define USAGE_MESSAGE                                                          \
-    "\nusage: ./client-test-saddle -i <ip address> -p <port number> [-t]\n"      \
+    "\nusage: ./test-client -i <ip address> -p <port number> [-t]\n"      \
     "\t-i <ip address>, connect to a server at this ip address.\n"               \
     "\t-p <port number>, connect to a server at this port number.\n"             \
     "\t[-t], optionally trace the execution of the program.\n\n"

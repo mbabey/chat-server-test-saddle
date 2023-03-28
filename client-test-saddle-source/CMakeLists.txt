@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(client-test-saddle
+project(test-client
         VERSION 0.0.1
         DESCRIPTION ""
         LANGUAGES C)
@@ -123,7 +123,7 @@ set(DOXYGEN_QUIET YES)
 doxygen_add_docs(doxygen
         ${HEADER_LIST}
         WORKING_DIRECTORY ..
-        COMMENT "Generating Doxygen documentation for client-test-saddle")
+        COMMENT "Generating Doxygen documentation for test-client")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CLANG_TIDY_CHECKS "*")
@@ -149,16 +149,16 @@ set(CLANG_TIDY_CHECKS "${CLANG_TIDY_CHECKS},-android-cloexec-accept")
 set(CMAKE_C_CLANG_TIDY clang-tidy -checks=${CLANG_TIDY_CHECKS};--quiet)
 
 if (${COMPILE_AS_LIBRARY})
-    add_library(client-test-saddle SHARED ${SOURCE_LIST} ${HEADER_LIST})
-    target_include_directories(client-test-saddle PRIVATE include/client-test-saddle)
-    target_include_directories(client-test-saddle PRIVATE /usr/local/include)
-    target_link_directories(client-test-saddle PRIVATE /usr/local/lib)
+    add_library(test-client SHARED ${SOURCE_LIST} ${HEADER_LIST})
+    target_include_directories(test-client PRIVATE include/test-client)
+    target_include_directories(test-client PRIVATE /usr/local/include)
+    target_link_directories(test-client PRIVATE /usr/local/lib)
 
     if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-        target_include_directories(client-test-saddle PRIVATE /usr/include)
+        target_include_directories(test-client PRIVATE /usr/include)
     endif ()
 
-    set_target_properties(client-test-saddle PROPERTIES
+    set_target_properties(test-client PROPERTIES
             VERSION ${PROJECT_VERSION}
             SOVERSION ${PROJECT_VERSION_MAJOR})
 
@@ -173,10 +173,10 @@ if (${COMPILE_AS_LIBRARY})
     set(INSTALL_LIB_DIR lib${LIBSUFFIX} CACHE PATH "Installation directory for libraries")
     mark_as_advanced(INSTALL_LIB_DIR)
 
-    install(TARGETS client-test-saddle LIBRARY DESTINATION ${INSTALL_LIB_DIR})
-    install(FILES ${HEADER_LIST} DESTINATION include/client-test-saddle)
+    install(TARGETS test-client LIBRARY DESTINATION ${INSTALL_LIB_DIR})
+    install(FILES ${HEADER_LIST} DESTINATION include/test-client)
 else()
-    add_executable(client-test-saddle ${SOURCE_LIST})
+    add_executable(test-client ${SOURCE_LIST})
 endif()
 
-add_dependencies(client-test-saddle doxygen)
+add_dependencies(test-client doxygen)
