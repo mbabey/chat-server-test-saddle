@@ -123,7 +123,7 @@ int create_auth_test(struct client_state *state)
     dispatch.version = (unsigned int) 1;
     dispatch.type = (unsigned int) CREATE;
     dispatch.object = (unsigned int) AUTH;
-    dispatch.body = strdup();
+    dispatch.body = strdup("thedog\x03password1234@!\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -143,7 +143,27 @@ int read_user_test(struct client_state *state)
     dispatch.version = (unsigned int) 1;
     dispatch.type = (unsigned int) READ;
     dispatch.object = (unsigned int) USER;
-    dispatch.body = strdup();
+    dispatch.body = strdup("thedog\x03");
+    dispatch.body_size = strlen(dispatch.body);
+    
+    if (test_dispatch(state, &dispatch) == -1)
+    {
+        return -1;
+    }
+    
+    return 0;
+}
+
+int read_all_user_test(struct client_state *state)
+{
+    printf("read_user_test not yet implemented.\n");
+    
+    struct dispatch dispatch;
+    
+    dispatch.version = (unsigned int) 1;
+    dispatch.type = (unsigned int) READ;
+    dispatch.object = (unsigned int) USER;
+    dispatch.body = strdup("");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -163,7 +183,87 @@ int read_channel_test(struct client_state *state)
     dispatch.version = (unsigned int) 1;
     dispatch.type = (unsigned int) READ;
     dispatch.object = (unsigned int) CHANNEL;
-    dispatch.body = strdup();
+    dispatch.body = strdup("the doghouse\x03""0\x03""0\x03""0\x03");
+    dispatch.body_size = strlen(dispatch.body);
+    
+    if (test_dispatch(state, &dispatch) == -1)
+    {
+        return -1;
+    }
+    
+    return 0;
+}
+
+int read_channel_get_users_test(struct client_state *state)
+{
+    printf("read_channel_test not yet implemented.\n");
+    
+    struct dispatch dispatch;
+    
+    dispatch.version = (unsigned int) 1;
+    dispatch.type = (unsigned int) READ;
+    dispatch.object = (unsigned int) CHANNEL;
+    dispatch.body = strdup("the doghouse\x03""1\x03""0\x03""0\x03");
+    dispatch.body_size = strlen(dispatch.body);
+    
+    if (test_dispatch(state, &dispatch) == -1)
+    {
+        return -1;
+    }
+    
+    return 0;
+}
+
+int read_channel_get_admins_test(struct client_state *state)
+{
+    printf("read_channel_test not yet implemented.\n");
+    
+    struct dispatch dispatch;
+    
+    dispatch.version = (unsigned int) 1;
+    dispatch.type = (unsigned int) READ;
+    dispatch.object = (unsigned int) CHANNEL;
+    dispatch.body = strdup("the doghouse\x03""0\x03""1\x03""0\x03");
+    dispatch.body_size = strlen(dispatch.body);
+    
+    if (test_dispatch(state, &dispatch) == -1)
+    {
+        return -1;
+    }
+    
+    return 0;
+}
+
+int read_channel_get_banned_users_test(struct client_state *state)
+{
+    printf("read_channel_test not yet implemented.\n");
+    
+    struct dispatch dispatch;
+    
+    dispatch.version = (unsigned int) 1;
+    dispatch.type = (unsigned int) READ;
+    dispatch.object = (unsigned int) CHANNEL;
+    dispatch.body = strdup("the doghouse\x03""0\x03""0\x03""1\x03");
+    dispatch.body_size = strlen(dispatch.body);
+    
+    if (test_dispatch(state, &dispatch) == -1)
+    {
+        return -1;
+    }
+    
+    return 0;
+}
+
+int read_channel_get_all_test(struct client_state *state)
+{
+    printf("read_channel_test not yet implemented.\n");
+    
+    struct dispatch dispatch;
+    
+    dispatch.version = (unsigned int) 1;
+    dispatch.type = (unsigned int) READ;
+    dispatch.object = (unsigned int) CHANNEL;
+    dispatch.body = strdup("the doghouse\x03""1\x03""1\x03""1\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
