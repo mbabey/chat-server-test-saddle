@@ -17,13 +17,13 @@ int read_all_user_test(struct client_state *state);
 
 int read_channel_test(struct client_state *state);
 
-int read_channel_get_all_test(struct client_state *state);
-
-int read_channel_get_banned_users_test(struct client_state *state);
+int read_channel_get_users_test(struct client_state *state);
 
 int read_channel_get_admins_test(struct client_state *state);
 
-int read_channel_get_users_test(struct client_state *state);
+int read_channel_get_banned_users_test(struct client_state *state);
+
+int read_channel_get_all_test(struct client_state *state);
 
 int read_message_test(struct client_state *state);
 
