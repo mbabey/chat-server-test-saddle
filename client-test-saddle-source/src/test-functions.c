@@ -116,7 +116,7 @@ int create_message_test(struct client_state *state)
 
 int create_auth_test(struct client_state *state)
 {
-    printf("\nLogging in user with login token \nbigdog69\n.\n");
+    printf("\nLogging in user with login token \"bigdog69\".\n");
     
     struct dispatch dispatch;
     
