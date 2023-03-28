@@ -456,22 +456,9 @@ int update_user_all_test_reset(struct client_state *state)
 
 int update_channel_name_test(struct client_state *state)
 {
-    printf("\nupdate_channel_test not yet implemented.\n");
+    printf("\nUpdating channel with name \"the doghouse\" to name \"the cathouse\".\n");
     
     struct dispatch dispatch;
-
-    /*
-     * update-channel-req-body = channel-name ETX
-                                change-name ETX [new-channel-name]
-                                change-publicity ETX [new-publicity]
-                                alter-users ETX
-                                [users-to-add] [users-to-remove]
-                                alter-admins ETX
-                                [admins-to-add] [admins-to-remove]
-                                alter-bans ETX
-                                [bans-to-add] [bans-to-remove]
-
-     */
     
     dispatch.version = (unsigned int) 1;
     dispatch.type = (unsigned int) UPDATE;
