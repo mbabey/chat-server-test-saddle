@@ -69,7 +69,7 @@ static int test_dispatch(struct client_state *state, struct dispatch *dispatch)
 
 int create_channel_test(struct client_state *state)
 {
-    printf("\nCreating channel \"the doghouse\".\n");
+    printf("\nCreating public channel \"the doghouse\".\n");
     
     struct dispatch dispatch;
 //    const char      *channel_name;
@@ -79,7 +79,7 @@ int create_channel_test(struct client_state *state)
     dispatch.version   = (unsigned int) 1;
     dispatch.type      = (unsigned int) CREATE;
     dispatch.object    = (unsigned int) CHANNEL;
-    dispatch.body      = strdup("the doghouse\x03thedog\x03""1""\x03");
+    dispatch.body      = strdup("the doghouse\x03thedog\x03""0""\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -476,20 +476,20 @@ int update_channel_test(struct client_state *state)
 
 int update_message_test(struct client_state *state)
 {
-    printf("\nupdate_message_test not yet implemented.\n");
-//
-//    struct dispatch dispatch;
-//
-//    dispatch.version = (unsigned int) 1;
-//    dispatch.type = (unsigned int) UPDATE;
-//    dispatch.object = (unsigned int) MESSAGE;
-//    dispatch.body = strdup("thedog\x03the doghouse\x03""0000000064228f8a\x03wtf haha this is a message\x03");
-//    dispatch.body_size = strlen(dispatch.body);
-//
-//    if (test_dispatch(state, &dispatch) == -1)
-//    {
-//        return -1;
-//    }
+    printf("\nUpdating message by user \"thedog\" in channel \"the doghouse\" with timestamp \"0000000064228f8a\".\n");
+
+    struct dispatch dispatch;
+
+    dispatch.version = (unsigned int) 1;
+    dispatch.type = (unsigned int) UPDATE;
+    dispatch.object = (unsigned int) MESSAGE;
+    dispatch.body = strdup("thedog\x03the doghouse\x03""0000000064228f8a\x03wtf haha this is a message\x03");
+    dispatch.body_size = strlen(dispatch.body);
+
+    if (test_dispatch(state, &dispatch) == -1)
+    {
+        return -1;
+    }
     
     return 0;
 }
