@@ -51,7 +51,6 @@ enum TestNumber
  * test run.
  * </p>
  * @param state the state object
- * @param client the client object
  * @return 0 on success, -1 on and set err failure
  */
 int run_client_saddle(struct client_state *state);

@@ -55,7 +55,7 @@ static int open_socket_connect(struct client_state *state)
     int       fd;
     socklen_t socklen;
     
-    fd = socket(PF_INET, SOCK_STREAM, 0);
+    fd = socket(PF_INET, SOCK_STREAM, 0); // NOLINT(android-cloexec-socket) : DNE
     if (fd == -1)
     {
         SET_ERROR(state->err);

@@ -56,10 +56,8 @@
     "+------------------------------------------------------------------------------+\n"\
     "Enter number or type \"q\" to quit:\n"
 
-/**
- * Number of characters that are scanned in the input.
- */
-#define INPUT_LINE_SIZE 2
+// NOLINTNEXTLINE(modernize-macro-to-enum)
+#define INPUT_LINE_SIZE 2 /** Number of characters that are scanned in the input. */
 
 /**
  * Determine whether a character is a linefeed or end of file.
