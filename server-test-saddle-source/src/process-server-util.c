@@ -156,10 +156,10 @@ int open_databases(struct core_object *co, struct server_object *so)
 {
     PRINT_STACK_TRACE(co->tracer);
     // NOLINTBEGIN(concurrency-mt-unsafe) : No threads here
-    so->user_db    = dbm_open(USER_DB_NAME, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
-    so->channel_db = dbm_open(CHANNEL_DB_NAME, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
-    so->message_db = dbm_open(MESSAGE_DB_NAME, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
-    so->auth_db    = dbm_open(AUTH_DB_NAME, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+    so->user_db    = dbm_open(USER_DB_NAME, DB_FLAGS, DB_FILE_MODE);
+    so->channel_db = dbm_open(CHANNEL_DB_NAME, DB_FLAGS, DB_FILE_MODE);
+    so->message_db = dbm_open(MESSAGE_DB_NAME, DB_FLAGS, DB_FILE_MODE);
+    so->auth_db    = dbm_open(AUTH_DB_NAME, DB_FLAGS, DB_FILE_MODE);
     // NOLINTEND(concurrency-mt-unsafe)
     if (so->user_db == (DBM *) 0 || so->channel_db == (DBM *) 0 || so->message_db == (DBM *) 0 ||
         so->auth_db == (DBM *) 0)

@@ -345,6 +345,8 @@ static int insert_user(struct core_object *co, struct server_object *so, User *u
     }
     
     insert_status = dbm_store(so->user_db, key, value, DBM_INSERT); // NOLINT(concurrency-mt-unsafe) : Protected
+    dbm_close(so->user_db);
+    so->user_db = dbm_open(USER_DB_NAME, );
     
     sem_post(so->user_db_sem);
     
