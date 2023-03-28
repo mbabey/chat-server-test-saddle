@@ -103,7 +103,7 @@ int create_message_test(struct client_state *state)
     dispatch.version   = (unsigned int) 1;
     dispatch.type      = (unsigned int) CREATE;
     dispatch.object    = (unsigned int) MESSAGE;
-    dispatch.body      = strdup("thedog\x03the doghouse\x03yo what's up its me the dog\x03""0000000064228f8a""\x03");
+    dispatch.body      = strdup("thedog\x03the doghouse\x03yo what's up its me the dog\x03""0000000064228f8a\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -456,7 +456,7 @@ int update_user_all_test_reset(struct client_state *state)
 
 int update_channel_name_test(struct client_state *state)
 {
-    printf("\nUpdating channel with name \"the doghouse\" to name \"the cathouse\".\n");
+    printf("\nUpdating channel with name \"the doghouse\" to name \"the catpad\".\n");
     
     struct dispatch dispatch;
     
@@ -466,6 +466,26 @@ int update_channel_name_test(struct client_state *state)
     dispatch.body = strdup("the doghouse\x03""1\x03the catpad\x03""0\x03""0\x03""0\x03");
     dispatch.body_size = strlen(dispatch.body);
 
+    if (test_dispatch(state, &dispatch) == -1)
+    {
+        return -1;
+    }
+    
+    return 0;
+}
+
+int update_channel_name_test_reset(struct client_state *state)
+{
+    printf("\nUpdating channel with name \"the catpad\" to name \"the doghouse\".\n");
+    
+    struct dispatch dispatch;
+    
+    dispatch.version = (unsigned int) 1;
+    dispatch.type = (unsigned int) UPDATE;
+    dispatch.object = (unsigned int) CHANNEL;
+    dispatch.body = strdup("the catpad\x03""1\x03the doghouse\x03""0\x03""0\x03""0\x03");
+    dispatch.body_size = strlen(dispatch.body);
+    
     if (test_dispatch(state, &dispatch) == -1)
     {
         return -1;
@@ -596,20 +616,20 @@ int destroy_channel_test(struct client_state *state)
 
 int destroy_message_test(struct client_state *state)
 {
-    printf("\ndestroy_message_test not yet implemented.\n");
+    printf("\nDestroying message by user \"thedog\" in channel \"the doghouse\" with timestamp \"0000000064228f8a\".\n");
     
-//    struct dispatch dispatch;
-//
-//    dispatch.version = (unsigned int) 1;
-//    dispatch.type = (unsigned int) DESTROY;
-//    dispatch.object = (unsigned int) MESSAGE;
-//    dispatch.body = strdup();
-//    dispatch.body_size = strlen(dispatch.body);
-//
-//    if (test_dispatch(state, &dispatch) == -1)
-//    {
-//        return -1;
-//    }
+    struct dispatch dispatch;
+
+    dispatch.version = (unsigned int) 1;
+    dispatch.type = (unsigned int) DESTROY;
+    dispatch.object = (unsigned int) MESSAGE;
+    dispatch.body = strdup("thedog\x03the doghouse\x03""0000000064228f8a\x03");
+    dispatch.body_size = strlen(dispatch.body);
+
+    if (test_dispatch(state, &dispatch) == -1)
+    {
+        return -1;
+    }
     
     return 0;
 }

@@ -45,6 +45,8 @@ int update_user_all_test_reset(struct client_state *state);
 
 int update_channel_name_test(struct client_state *state);
 
+int update_channel_name_test_reset(struct client_state *state);
+
 int update_message_test(struct client_state *state);
 
 int update_auth_test(struct client_state *state);

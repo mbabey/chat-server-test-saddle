@@ -248,7 +248,7 @@ static int run_read_test(struct client_state *state)
     return 0;
 }
 
-static int run_update_test(struct client_state *state)
+static int run_update_test(struct client_state *state) // NOLINT(readability-function-cognitive-complexity): necesita que
 {
     PRINT_STACK_TRACE(state->tracer);
     
@@ -326,6 +326,15 @@ static int run_update_test(struct client_state *state)
             }
             break;
         }
+        case UPDATE_CHANNEL_NAME_RESET:
+        {
+            if (update_channel_name_test_reset(state) == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+    
         case UPDATE_MESSAGE:
         {
             if (update_message_test(state) == -1)
