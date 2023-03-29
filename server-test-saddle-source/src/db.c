@@ -288,7 +288,7 @@ static int insert_user(struct core_object *co, struct server_object *so, User *u
         return -1;
     }
     insert_status = dbm_store(db, key, value, DBM_INSERT);
-    if (!key.dptr && dbm_error(db)) // NOLINT(concurrency-mt-unsafe) : No threads here
+    if (dbm_error(db)) // NOLINT(concurrency-mt-unsafe) : No threads here
     {
         print_db_error(db);
     }
@@ -335,45 +335,33 @@ static int find_by_name(struct core_object *co, const char *db_name, sem_t *db_s
     }
     key   = dbm_firstkey(db);
     value = dbm_fetch(db, key);
-    if (!key.dptr && dbm_error(db)) // NOLINT(concurrency-mt-unsafe) : No threads here
+    if (!key.dptr && dbm_error(db))
     {
         print_db_error(db);
     }
-    dbm_close(db);
-    // NOLINTEND(concurrency-mt-unsafe) : Protected
-    sem_post(db_sem);
-    
     if (key.dptr)
     {
-        printf("name %s\n", (char *) (((int *) value.dptr) + 1));
+        printf("id: %d\n", *(int *) key.dptr);
+        printf("size: %zu\n", value.dsize);
+        printf("name: %s\n", (char *) (((int *) value.dptr) + 1));
     } else
     {
         printf("key.dptr is null\n");
     }
-    
     // Compare the display name to the name in the db
-    while (key.dptr && strcmp((char *) (((int *) value.dptr) + 1), name) != 0) // strcmps are done outside of db time.
+    while (key.dptr && strcmp((char *) (((int *) value.dptr) + 1), name) != 0)
     {
-        if (sem_wait(db_sem) == -1)
-        {
-            SET_ERROR(co->err);
-            return -1;
-        }
-        // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
-        db    = dbm_open(db_name, DB_FLAGS, DB_FILE_MODE);
         key   = dbm_firstkey(db);
         value = dbm_fetch(db, key);
-        if (!key.dptr && dbm_error(db)) // NOLINT(concurrency-mt-unsafe) : No threads here
+        if (!key.dptr && dbm_error(db))
         {
             print_db_error(db);
         }
-        dbm_close(db);
-        // NOLINTEND(concurrency-mt-unsafe) : Protected
-        sem_post(db_sem);
     }
-    
-    
-    *serial_object = value.dptr; // Will be null if not found.
+    dbm_close(db);
+    memcpy(value.dptr, *serial_object, value.dsize);
+    // NOLINTEND(concurrency-mt-unsafe) : Protected
+    sem_post(db_sem);
     
     return 0;
 }
@@ -426,7 +414,7 @@ static int insert_channel(struct core_object *co, struct server_object *so, Chan
         return -1;
     }
     insert_status = dbm_store(db, key, value, DBM_INSERT);
-    if (!key.dptr && dbm_error(db)) // NOLINT(concurrency-mt-unsafe) : No threads here
+    if (dbm_error(db)) // NOLINT(concurrency-mt-unsafe) : No threads here
     {
         print_db_error(db);
     }
