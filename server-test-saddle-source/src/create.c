@@ -450,8 +450,8 @@ static int assemble_200_create_auth_response(struct core_object *co, struct disp
     int    privilege_size;
     size_t body_size;
     
-    id_size        = sprintf(NULL, "%d", user->id);
-    privilege_size = sprintf(NULL, "%d", user->privilege_level);
+    id_size        = snprintf(NULL, 0, "%d", user->id);
+    privilege_size = snprintf(NULL, 0, "%d", user->privilege_level);
     if (id_size == -1 || privilege_size == -1)
     {
         SET_ERROR(co->err);
