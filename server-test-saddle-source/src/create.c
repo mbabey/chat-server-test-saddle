@@ -331,7 +331,7 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     }
     if (!auth) // No login token exists
     {
-        dispatch->body      = strdup("403\x03No account found with provided login token,\x03");
+        dispatch->body      = strdup("403\x03No account found with provided login token.\x03");
         dispatch->body_size = strlen(dispatch->body);
         return 0;
     }
@@ -349,14 +349,14 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     user_key.dptr  = &auth->user_id;
     user_key.dsize = sizeof(auth->user_id);
     
-    if (sem_wait(so->auth_db_sem) == -1)
+    if (sem_wait(so->user_db_sem) == -1)
     {
         SET_ERROR(co->err);
         return -1;
     }
     // get user with id
-    user_value = dbm_fetch(so->auth_db, user_key); // NOLINT(concurrency-mt-unsafe) : Protected
-    sem_post(so->auth_db_sem);
+    user_value = dbm_fetch(so->user_db, user_key); // NOLINT(concurrency-mt-unsafe) : Protected
+    sem_post(so->user_db_sem);
     
     if (user_value.dptr == NULL) // This should never happen.
     {
@@ -366,6 +366,9 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     // add user socket to server
     
     // assemble body with user info
+    
+    
+    // need to add user name, user
     
     return 0;
 }

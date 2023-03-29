@@ -79,7 +79,7 @@ int recv_parse_message(struct state *state, int socket_fd, struct dispatch *disp
         SET_ERROR(state->err);
         return -1;
     }
-
+    
     dispatch->type = version_and_type & MASK_b1111;
     version_and_type >>= (unsigned int) 4; // Bit shift right 4.
     dispatch->version = version_and_type & MASK_b1111;
@@ -257,21 +257,29 @@ void print_dispatch(struct state *state, struct dispatch *dispatch, const char *
     const char *type_string;
     const char *object_string;
     
-    type_string = type_to_string(dispatch->type);
+    type_string   = type_to_string(dispatch->type);
     object_string = object_to_string(dispatch->object);
     
-    (void) fprintf(stdout, "\n--- Dispatch %s ---\n"
-                           "Version:\t%d\n"
-                           "Type:\t\t%d (%s)\n"
-                           "Object:\t\t%d (%s)\n"
-                           "Body size:\t%d Bytes\n"
-                           "Body:\t\t%s\n\n",
-                           req_res_str,
-                           dispatch->version,
-                           dispatch->type, type_string,
-                           dispatch->object, object_string,
-                           dispatch->body_size,
-                           dispatch->body);
+//    (void) fprintf(stdout, "\n--- Dispatch %s ---\n"
+//                           "Version:\t%d\n"
+//                           "Type:\t\t%d (%s)\n"
+//                           "Object:\t\t%d (%s)\n"
+//                           "Body size:\t%d Bytes\n"
+//                           "Body:\t\t%s\n\n",
+//                           req_res_str,
+//                           dispatch->version,
+//                           dispatch->type, type_string,
+//                           dispatch->object, object_string,
+//                           dispatch->body_size,
+//                           dispatch->body);
+    
+    (void) fprintf(stdout, "\n--- Dispatch %s ---\n", req_res_str);
+    (void) fprintf(stdout, "Version:\t%d\n", dispatch->version);
+    (void) fprintf(stdout, "Type:\t\t%d (%s)\n", dispatch->type, type_string);
+    (void) fprintf(stdout, "Object:\t\t%d (%s)\n", dispatch->object, object_string);
+    (void) fprintf(stdout, "Body size:\t%d Bytes\n", dispatch->body_size);
+    (void) fprintf(stdout, "Body:\t\t%s\n\n", dispatch->body);
+    
 }
 
 static const char *type_to_string(uint8_t type)
@@ -323,7 +331,7 @@ static const char *object_to_string(uint8_t object)
 {
     const char *object_string;
     
-    switch(object)
+    switch (object)
     {
         case USER:
         {
