@@ -480,7 +480,7 @@ static int insert_channel(struct core_object *co, struct server_object *so, Chan
     // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
     insert_status = dbm_store(so->channel_db, key, value, DBM_INSERT); // NOLINT(concurrency-mt-unsafe) : Protected
     dbm_close(so->channel_db);
-    so->channel_db = dbm_open(USER_DB_NAME, DB_FLAGS, DB_FILE_MODE);
+    so->channel_db = dbm_open(CHANNEL_DB_NAME, DB_FLAGS, DB_FILE_MODE);
     // NOLINTEND(concurrency-mt-unsafe)
     sem_post(so->channel_db_sem);
     
@@ -583,7 +583,7 @@ static int insert_message(struct core_object *co, struct server_object *so, Mess
     // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
     insert_status = dbm_store(so->message_db, key, value, DBM_INSERT); // NOLINT(concurrency-mt-unsafe) : Protected
     dbm_close(so->message_db);
-    so->message_db = dbm_open(USER_DB_NAME, DB_FLAGS, DB_FILE_MODE);
+    so->message_db = dbm_open(MESSAGE_DB_NAME, DB_FLAGS, DB_FILE_MODE);
     // NOLINTEND(concurrency-mt-unsafe)
     sem_post(so->message_db_sem);
     
@@ -680,7 +680,7 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
     // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
     insert_status = dbm_store(so->auth_db, key, value, DBM_INSERT); // NOLINT(concurrency-mt-unsafe) : Protected
     dbm_close(so->auth_db);
-    so->auth_db = dbm_open(USER_DB_NAME, DB_FLAGS, DB_FILE_MODE);
+    so->auth_db = dbm_open(AUTH_DB_NAME, DB_FLAGS, DB_FILE_MODE);
     // NOLINTEND(concurrency-mt-unsafe)
     sem_post(so->auth_db_sem);
     
@@ -893,9 +893,9 @@ static void deserialize_auth(struct core_object *co, Auth **auth_get, uint8_t *s
     memcpy(&(*auth_get)->user_id, serial_auth, sizeof((*auth_get)->user_id));
     byte_offset = sizeof((*auth_get)->user_id);
     printf("%s\n", (char *) (serial_auth + byte_offset));
-    strcpy((*auth_get)->login_token, (char *) (serial_auth + byte_offset)); // TODO: need to allocate memory for this.
-    byte_offset += strlen((*auth_get)->login_token);
-    strcpy((*auth_get)->password, (char *) (serial_auth + byte_offset));
+    (*auth_get)->login_token = strdup((char *) (serial_auth + byte_offset));
+    byte_offset += strlen((*auth_get)->login_token) + 1;
+    (*auth_get)->password = strdup((char *) (serial_auth + byte_offset));
 }
 
 int db_update(struct core_object *co, struct server_object *so, int type, void *object)

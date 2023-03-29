@@ -108,7 +108,7 @@ int recv_parse_message(struct state *state, int socket_fd, struct dispatch *disp
         return -1;
     }
     dispatch->body_size = ntohs(dispatch->body_size);
-    PRINT_STACK_TRACE(state->tracer);
+    
     // Get the body.
     dispatch->body = (char *) mm_calloc(1, dispatch->body_size + 1, state->mm);
     if (!dispatch->body)
@@ -116,7 +116,6 @@ int recv_parse_message(struct state *state, int socket_fd, struct dispatch *disp
         SET_ERROR(state->err);
         return -1;
     }
-    PRINT_STACK_TRACE(state->tracer);
     
     bytes_read = recv(socket_fd, dispatch->body, dispatch->body_size, 0);
     if (bytes_read == 0 || errno == ECONNRESET)
@@ -129,13 +128,11 @@ int recv_parse_message(struct state *state, int socket_fd, struct dispatch *disp
         return -1;
     }
     
-    PRINT_STACK_TRACE(state->tracer);
     if (parse_body(state, body_tokens, dispatch->body_size, dispatch->body) == -1)
     {
         return -1;
     }
     
-    PRINT_STACK_TRACE(state->tracer);
     return 0;
 }
 

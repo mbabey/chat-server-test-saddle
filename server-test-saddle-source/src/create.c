@@ -331,13 +331,13 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     }
     if (!auth) // No login token exists
     {
-        dispatch->body      = strdup("400\x03Invalid fields\x03");
+        dispatch->body      = strdup("403\x03No account found with provided login token,\x03");
         dispatch->body_size = strlen(dispatch->body);
         return 0;
     }
     if (strcmp(auth->password, *(body_tokens + 1)) != 0) // Wrong password
     {
-        dispatch->body      = strdup("403\x03Invalid fields\x03");
+        dispatch->body      = strdup("403\x03Incorrect password.\x03");
         dispatch->body_size = strlen(dispatch->body);
         return 0;
     }
