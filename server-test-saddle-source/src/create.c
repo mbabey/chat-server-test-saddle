@@ -374,8 +374,6 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     user = mm_malloc(sizeof(User), co->mm);
     if (!user)
     {
-        dispatch->body = mm_strdup("500\x03""Server memory error.\x03", co->mm);
-        dispatch->body_size = strlen(dispatch->body);
         SET_ERROR(co->err);
         return -1;
     }
@@ -383,13 +381,37 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     deserialize_user(co, &user, user_value.dptr);
     
     // update user online status
-    db_update(co, so, USER, NULL)
+    user->online_status = 1;
+    if (db_update(co, so, USER, user) == -1)
+    {
+        return -1;
+    }
     
     // add user socket to server
     
     // assemble body with user info
+    char *body_buffer;
+    int id_size;
+    int privilege_size;
+    size_t body_size;
     
+    id_size = sprintf(NULL, "%d", user->id);
+    privilege_size = sprintf(NULL, "%d", user->privilege_level); // TODO: check err here
     
+    body_size = id_size + strlen(user->display_name) + privilege_size + 5;
+    
+    body_buffer = mm_malloc(body_size, co->mm);
+    if (!body_buffer)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
+    
+    snprintf(body_buffer, body_size, "%d\x03%s\x03%d\x03%d\x03",
+             user->id, user->display_name, user->privilege_level, user->online_status);
+    
+    dispatch->body = body_buffer;
+    dispatch->body_size = body_size;
     
     return 0;
 }
