@@ -845,7 +845,10 @@ static int delete_user(struct core_object *co, struct server_object *so, User *u
     key.dptr  = &user->id;
     key.dsize = sizeof(user->id);
     
-    if (safe_dbm_delete(co, USER_DB_NAME, so->user_db_sem, &key))
+    if (safe_dbm_delete(co, USER_DB_NAME, so->user_db_sem, &key) == -1)
+    {
+        return -1;
+    }
     
     return 0;
 }
@@ -891,19 +894,9 @@ static int delete_channel(struct core_object *co, struct server_object *so, Chan
     key.dptr  = &channel->id;
     key.dsize = sizeof(channel->id);
     
-    if (sem_wait(so->channel_db_sem) == -1)
+    if (safe_dbm_delete(co, CHANNEL_DB_NAME, so->channel_db_sem, &key) == -1)
     {
-        SET_ERROR(co->err);
         return -1;
-    }
-    
-    delete_status = dbm_delete(so->channel_db, key); // NOLINT(concurrency-mt-unsafe) : Protected
-    
-    sem_post(so->channel_db_sem);
-    
-    if (delete_status == -1)
-    {
-        print_db_error(so->channel_db);
     }
     
     return 0;
@@ -919,20 +912,9 @@ static int delete_message(struct core_object *co, struct server_object *so, Mess
     key.dptr  = &message->id;
     key.dsize = sizeof(message->id);
     
-    if (sem_wait(so->message_db_sem) == -1)
+    if (safe_dbm_delete(co, MESSAGE_DB_NAME, so->message_db_sem, &key) == -1)
     {
-        SET_ERROR(co->err);
         return -1;
-    }
-    // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
-    delete_status = dbm_delete(so->message_db, key);
-    // NOLINTEND(concurrency-mt-unsafe)
-    
-    sem_post(so->message_db_sem);
-    
-    if (delete_status == -1)
-    {
-        print_db_error(so->message_db);
     }
     
     return 0;
@@ -947,20 +929,11 @@ static int delete_auth(struct core_object *co, struct server_object *so, Auth *a
     key.dptr  = &auth->user_id;
     key.dsize = sizeof(auth->user_id);
     
-    if (sem_wait(so->auth_db_sem) == -1)
+    if (safe_dbm_delete(co, AUTH_DB_NAME, so->auth_db_sem, &key) == -1)
     {
-        SET_ERROR(co->err);
         return -1;
     }
     
-    delete_status = dbm_delete(so->auth_db, key); // NOLINT(concurrency-mt-unsafe) : Protected
-    
-    sem_post(so->auth_db_sem);
-    
-    if (delete_status == -1)
-    {
-        print_db_error(so->auth_db);
-    }
     return 0;
 }
 
