@@ -10,10 +10,10 @@
 /** Number of tokens that should be present in Create Type Dispatches. */
 enum BodyTokenSizes
 {
-    CREATE_USER_BODY_TOKEN_SIZE = 3,
+    CREATE_USER_BODY_TOKEN_SIZE    = 3,
     CREATE_CHANNEL_BODY_TOKEN_SIZE = 3,
     CREATE_MESSAGE_BODY_TOKEN_SIZE = 4,
-    CREATE_AUTH_BODY_TOKEN_SIZE = 2
+    CREATE_AUTH_BODY_TOKEN_SIZE    = 2
 };
 
 /**
@@ -74,7 +74,19 @@ static int generate_message_id(TRACER_FUNCTION_AS(tracer));
  */
 static int assemble_200_create_auth_response(struct core_object *co, struct dispatch *dispatch, const User *user);
 
-int log_in_user(struct core_object *co, struct server_object *so, User *user);
+/**
+ * log_in_user
+ * <p>
+ * Update a user's online status to 1 and update the user in the database. Add the user to the list of active users.
+ * If the user is already logged in, remove the disconnect the currently connected socket address and replace it with
+ * the new socket address.
+ * </p>
+ * @param co the core object
+ * @param so the server object
+ * @param user the user to log in
+ * @return 0 on success, -1 and set err on failure.
+ */
+static int log_in_user(struct core_object *co, struct server_object *so, User *user);
 
 int handle_create(struct core_object *co, struct server_object *so, struct dispatch *dispatch, char **body_tokens)
 {
@@ -132,7 +144,7 @@ int handle_create_user(struct core_object *co, struct server_object *so, struct 
     size_t count;
     char   **body_tokens_cpy;
     
-    count = 0;
+    count           = 0;
     body_tokens_cpy = body_tokens;
     COUNT_TOKENS(count, body_tokens_cpy);
     if (count != CREATE_USER_BODY_TOKEN_SIZE)
@@ -319,7 +331,9 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     size_t count;
     char   **body_tokens_cpy;
     
-    count = 0;
+    // Validate Auth message.
+    
+    count           = 0;
     body_tokens_cpy = body_tokens;
     COUNT_TOKENS(count, body_tokens_cpy);
     if (count != CREATE_AUTH_BODY_TOKEN_SIZE)
@@ -328,8 +342,6 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
         dispatch->body_size = strlen(dispatch->body);
         return 0;
     }
-    
-    // validate auth fields
     if (!(VALIDATE_LOGIN_TOKEN(*body_tokens) && VALIDATE_PASSWORD(*(body_tokens + 1))))
     {
         dispatch->body      = mm_strdup("400\x03Invalid fields\x03", co->mm);
@@ -339,7 +351,8 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     
     Auth *auth;
     
-    // read db for auth
+    // Read database to find Auth.
+    
     if (db_read(co, so, AUTH, &auth, *body_tokens) == -1)
     {
         return -1;
@@ -369,7 +382,6 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
         SET_ERROR(co->err);
         return -1;
     }
-    
     user_value = dbm_fetch(so->user_db, user_key); // NOLINT(concurrency-mt-unsafe) : Protected
     sem_post(so->user_db_sem);
     
@@ -378,7 +390,8 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     if (user_value.dptr == NULL) // This should never happen.
     {
         (void) fprintf(stdout, "Create-Auth: User with id \"%d\" not found in User database.\n", auth->user_id);
-        dispatch->body = mm_strdup("500\x03""Database Error: Auth exists with no existing referenced user.\x03", co->mm);
+        dispatch->body      = mm_strdup("500\x03""Database Error: Auth exists with no existing referenced User.\x03",
+                                        co->mm);
         dispatch->body_size = strlen(dispatch->body);
         return 0;
     }
@@ -391,15 +404,13 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
         SET_ERROR(co->err);
         return -1;
     }
-    
     deserialize_user(co, &user, user_value.dptr);
-    
     if (log_in_user(co, so, user) == -1)
     {
         return -1;
     }
     
-    // add user socket to server
+    
     if (assemble_200_create_auth_response(co, dispatch, user) == -1)
     {
         return -1;
@@ -408,16 +419,27 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     return 0;
 }
 
-int log_in_user(struct core_object *co, struct server_object *so, User *user)
+static int log_in_user(struct core_object *co, struct server_object *so, User *user)
 {
-    // TODO: if user online status is already 1, log user out and log new user in.
+    /* TODO:
+     * If the user is already logged in, remove the disconnect the currently
+     * connected socket address and replace it with the new socket address.
+     */
     
     // update user online status to log user in
-    user->online_status = 1;
-    if (db_update(co, so, USER, user) == -1)
+    if (user->online_status == 0)
     {
-        return -1;
+        user->online_status = 1;
+        if (db_update(co, so, USER, user) == -1)
+        {
+            return -1;
+        }
+    } else
+    {
+        
     }
+    
+    // TODO: add user socket to server cache
     
     return 0;
 }
@@ -425,12 +447,12 @@ int log_in_user(struct core_object *co, struct server_object *so, User *user)
 static int assemble_200_create_auth_response(struct core_object *co, struct dispatch *dispatch, const User *user)
 {
     // assemble body with user info
-    char *body_buffer;
-    int id_size;
-    int privilege_size;
+    char   *body_buffer;
+    int    id_size;
+    int    privilege_size;
     size_t body_size;
     
-    id_size = sprintf(NULL, "%d", user->id);
+    id_size        = sprintf(NULL, "%d", user->id);
     privilege_size = sprintf(NULL, "%d", user->privilege_level);
     if (id_size == -1 || privilege_size == -1)
     {
@@ -449,13 +471,13 @@ static int assemble_200_create_auth_response(struct core_object *co, struct disp
     }
     
     if (snprintf(body_buffer, body_size, "200\x03%d\x03%s\x03%d\x03%d\x03",
-             user->id, user->display_name, user->privilege_level, user->online_status) == -1)
+                 user->id, user->display_name, user->privilege_level, user->online_status) == -1)
     {
         SET_ERROR(co->err);
         return -1;
     }
     
-    dispatch->body = body_buffer;
+    dispatch->body      = body_buffer;
     dispatch->body_size = body_size;
     
     return 0;
