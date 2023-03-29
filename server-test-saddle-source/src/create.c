@@ -398,7 +398,8 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     id_size = sprintf(NULL, "%d", user->id);
     privilege_size = sprintf(NULL, "%d", user->privilege_level); // TODO: check err here
     
-    body_size = id_size + strlen(user->display_name) + privilege_size + 5;
+    // 8 is the 3 digit status code and the 5 terminating ETXs
+    body_size = id_size + strlen(user->display_name) + privilege_size + 8;
     
     body_buffer = mm_malloc(body_size, co->mm);
     if (!body_buffer)
@@ -407,7 +408,7 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
         return -1;
     }
     
-    snprintf(body_buffer, body_size, "%d\x03%s\x03%d\x03%d\x03",
+    snprintf(body_buffer, body_size, "200\x03%d\x03%s\x03%d\x03%d\x03",
              user->id, user->display_name, user->privilege_level, user->online_status);
     
     dispatch->body = body_buffer;
