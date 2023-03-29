@@ -336,10 +336,11 @@ static int insert_user(struct core_object *co, struct server_object *so, User *u
         SET_ERROR(co->err);
         return -1;
     }
-    insert_status = dbm_store(so->user_db, key, value, DBM_INSERT); // NOLINT(concurrency-mt-unsafe) : Protected
+    // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
+    insert_status = dbm_store(so->user_db, key, value, DBM_INSERT);
     dbm_close(so->user_db);
     so->user_db = dbm_open(USER_DB_NAME, DB_FLAGS, DB_FILE_MODE);
-
+    // NOLINTEND(concurrency-mt-unsafe)
     sem_post(so->user_db_sem);
     
     if (so->user_db == (DBM *) 0)
@@ -476,11 +477,11 @@ static int insert_channel(struct core_object *co, struct server_object *so, Chan
         SET_ERROR(co->err);
         return -1;
     }
-    
+    // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
     insert_status = dbm_store(so->channel_db, key, value, DBM_INSERT); // NOLINT(concurrency-mt-unsafe) : Protected
     dbm_close(so->channel_db);
     so->channel_db = dbm_open(USER_DB_NAME, DB_FLAGS, DB_FILE_MODE);
-    
+    // NOLINTEND(concurrency-mt-unsafe)
     sem_post(so->channel_db_sem);
     
     if (so->channel_db == (DBM *) 0)
@@ -579,11 +580,11 @@ static int insert_message(struct core_object *co, struct server_object *so, Mess
         SET_ERROR(co->err);
         return -1;
     }
-    
+    // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
     insert_status = dbm_store(so->message_db, key, value, DBM_INSERT); // NOLINT(concurrency-mt-unsafe) : Protected
     dbm_close(so->message_db);
     so->message_db = dbm_open(USER_DB_NAME, DB_FLAGS, DB_FILE_MODE);
-    
+    // NOLINTEND(concurrency-mt-unsafe)
     sem_post(so->message_db_sem);
     
     if (so->message_db == (DBM *) 0)
@@ -676,11 +677,11 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
         SET_ERROR(co->err);
         return -1;
     }
-    
+    // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
     insert_status = dbm_store(so->auth_db, key, value, DBM_INSERT); // NOLINT(concurrency-mt-unsafe) : Protected
     dbm_close(so->auth_db);
     so->auth_db = dbm_open(USER_DB_NAME, DB_FLAGS, DB_FILE_MODE);
-    
+    // NOLINTEND(concurrency-mt-unsafe)
     sem_post(so->auth_db_sem);
     
     if (so->auth_db == (DBM *) 0)
@@ -891,7 +892,8 @@ static void deserialize_auth(struct core_object *co, Auth **auth_get, uint8_t *s
     
     memcpy(&(*auth_get)->user_id, serial_auth, sizeof((*auth_get)->user_id));
     byte_offset = sizeof((*auth_get)->user_id);
-    strcpy((*auth_get)->login_token, (char *) (serial_auth + byte_offset));
+    printf("%s\n", (char *) (serial_auth + byte_offset));
+    strcpy((*auth_get)->login_token, (char *) (serial_auth + byte_offset)); // TODO: need to allocate memory for this.
     byte_offset += strlen((*auth_get)->login_token);
     strcpy((*auth_get)->password, (char *) (serial_auth + byte_offset));
 }
@@ -1006,8 +1008,9 @@ static int delete_message(struct core_object *co, struct server_object *so, Mess
         SET_ERROR(co->err);
         return -1;
     }
-    
+    // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
     delete_status = dbm_delete(so->message_db, key);
+    // NOLINTEND(concurrency-mt-unsafe)
     
     sem_post(so->message_db_sem);
     

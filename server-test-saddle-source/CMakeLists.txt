@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(server-test-saddle
+project(test-server
         VERSION 0.0.1
         DESCRIPTION ""
         LANGUAGES C)
@@ -136,7 +136,7 @@ set(DOXYGEN_QUIET YES)
 doxygen_add_docs(doxygen
         ${HEADER_LIST}
         WORKING_DIRECTORY /Users/mud/Projects/cProjects/projects/chat-server-test-saddle/server-test-saddle-source
-        COMMENT "Generating Doxygen documentation for server-test-saddle")
+        COMMENT "Generating Doxygen documentation for test-server")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CLANG_TIDY_CHECKS "*")
@@ -162,16 +162,16 @@ set(CLANG_TIDY_CHECKS "${CLANG_TIDY_CHECKS},-android-cloexec-accept")
 set(CMAKE_C_CLANG_TIDY clang-tidy -checks=${CLANG_TIDY_CHECKS};--quiet)
 
 if(${COMPILE_AS_LIBRARY})
-    add_library(server-test-saddle SHARED ${SOURCE_LIST} ${HEADER_LIST})
-    target_include_directories(server-test-saddle PRIVATE include/server-test-saddle)
-    target_include_directories(server-test-saddle PRIVATE /usr/local/include)
-    target_link_directories(server-test-saddle PRIVATE /usr/local/lib)
+    add_library(test-server SHARED ${SOURCE_LIST} ${HEADER_LIST})
+    target_include_directories(test-server PRIVATE include/test-server)
+    target_include_directories(test-server PRIVATE /usr/local/include)
+    target_link_directories(test-server PRIVATE /usr/local/lib)
 
     if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-        target_include_directories(server-test-saddle PRIVATE /usr/include)
+        target_include_directories(test-server PRIVATE /usr/include)
     endif ()
 
-    set_target_properties(server-test-saddle PROPERTIES
+    set_target_properties(test-server PROPERTIES
             VERSION ${PROJECT_VERSION}
             SOVERSION ${PROJECT_VERSION_MAJOR})
 
@@ -186,10 +186,10 @@ if(${COMPILE_AS_LIBRARY})
     set(INSTALL_LIB_DIR lib${LIBSUFFIX} CACHE PATH "Installation directory for libraries")
     mark_as_advanced(INSTALL_LIB_DIR)
 
-    install(TARGETS server-test-saddle LIBRARY DESTINATION ${INSTALL_LIB_DIR})
-    install(FILES ${HEADER_LIST} DESTINATION include/server-test-saddle)
+    install(TARGETS test-server LIBRARY DESTINATION ${INSTALL_LIB_DIR})
+    install(FILES ${HEADER_LIST} DESTINATION include/test-server)
 else()
-    add_executable(server-test-saddle ${SOURCE_LIST})
+    add_executable(test-server ${SOURCE_LIST})
 endif()
 
-add_dependencies(server-test-saddle doxygen)
+add_dependencies(test-server doxygen)
