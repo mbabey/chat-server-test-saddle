@@ -383,7 +383,7 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     deserialize_user(co, &user, user_value.dptr);
     
     // update user online status
-    db_update(co, so, USER, )
+    db_update(co, so, USER, NULL)
     
     // add user socket to server
     

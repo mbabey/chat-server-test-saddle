@@ -134,6 +134,19 @@ static int read_messages(struct core_object *co, struct server_object *so, Messa
 static int read_auth(struct core_object *co, struct server_object *so, Auth **auth_get, const char *login_token);
 
 /**
+ * update_user
+ * <p>
+ * Provided the updated user in user, find a user with the same ID in the database and update the user with the
+ * values of the fields in user.
+ * </p>
+ * @param co the core object
+ * @param so the server object
+ * @param user the updated user; id will be used for query
+ * @return 0 on success, -1 and set err on failure
+ */
+static int update_user(struct core_object *co, struct server_object *so, User *user);
+
+/**
  * delete_user
  * <p>
  * Delete a User from the User database.
@@ -654,8 +667,8 @@ static int read_auth(struct core_object *co, struct server_object *so, Auth **au
     
     return 0;
 }
-static int update_user(struct core_object *co, struct server_object *so, User *user);
-int db_update(struct core_object *co, struct server_object *so, int type, void **object_dst, const void *object_src)
+
+int db_update(struct core_object *co, struct server_object *so, int type, void *object_src)
 {
     PRINT_STACK_TRACE(co->tracer);
     
@@ -663,24 +676,36 @@ int db_update(struct core_object *co, struct server_object *so, int type, void *
     {
         case USER:
         {
-            if (update_user(co, so, (const User *) object_src) == -1)
+            if (update_user(co, so, (User *) object_src) == -1)
             {
                 return -1;
             }
             break;
         }
-        case CHANNEL:
-        {
-            break;
-        }
-        case MESSAGE:
-        {
-            break;
-        }
-        case AUTH:
-        {
-            break;
-        }
+//        case CHANNEL:
+//        {
+//            if (update_channel(co, so, (Channel *) object_src) == -1)
+//            {
+//                return -1;
+//            }
+//            break;
+//        }
+//        case MESSAGE:
+//        {
+//            if (update_message(co, so, (Channel *) object_src) == -1)
+//            {
+//                return -1;
+//            }
+//            break;
+//        }
+//        case AUTH:
+//        {
+//            if (update_auth(co, so, (Channel *) object_src) == -1)
+//            {
+//                return -1;
+//            }
+//            break;
+//        }
         default:;
     }
     
@@ -713,7 +738,10 @@ static int update_user(struct core_object *co, struct server_object *so, User *u
         SET_ERROR(co->err);
         return -1;
     }
-    dbm_store(so->user_db, key, value, DBM_REPLACE);
+    if (dbm_store(so->user_db, key, value, DBM_REPLACE) == -1)
+    {
+        print_db_error(so->user_db);
+    }
     dbm_close(so->user_db);
     so->user_db = dbm_open(USER_DB_NAME, DB_FLAGS, DB_FILE_MODE);
     sem_post(so->user_db_sem);
