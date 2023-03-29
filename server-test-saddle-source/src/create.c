@@ -1,6 +1,7 @@
 #include "../../include/util.h"
 #include "../include/create.h"
 #include "../include/db.h"
+#include "../include/object-serialization.h"
 
 #include <stdlib.h>
 
@@ -361,13 +362,27 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     if (user_value.dptr == NULL) // This should never happen.
     {
         (void) fprintf(stdout, "Create-Auth: User with id \"%d\" not found in User database.\n", auth->user_id);
+        dispatch->body = strdup("500\x03""Database Error: Auth exists with no existing referenced user.\x03");
+        dispatch->body_size = strlen(dispatch->body);
+        return 0;
     }
+    
+    User *user;
+    
+    user = mm_malloc(sizeof(User), co->mm);
+    if (!user)
+    {
+        dispatch->body = strdup("500\x03""Server memory error.\x03");
+        dispatch->body_size = strlen(dispatch->body);
+        SET_ERROR(co->err);
+        return -1;
+    }
+    
+    deserialize_user(co, &user, user_value.dptr);
     // update user online status
     // add user socket to server
     
     // assemble body with user info
-    
-    
     // need to add user name, user
     
     return 0;
