@@ -411,7 +411,6 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
         return -1;
     }
     
-    
     if (assemble_200_create_auth_response(co, dispatch, user) == -1)
     {
         return -1;
@@ -458,10 +457,10 @@ static int assemble_200_create_auth_response(struct core_object *co, struct disp
         return -1;
     }
     
-    // 8 is the 3 digit status code and the 5 terminating ETXs
-    body_size = id_size + strlen(user->display_name) + privilege_size + 8; // NOLINT : Magic number contained
+    // 9 is the 3 digit status code, the online status, and the 5 terminating ETXs
+    body_size = id_size + strlen(user->display_name) + privilege_size + 9; // NOLINT : Magic number contained
     
-    body_buffer = mm_malloc(body_size, co->mm);
+    body_buffer = mm_malloc(body_size + 1, co->mm);
     if (!body_buffer)
     {
         SET_ERROR(co->err);
