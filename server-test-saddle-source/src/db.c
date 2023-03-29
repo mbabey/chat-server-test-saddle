@@ -255,8 +255,6 @@ static int insert_user(struct core_object *co, struct server_object *so, User *u
         return -1;
     }
     
-    printf("serial_user_size: %lu\n", serial_user_size);
-    
     key.dptr    = serial_user;
     key.dsize   = sizeof(user->id);
     value.dptr  = serial_user;
@@ -656,7 +654,7 @@ static int read_auth(struct core_object *co, struct server_object *so, Auth **au
     
     return 0;
 }
-static int update_user(struct core_object *co, struct server_object *so, User **user_dst, const User *user_src);
+static int update_user(struct core_object *co, struct server_object *so, User *user);
 int db_update(struct core_object *co, struct server_object *so, int type, void **object_dst, const void *object_src)
 {
     PRINT_STACK_TRACE(co->tracer);
@@ -665,7 +663,7 @@ int db_update(struct core_object *co, struct server_object *so, int type, void *
     {
         case USER:
         {
-            if (update_user(co, so, (User **) object_dst, (const User *) object_src) == -1)
+            if (update_user(co, so, (const User *) object_src) == -1)
             {
                 return -1;
             }
@@ -689,11 +687,42 @@ int db_update(struct core_object *co, struct server_object *so, int type, void *
     return 0;
 }
 
-static int update_user(struct core_object *co, struct server_object *so, User **user_dst, const User *user_src)
+static int update_user(struct core_object *co, struct server_object *so, User *user)
 {
     PRINT_STACK_TRACE(co->tracer);
     
+    unsigned long serial_user_size;
+    uint8_t *serial_user;
+    datum key;
+    datum value;
     
+    serial_user_size = serialize_user(co, &serial_user, user);
+    if (serial_user_size == 0)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
+    
+    key.dptr = serial_user;
+    key.dsize = sizeof(int);
+    value.dptr = serial_user;
+    value.dsize = serial_user_size;
+    
+    if (sem_wait(so->user_db_sem) == -1)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
+    dbm_store(so->user_db, key, value, DBM_REPLACE);
+    dbm_close(so->user_db);
+    so->user_db = dbm_open(USER_DB_NAME, DB_FLAGS, DB_FILE_MODE);
+    sem_post(so->user_db_sem);
+    
+    if (so->user_db == (DBM *) 0)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
     
     return 0;
 }
