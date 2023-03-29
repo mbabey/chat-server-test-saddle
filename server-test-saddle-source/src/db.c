@@ -889,7 +889,6 @@ static int delete_channel(struct core_object *co, struct server_object *so, Chan
     PRINT_STACK_TRACE(co->tracer);
     
     datum key;
-    int   delete_status;
     
     key.dptr  = &channel->id;
     key.dsize = sizeof(channel->id);
@@ -907,7 +906,6 @@ static int delete_message(struct core_object *co, struct server_object *so, Mess
     PRINT_STACK_TRACE(co->tracer);
     
     datum key;
-    int   delete_status;
     
     key.dptr  = &message->id;
     key.dsize = sizeof(message->id);
@@ -924,7 +922,6 @@ static int delete_auth(struct core_object *co, struct server_object *so, Auth *a
 {
     PRINT_STACK_TRACE(co->tracer);
     datum key;
-    int   delete_status;
     
     key.dptr  = &auth->user_id;
     key.dsize = sizeof(auth->user_id);
