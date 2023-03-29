@@ -51,7 +51,7 @@ int db_create(struct core_object *co, struct server_object *so, int type, void *
  */
 int db_read(struct core_object *co, struct server_object *so, int type, void *object_dst, void *object_query);
 
-int db_update(struct core_object *co, struct server_object *so, int type, void *object);
+int db_update(struct core_object *co, struct server_object *so, int type, void **object_dst, const void *object_src);
 
 int db_destroy(struct core_object *co, struct server_object *so, int type, void *object);
 

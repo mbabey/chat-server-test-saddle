@@ -656,10 +656,44 @@ static int read_auth(struct core_object *co, struct server_object *so, Auth **au
     
     return 0;
 }
-
-int db_update(struct core_object *co, struct server_object *so, int type, void *object)
+static int update_user(struct core_object *co, struct server_object *so, User **user_dst, const User *user_src);
+int db_update(struct core_object *co, struct server_object *so, int type, void **object_dst, const void *object_src)
 {
     PRINT_STACK_TRACE(co->tracer);
+    
+    switch (type)
+    {
+        case USER:
+        {
+            if (update_user(co, so, (User **) object_dst, (const User *) object_src) == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case CHANNEL:
+        {
+            break;
+        }
+        case MESSAGE:
+        {
+            break;
+        }
+        case AUTH:
+        {
+            break;
+        }
+        default:;
+    }
+    
+    return 0;
+}
+
+static int update_user(struct core_object *co, struct server_object *so, User **user_dst, const User *user_src)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    
     
     return 0;
 }

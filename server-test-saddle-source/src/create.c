@@ -323,7 +323,7 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
         return 0;
     }
     
-    Auth *auth; // TODO: must free
+    Auth *auth;
     
     // read db for auth
     if (db_read(co, so, AUTH, &auth, *body_tokens) == -1)
@@ -359,6 +359,8 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     user_value = dbm_fetch(so->user_db, user_key); // NOLINT(concurrency-mt-unsafe) : Protected
     sem_post(so->user_db_sem);
     
+    free_auth(co, auth);
+    
     if (user_value.dptr == NULL) // This should never happen.
     {
         (void) fprintf(stdout, "Create-Auth: User with id \"%d\" not found in User database.\n", auth->user_id);
@@ -379,11 +381,15 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     }
     
     deserialize_user(co, &user, user_value.dptr);
+    
     // update user online status
+    db_update(co, so, USER, )
+    
     // add user socket to server
     
     // assemble body with user info
-    // need to add user name, user
+    
+    
     
     return 0;
 }
