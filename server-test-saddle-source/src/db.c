@@ -834,8 +834,6 @@ int db_destroy(struct core_object *co, struct server_object *so, int type, void 
     return 0;
 }
 
-static int safe_dbm_delete(struct core_object *co, const char *db_name, sem_t *sem, datum *key);
-
 static int delete_user(struct core_object *co, struct server_object *so, User *user)
 {
     PRINT_STACK_TRACE(co->tracer);
@@ -853,7 +851,7 @@ static int delete_user(struct core_object *co, struct server_object *so, User *u
     return 0;
 }
 
-static int safe_dbm_delete(struct core_object *co, const char *db_name, sem_t *sem, datum *key)
+int safe_dbm_delete(struct core_object *co, const char *db_name, sem_t *sem, datum *key)
 {
     DBM *db;
     

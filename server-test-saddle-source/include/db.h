@@ -55,4 +55,17 @@ int db_update(struct core_object *co, struct server_object *so, int type, void *
 
 int db_destroy(struct core_object *co, struct server_object *so, int type, void *object);
 
+/**
+ * safe_dbm_delete
+ * <p>
+ * Safely delete an item from a database.
+ * </p>
+ * @param co the core object
+ * @param db_name the database name
+ * @param sem the database semaphore
+ * @param key the key to delete
+ * @return 0 on success, -1 and set err on failure.
+ */
+int safe_dbm_delete(struct core_object *co, const char *db_name, sem_t *sem, datum *key);
+
 #endif //SERVER_TEST_SADDLE_DB_H
