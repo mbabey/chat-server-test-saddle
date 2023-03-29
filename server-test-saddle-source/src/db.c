@@ -261,6 +261,7 @@ static int insert_user(struct core_object *co, struct server_object *so, User *u
     {
         (void) fprintf(stdout, "Database error occurred: User with name \"%s\" already exists in User database.\n",
                        user->display_name);
+        mm_free(co->mm, serial_user);
         return 1;
     }
     
@@ -311,6 +312,7 @@ static int insert_user(struct core_object *co, struct server_object *so, User *u
     return 0;
 }
 
+// TODO: this function returns an int 1 if the object is found and an int 0 if the object is not found
 static int find_by_name(struct core_object *co, const char *db_name, sem_t *db_sem,
                         uint8_t **serial_object, const char *name)
 {
@@ -359,7 +361,19 @@ static int find_by_name(struct core_object *co, const char *db_name, sem_t *db_s
         }
     }
     dbm_close(db);
-    memcpy(value.dptr, *serial_object, value.dsize);
+    if (value.dptr)
+    {
+        *serial_object = mm_malloc(value.dsize, co->mm);
+        if (!*serial_object)
+        {
+            SET_ERROR(co->err);
+            return -1;
+        }
+        memcpy(value.dptr, *serial_object, value.dsize);
+    } else
+    {
+        *serial_object = NULL;
+    }
     // NOLINTEND(concurrency-mt-unsafe) : Protected
     sem_post(db_sem);
     
@@ -387,6 +401,7 @@ static int insert_channel(struct core_object *co, struct server_object *so, Chan
         (void) fprintf(stdout,
                        "Database error occurred: Channel with name \"%s\" already exists in Channel database.\n",
                        channel->channel_name);
+        mm_free(co->mm, serial_channel);
         return 1;
     }
     
@@ -511,6 +526,7 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
     {
         (void) fprintf(stdout, "Database error occurred: Auth with token \"%s\" already exists in Auth database.\n",
                        auth->login_token);
+        mm_free(co->mm, serial_auth);
         return 1;
     }
     
