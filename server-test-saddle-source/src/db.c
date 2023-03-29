@@ -247,21 +247,21 @@ static int insert_user(struct core_object *co, struct server_object *so, User *u
     
     uint8_t       *serial_user;
     unsigned long serial_user_size;
-    int           insert_status;
+    int           status;
     datum         key;
     datum         value;
     DBM           *db;
     
     // Determine if a user with the username already exists in the database.
-    if (find_by_name(co, USER_DB_NAME, so->user_db_sem, &serial_user, user->display_name) == -1)
+    status = find_by_name(co, USER_DB_NAME, so->user_db_sem, NULL, user->display_name);
+    if (status == -1)
     {
         return -1;
     }
-    if (serial_user)
+    if (status == 1)
     {
         (void) fprintf(stdout, "Database error occurred: User with name \"%s\" already exists in User database.\n",
                        user->display_name);
-        mm_free(co->mm, serial_user);
         return 1;
     }
     
@@ -288,7 +288,7 @@ static int insert_user(struct core_object *co, struct server_object *so, User *u
         SET_ERROR(co->err);
         return -1;
     }
-    insert_status = dbm_store(db, key, value, DBM_INSERT);
+    status = dbm_store(db, key, value, DBM_INSERT);
     if (dbm_error(db)) // NOLINT(concurrency-mt-unsafe) : No threads here
     {
         print_db_error(db);
@@ -297,13 +297,13 @@ static int insert_user(struct core_object *co, struct server_object *so, User *u
     // NOLINTEND(concurrency-mt-unsafe)
     sem_post(so->user_db_sem);
     
-    if (insert_status == 1)
+    if (status == 1)
     {
         (void) fprintf(stdout, "Database error occurred: User with ID \"%d\" already exists in User database.\n",
                        *(int *) key.dptr);
         return 1;
     }
-    if (insert_status == -1)
+    if (status == -1)
     {
         SET_ERROR(co->err);
         return -1;
@@ -404,22 +404,22 @@ static int insert_channel(struct core_object *co, struct server_object *so, Chan
     
     uint8_t       *serial_channel;
     unsigned long serial_channel_size;
-    int           insert_status;
+    int           status;
     datum         key;
     datum         value;
     DBM           *db;
     
     // Determine if a channel with the channel name already exists in the database.
-    if (find_by_name(co, CHANNEL_DB_NAME, so->channel_db_sem, &serial_channel, channel->channel_name) == -1)
+    status = find_by_name(co, CHANNEL_DB_NAME, so->channel_db_sem, NULL, channel->channel_name);
+    if (status == -1)
     {
         return -1;
     }
-    if (serial_channel)
+    if (status == 1)
     {
         (void) fprintf(stdout,
                        "Database error occurred: Channel with name \"%s\" already exists in Channel database.\n",
                        channel->channel_name);
-        mm_free(co->mm, serial_channel);
         return 1;
     }
     
@@ -446,7 +446,7 @@ static int insert_channel(struct core_object *co, struct server_object *so, Chan
         SET_ERROR(co->err);
         return -1;
     }
-    insert_status = dbm_store(db, key, value, DBM_INSERT);
+    status = dbm_store(db, key, value, DBM_INSERT);
     if (dbm_error(db)) // NOLINT(concurrency-mt-unsafe) : No threads here
     {
         print_db_error(db);
@@ -455,11 +455,11 @@ static int insert_channel(struct core_object *co, struct server_object *so, Chan
     // NOLINTEND(concurrency-mt-unsafe)
     sem_post(so->channel_db_sem);
     
-    if (insert_status == 1)
+    if (status == 1)
     {
         (void) fprintf(stdout, "Database error occurred: Channel with ID \"%d\" already exists in Channel database.\n",
                        *(int *) key.dptr);
-    } else if (insert_status == -1)
+    } else if (status == -1)
     {
         SET_ERROR(co->err);
         return -1;
@@ -474,7 +474,7 @@ static int insert_message(struct core_object *co, struct server_object *so, Mess
     
     uint8_t       *serial_message;
     unsigned long serial_message_size;
-    int           insert_status;
+    int           status;
     datum         key;
     datum         value;
     DBM           *db;
@@ -502,7 +502,7 @@ static int insert_message(struct core_object *co, struct server_object *so, Mess
         SET_ERROR(co->err);
         return -1;
     }
-    insert_status = dbm_store(db, key, value, DBM_INSERT);
+    status = dbm_store(db, key, value, DBM_INSERT);
     if (!key.dptr && dbm_error(db)) // NOLINT(concurrency-mt-unsafe) : No threads here
     {
         print_db_error(db);
@@ -511,11 +511,11 @@ static int insert_message(struct core_object *co, struct server_object *so, Mess
     // NOLINTEND(concurrency-mt-unsafe)
     sem_post(so->message_db_sem);
     
-    if (insert_status == 1)
+    if (status == 1)
     {
         (void) fprintf(stdout, "Database error occurred: Message with ID \"%d\" already exists in Message database.\n",
                        *(int *) key.dptr);
-    } else if (insert_status == -1)
+    } else if (status == -1)
     {
         SET_ERROR(co->err);
         return -1;
@@ -530,21 +530,21 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
     
     uint8_t       *serial_auth;
     unsigned long serial_auth_size;
-    int           insert_status;
+    int           status;
     datum         key;
     datum         value;
     DBM           *db;
     
     // Determine if an auth with the login token already exists in the database.
-    if (find_by_name(co, AUTH_DB_NAME, so->auth_db_sem, &serial_auth, auth->login_token) == -1)
+    status = find_by_name(co, AUTH_DB_NAME, so->auth_db_sem, NULL, auth->login_token);
+    if (status == -1)
     {
         return -1;
     }
-    if (serial_auth)
+    if (status == 1)
     {
         (void) fprintf(stdout, "Database error occurred: Auth with token \"%s\" already exists in Auth database.\n",
                        auth->login_token);
-        mm_free(co->mm, serial_auth);
         return 1;
     }
     
@@ -571,7 +571,7 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
         SET_ERROR(co->err);
         return -1;
     }
-    insert_status = dbm_store(db, key, value, DBM_INSERT);
+    status = dbm_store(db, key, value, DBM_INSERT);
     if (!key.dptr && dbm_error(db)) // NOLINT(concurrency-mt-unsafe) : No threads here
     {
         print_db_error(db);
@@ -580,13 +580,13 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
     // NOLINTEND(concurrency-mt-unsafe)
     sem_post(so->auth_db_sem);
     
-    if (insert_status == 1)
+    if (status == 1)
     {
         (void) fprintf(stdout, "Database error occurred: Auth with ID \"%d\" already exists in Auth database.\n",
                        *(int *) key.dptr);
         return 1;
     }
-    if (insert_status == -1)
+    if (status == -1)
     {
         SET_ERROR(co->err);
         return -1;
