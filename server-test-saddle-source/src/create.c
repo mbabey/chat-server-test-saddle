@@ -62,6 +62,18 @@ static int create_name_list(struct core_object *co, const char ***dst_list, char
  */
 static int generate_message_id(TRACER_FUNCTION_AS(tracer));
 
+/**
+ * assemble_200_create_auth_response
+ * <p>
+ * Assemble a 200 create auth response with the user information in the body.
+ * </p>
+ * @param co the core object
+ * @param dispatch the dispatch in which to assemble the body
+ * @param user the user of which to send information
+ * @return 0 on success, -1 and set err on failure
+ */
+static int assemble_200_create_auth_response(struct core_object *co, struct dispatch *dispatch, const User *user);
+
 int handle_create(struct core_object *co, struct server_object *so, struct dispatch *dispatch, char **body_tokens)
 {
     PRINT_STACK_TRACE(co->tracer);
@@ -346,7 +358,7 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     datum user_key;
     datum user_value;
     
-    // get user_id
+    // get user_id, get user with id
     user_key.dptr  = &auth->user_id;
     user_key.dsize = sizeof(auth->user_id);
     
@@ -355,7 +367,7 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
         SET_ERROR(co->err);
         return -1;
     }
-    // get user with id
+    
     user_value = dbm_fetch(so->user_db, user_key); // NOLINT(concurrency-mt-unsafe) : Protected
     sem_post(so->user_db_sem);
     
@@ -388,7 +400,16 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     }
     
     // add user socket to server
+    if (assemble_200_create_auth_response(co, dispatch, user) == -1)
+    {
+        return -1;
+    }
     
+    return 0;
+}
+
+static int assemble_200_create_auth_response(struct core_object *co, struct dispatch *dispatch, const User *user)
+{
     // assemble body with user info
     char *body_buffer;
     int id_size;
@@ -396,10 +417,15 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     size_t body_size;
     
     id_size = sprintf(NULL, "%d", user->id);
-    privilege_size = sprintf(NULL, "%d", user->privilege_level); // TODO: check err here
+    privilege_size = sprintf(NULL, "%d", user->privilege_level);
+    if (id_size == -1 || privilege_size == -1)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
     
     // 8 is the 3 digit status code and the 5 terminating ETXs
-    body_size = id_size + strlen(user->display_name) + privilege_size + 8;
+    body_size = id_size + strlen(user->display_name) + privilege_size + 8; // NOLINT : Magic number contained
     
     body_buffer = mm_malloc(body_size, co->mm);
     if (!body_buffer)
@@ -408,8 +434,12 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
         return -1;
     }
     
-    snprintf(body_buffer, body_size, "200\x03%d\x03%s\x03%d\x03%d\x03",
-             user->id, user->display_name, user->privilege_level, user->online_status);
+    if (snprintf(body_buffer, body_size, "200\x03%d\x03%s\x03%d\x03%d\x03",
+             user->id, user->display_name, user->privilege_level, user->online_status) == -1)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
     
     dispatch->body = body_buffer;
     dispatch->body_size = body_size;
