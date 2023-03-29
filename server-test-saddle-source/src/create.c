@@ -74,6 +74,8 @@ static int generate_message_id(TRACER_FUNCTION_AS(tracer));
  */
 static int assemble_200_create_auth_response(struct core_object *co, struct dispatch *dispatch, const User *user);
 
+int log_in_user(struct core_object *co, struct server_object *so, User *user);
+
 int handle_create(struct core_object *co, struct server_object *so, struct dispatch *dispatch, char **body_tokens)
 {
     PRINT_STACK_TRACE(co->tracer);
@@ -392,15 +394,27 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     
     deserialize_user(co, &user, user_value.dptr);
     
-    // update user online status
-    user->online_status = 1;
-    if (db_update(co, so, USER, user) == -1)
+    if (log_in_user(co, so, user) == -1)
     {
         return -1;
     }
     
     // add user socket to server
     if (assemble_200_create_auth_response(co, dispatch, user) == -1)
+    {
+        return -1;
+    }
+    
+    return 0;
+}
+
+int log_in_user(struct core_object *co, struct server_object *so, User *user)
+{
+    // TODO: if user online status is already 1, log user out and log new user in.
+    
+    // update user online status to log user in
+    user->online_status = 1;
+    if (db_update(co, so, USER, user) == -1)
     {
         return -1;
     }
