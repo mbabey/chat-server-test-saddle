@@ -179,3 +179,20 @@ void deserialize_auth(struct core_object *co, Auth **auth_get, uint8_t *serial_a
     byte_offset += strlen((*auth_get)->login_token) + 1;
     (*auth_get)->password = mm_strdup((char *) (serial_auth + byte_offset), co->mm);
 }
+
+void free_user(struct core_object *co, User *user)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    mm_free(co->mm, user->display_name);
+    mm_free(co->mm, user);
+}
+
+void free_auth(struct core_object *co, Auth *auth)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    mm_free(co->mm, auth->login_token);
+    mm_free(co->mm, auth->password);
+    mm_free(co->mm, auth);
+}

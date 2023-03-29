@@ -73,4 +73,24 @@ void deserialize_user(struct core_object *co, User **user_get, uint8_t *serial_u
  */
 void deserialize_auth(struct core_object *co, Auth **auth_get, uint8_t *serial_auth);
 
+/**
+ * free_user
+ * <p>
+ * Free a user's fields then the user. Must be allocated in the memory manager.
+ * </p>
+ * @param co the core object
+ * @param user the user to deallocate
+ */
+void free_user(struct core_object *co, User *user);
+
+/**
+ * free_auth
+ * <p>
+ * Free a auth's fields then the auth. Must be allocated in the memory manager.
+ * </p>
+ * @param co the core object
+ * @param auth the user to deallocate
+ */
+void free_auth(struct core_object *co, Auth *auth);
+
 #endif //TEST_SERVER_OBJECT_UTIL_H
