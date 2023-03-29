@@ -123,7 +123,7 @@ int handle_create_user(struct core_object *co, struct server_object *so, struct 
     COUNT_TOKENS(count, body_tokens_cpy);
     if (count != CREATE_USER_BODY_TOKEN_SIZE)
     {
-        dispatch->body      = strdup("400\x03Invalid number of fields\x03");
+        dispatch->body      = mm_strdup("400\x03Invalid number of fields\x03", co->mm);
         dispatch->body_size = strlen(dispatch->body);
         return 0;
     }
@@ -139,7 +139,7 @@ int handle_create_user(struct core_object *co, struct server_object *so, struct 
           && VALIDATE_DISPLAY_NAME(new_user.display_name)
           && VALIDATE_PASSWORD(new_auth.password)))
     {
-        dispatch->body      = strdup("400\x03Invalid fields\x03");
+        dispatch->body      = mm_strdup("400\x03Invalid fields\x03", co->mm);
         dispatch->body_size = strlen(dispatch->body);
         return 0;
     }
@@ -159,7 +159,7 @@ int handle_create_user(struct core_object *co, struct server_object *so, struct 
     
     if (insert_status_user == 1 && insert_status_auth == 1)
     {
-        dispatch->body      = strdup("409\x03""3\x03Login token and display name already taken.\x03");
+        dispatch->body      = mm_strdup("409\x03""3\x03Login token and display name already taken.\x03", co->mm);
         dispatch->body_size = strlen(dispatch->body);
     } else if (insert_status_user == 1)
     {
@@ -167,7 +167,7 @@ int handle_create_user(struct core_object *co, struct server_object *so, struct 
         {
             return -1;
         }
-        dispatch->body      = strdup("409\x03""2\x03Display name already taken.\x03");
+        dispatch->body      = mm_strdup("409\x03""2\x03Display name already taken.\x03", co->mm);
         dispatch->body_size = strlen(dispatch->body);
     } else if (insert_status_auth == 1)
     {
@@ -175,11 +175,11 @@ int handle_create_user(struct core_object *co, struct server_object *so, struct 
         {
             return -1;
         }
-        dispatch->body      = strdup("409\x03""1\x03Login token already taken.\x03");
+        dispatch->body      = mm_strdup("409\x03""1\x03Login token already taken.\x03", co->mm);
         dispatch->body_size = strlen(dispatch->body);
     } else
     {
-        dispatch->body      = strdup("201\x03"); // Success.
+        dispatch->body      = mm_strdup("201\x03", co->mm); // Success.
         dispatch->body_size = strlen(dispatch->body);
     }
     
@@ -310,7 +310,7 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     COUNT_TOKENS(count, body_tokens_cpy);
     if (count != CREATE_AUTH_BODY_TOKEN_SIZE)
     {
-        dispatch->body      = strdup("400\x03Invalid number of fields\x03");
+        dispatch->body      = mm_strdup("400\x03Invalid number of fields\x03", co->mm);
         dispatch->body_size = strlen(dispatch->body);
         return 0;
     }
@@ -318,7 +318,7 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     // validate auth fields
     if (!(VALIDATE_LOGIN_TOKEN(*body_tokens) && VALIDATE_PASSWORD(*(body_tokens + 1))))
     {
-        dispatch->body      = strdup("400\x03Invalid fields\x03");
+        dispatch->body      = mm_strdup("400\x03Invalid fields\x03", co->mm);
         dispatch->body_size = strlen(dispatch->body);
         return 0;
     }
@@ -332,13 +332,13 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     }
     if (!auth) // No login token exists
     {
-        dispatch->body      = strdup("403\x03No account found with provided login token.\x03");
+        dispatch->body      = mm_strdup("403\x03No account found with provided login token.\x03", co->mm);
         dispatch->body_size = strlen(dispatch->body);
         return 0;
     }
     if (strcmp(auth->password, *(body_tokens + 1)) != 0) // Wrong password
     {
-        dispatch->body      = strdup("403\x03Incorrect password.\x03");
+        dispatch->body      = mm_strdup("403\x03Incorrect password.\x03", co->mm);
         dispatch->body_size = strlen(dispatch->body);
         return 0;
     }
@@ -362,7 +362,7 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     if (user_value.dptr == NULL) // This should never happen.
     {
         (void) fprintf(stdout, "Create-Auth: User with id \"%d\" not found in User database.\n", auth->user_id);
-        dispatch->body = strdup("500\x03""Database Error: Auth exists with no existing referenced user.\x03");
+        dispatch->body = mm_strdup("500\x03""Database Error: Auth exists with no existing referenced user.\x03", co->mm);
         dispatch->body_size = strlen(dispatch->body);
         return 0;
     }
@@ -372,7 +372,7 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     user = mm_malloc(sizeof(User), co->mm);
     if (!user)
     {
-        dispatch->body = strdup("500\x03""Server memory error.\x03");
+        dispatch->body = mm_strdup("500\x03""Server memory error.\x03", co->mm);
         dispatch->body_size = strlen(dispatch->body);
         SET_ERROR(co->err);
         return -1;

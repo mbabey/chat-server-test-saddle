@@ -159,7 +159,7 @@ void deserialize_user(struct core_object *co, User **user_get, uint8_t *serial_u
     
     memcpy(&(*user_get)->id, serial_user, sizeof((*user_get)->id));
     byte_offset = sizeof((*user_get)->id);
-    (*user_get)->display_name = strdup((char *) (serial_user + byte_offset));
+    (*user_get)->display_name = mm_strdup((char *) (serial_user + byte_offset), co->mm);
     byte_offset += strlen((*user_get)->display_name);
     memcpy(&(*user_get)->privilege_level, (serial_user + byte_offset), sizeof((*user_get)->privilege_level));
     byte_offset += sizeof((*user_get)->privilege_level);
@@ -175,7 +175,7 @@ void deserialize_auth(struct core_object *co, Auth **auth_get, uint8_t *serial_a
     memcpy(&(*auth_get)->user_id, serial_auth, sizeof((*auth_get)->user_id));
     byte_offset = sizeof((*auth_get)->user_id);
     printf("%s\n", (char *) (serial_auth + byte_offset));
-    (*auth_get)->login_token = strdup((char *) (serial_auth + byte_offset));
+    (*auth_get)->login_token = mm_strdup((char *) (serial_auth + byte_offset), co->mm);
     byte_offset += strlen((*auth_get)->login_token) + 1;
-    (*auth_get)->password = strdup((char *) (serial_auth + byte_offset));
+    (*auth_get)->password = mm_strdup((char *) (serial_auth + byte_offset), co->mm);
 }

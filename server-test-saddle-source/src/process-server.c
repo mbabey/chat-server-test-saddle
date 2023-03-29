@@ -653,7 +653,7 @@ static int c_handle_network_dispatch(struct core_object *co, struct server_objec
     
     if (perform_dispatch_operation(co, so, &dispatch, body_tokens) == -1)
     {
-        dispatch.body      = strdup("500");
+        dispatch.body      = mm_strdup("500\x03", co->mm);
         dispatch.body_size = strlen(dispatch.body);
     }
     
@@ -662,7 +662,7 @@ static int c_handle_network_dispatch(struct core_object *co, struct server_objec
     print_dispatch((struct state *) co, &dispatch, "Response");
     
     status = assemble_message_send((struct state *) co, child->client_fd_local, &dispatch);
-    free(dispatch.body);
+    mm_free(co->mm, dispatch.body);
     if (status == -1)
     {
         return -1;
