@@ -1,5 +1,5 @@
 #include "../../include/global-objects.h"
-#include "../include/object-serialization.h"
+#include "../include/object-util.h"
 #include "../include/db.h"
 
 /**

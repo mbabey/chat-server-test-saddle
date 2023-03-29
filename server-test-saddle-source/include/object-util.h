@@ -1,5 +1,5 @@
-#ifndef TEST_SERVER_OBJECT_SERIALIZATION_H
-#define TEST_SERVER_OBJECT_SERIALIZATION_H
+#ifndef TEST_SERVER_OBJECT_UTIL_H
+#define TEST_SERVER_OBJECT_UTIL_H
 
 #include "../include/objects.h"
 
@@ -73,4 +73,4 @@ void deserialize_user(struct core_object *co, User **user_get, uint8_t *serial_u
  */
 void deserialize_auth(struct core_object *co, Auth **auth_get, uint8_t *serial_auth);
 
-#endif //TEST_SERVER_OBJECT_SERIALIZATION_H
+#endif //TEST_SERVER_OBJECT_UTIL_H

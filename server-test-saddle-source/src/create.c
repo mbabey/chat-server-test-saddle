@@ -1,7 +1,7 @@
 #include "../../include/util.h"
 #include "../include/create.h"
 #include "../include/db.h"
-#include "../include/object-serialization.h"
+#include "../include/object-util.h"
 
 #include <stdlib.h>
 
@@ -323,7 +323,7 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
         return 0;
     }
     
-    Auth *auth;
+    Auth *auth; // TODO: must free
     
     // read db for auth
     if (db_read(co, so, AUTH, &auth, *body_tokens) == -1)

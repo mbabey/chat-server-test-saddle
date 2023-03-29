@@ -20,7 +20,7 @@ set(SOURCE_LIST
         ${SOURCE_DIR}/update.c
         ${SOURCE_DIR}/destroy.c
         ${SOURCE_DIR}/db.c
-        ${SOURCE_DIR}/object-serialization.c
+        ${SOURCE_DIR}/object-util.c
         ../${SOURCE_DIR}/manager.c
         ../${SOURCE_DIR}/util.c
         #=vvvv= SOURCE FOR DUMMY MAIN =vvvv=#
@@ -38,7 +38,7 @@ set(HEADER_LIST
         ${INCLUDE_DIR}/update.h
         ${INCLUDE_DIR}/destroy.h
         ${INCLUDE_DIR}/db.h
-        ${INCLUDE_DIR}/object-serialization.h
+        ${INCLUDE_DIR}/object-util.h
         ../${INCLUDE_DIR}/manager.h
         ../${INCLUDE_DIR}/util.h
         #=vvvv= INCLUDES FOR DUMMY MAIN =vvvv=#
