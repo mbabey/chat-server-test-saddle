@@ -834,31 +834,50 @@ int db_destroy(struct core_object *co, struct server_object *so, int type, void 
     return 0;
 }
 
+static int safe_dbm_delete(struct core_object *co, const char *db_name, sem_t *sem, datum *key);
+
 static int delete_user(struct core_object *co, struct server_object *so, User *user)
 {
     PRINT_STACK_TRACE(co->tracer);
     
     datum key;
-    int   delete_status;
     
     key.dptr  = &user->id;
     key.dsize = sizeof(user->id);
     
-    if (sem_wait(so->user_db_sem) == -1)
+    if (safe_dbm_delete(co, USER_DB_NAME, so->user_db_sem, &key))
+    
+    return 0;
+}
+
+static int safe_dbm_delete(struct core_object *co, const char *db_name, sem_t *sem, datum *key)
+{
+    DBM *db;
+    
+    if (sem_wait(sem) == -1)
     {
         SET_ERROR(co->err);
         return -1;
     }
-    
-    delete_status = dbm_delete(so->user_db, key); // NOLINT(concurrency-mt-unsafe) : Protected
-    
-    sem_post(so->user_db_sem);
-    
-    if (delete_status == -1)
+    // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
+    db = dbm_open(db_name, DB_FLAGS, DB_FILE_MODE);
+    if (db == (DBM *) 0)
     {
-        print_db_error(so->user_db);
+        SET_ERROR(co->err);
+        return -1;
     }
-    
+    if (dbm_delete(db, *key) == -1)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
+    if (!(*key).dptr && dbm_error(db))
+    {
+        print_db_error(db);
+    }
+    dbm_close(db);
+    // NOLINTEND(concurrency-mt-unsafe)
+    sem_post(sem);
     return 0;
 }
 
