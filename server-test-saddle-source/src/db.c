@@ -22,9 +22,9 @@ static int insert_user(struct core_object *co, struct server_object *so, User *u
  * @param co the core object
  * @param db the database in which to search
  * @param db_sem the semaphore for the database
- * @param serial_object the array to store the result
+ * @param serial_object the object to store the result, or NULL if no resuilt is needed
  * @param name the
- * @return 0 on success, -1 and set err on failure
+ * @return 0 on success and record not located, 1 on success and record located, -1 and set err on failure
  */
 static int find_by_name(struct core_object *co, const char *db_name, sem_t *db_sem,
                         uint8_t **serial_object, const char *name);
@@ -360,24 +360,42 @@ static int find_by_name(struct core_object *co, const char *db_name, sem_t *db_s
             print_db_error(db);
         }
     }
-    dbm_close(db);
+    
+    // IF dptr is found,
+    // if serial object is not null
+    //  assign serial object and return 1
+    
+    int ret_val;
+    
     if (value.dptr)
     {
-        *serial_object = mm_malloc(value.dsize, co->mm);
-        if (!*serial_object)
+        ret_val = 1;
+        if (serial_object)
         {
-            SET_ERROR(co->err);
-            return -1;
+            *serial_object = mm_malloc(value.dsize, co->mm);
+            if (!*serial_object)
+            {
+                SET_ERROR(co->err);
+                dbm_close(db);
+                sem_post(db_sem);
+                return -1;
+            }
+            memcpy(value.dptr, *serial_object, value.dsize);
         }
-        memcpy(value.dptr, *serial_object, value.dsize);
     } else
     {
-        *serial_object = NULL;
+        ret_val = 0;
+        if (serial_object)
+        {
+            *serial_object = NULL;
+        }
     }
+    
+    dbm_close(db);
     // NOLINTEND(concurrency-mt-unsafe) : Protected
     sem_post(db_sem);
     
-    return 0;
+    return ret_val;
 }
 
 static int insert_channel(struct core_object *co, struct server_object *so, Channel *channel)
