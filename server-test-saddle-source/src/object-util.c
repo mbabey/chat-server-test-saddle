@@ -1,6 +1,6 @@
 #include "../../include/error-handlers.h"
-#include "../include/object-util.h"
 #include "../../include/manager.h"
+#include "../include/object-util.h"
 
 #include <string.h>
 

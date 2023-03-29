@@ -1,6 +1,6 @@
 #include "../../include/global-objects.h"
-#include "../include/object-util.h"
 #include "../include/db.h"
+#include "../include/object-util.h"
 
 /**
  * insert_user
@@ -738,12 +738,14 @@ static int update_user(struct core_object *co, struct server_object *so, User *u
         SET_ERROR(co->err);
         return -1;
     }
+    // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
     if (dbm_store(so->user_db, key, value, DBM_REPLACE) == -1)
     {
         print_db_error(so->user_db);
     }
     dbm_close(so->user_db);
     so->user_db = dbm_open(USER_DB_NAME, DB_FLAGS, DB_FILE_MODE);
+    // NOLINTEND(concurrency-mt-unsafe)
     sem_post(so->user_db_sem);
     
     if (so->user_db == (DBM *) 0)

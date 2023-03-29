@@ -5,6 +5,7 @@
 
 #include <stdlib.h>
 
+// NOLINTNEXTLINE(modernize-macro-to-enum) : No
 #define BASE 10 // Base for strtol calls, DO NOT CHANGE
 
 /** Number of tokens that should be present in Create Type Dispatches. */
@@ -434,9 +435,6 @@ static int log_in_user(struct core_object *co, struct server_object *so, User *u
         {
             return -1;
         }
-    } else
-    {
-        
     }
     
     // TODO: add user socket to server cache

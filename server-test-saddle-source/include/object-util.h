@@ -22,7 +22,7 @@ unsigned long serialize_user(struct core_object *co, uint8_t **serial_user, cons
  * </p>
  * @param co the core object
  * @param serial_channel the buffer into which to serialize the Channel
- * @param user the Channel to serialize
+ * @param channel the Channel to serialize
  * @return size of Channel in bytes on success, 0 and set err on failure
  */
 unsigned long serialize_channel(struct core_object *co, uint8_t **serial_channel, const Channel *channel);
@@ -34,7 +34,7 @@ unsigned long serialize_channel(struct core_object *co, uint8_t **serial_channel
  * </p>
  * @param co the core object
  * @param serial_message the buffer into which to serialize the Message
- * @param user the Message to serialize
+ * @param message the Message to serialize
  * @return size of Message in bytes on success, 0 and set err on failure
  */
 unsigned long serialize_message(struct core_object *co, uint8_t **serial_message, const Message *message);
@@ -46,7 +46,7 @@ unsigned long serialize_message(struct core_object *co, uint8_t **serial_message
  * </p>
  * @param co the core object
  * @param serial_auth the buffer into which to serialize the Auth
- * @param user the Auth to serialize
+ * @param auth the Auth to serialize
  * @return size of Auth in bytes on success, 0 and set err on failure
  */
 unsigned long serialize_auth(struct core_object *co, uint8_t **serial_auth, const Auth *auth);
