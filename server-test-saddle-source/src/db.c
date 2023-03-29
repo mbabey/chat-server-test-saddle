@@ -569,6 +569,7 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
     if (db == (DBM *) 0)
     {
         SET_ERROR(co->err);
+        sem_post(so->auth_db_sem);
         return -1;
     }
     status = dbm_store(db, key, value, DBM_INSERT);
@@ -593,6 +594,36 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
     }
     
     return 0;
+}
+
+int safe_dbm_store(struct core_object *co, const char *db_name, sem_t *sem, datum *key, datum *value, int store_flags)
+{
+    DBM *db;
+    int status;
+    
+    if (sem_wait(sem) == -1)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
+    // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
+    db = dbm_open(db_name, DB_FLAGS, DB_FILE_MODE);
+    if (db == (DBM *) 0)
+    {
+        SET_ERROR(co->err);
+        sem_post(sem);
+        return -1;
+    }
+    status = dbm_store(db, *key, *value, store_flags);
+    if (!key.dptr && dbm_error(db)) // NOLINT(concurrency-mt-unsafe) : No threads here
+    {
+        print_db_error(db);
+    }
+    dbm_close(db);
+    // NOLINTEND(concurrency-mt-unsafe)
+    sem_post(sem);
+    
+    return status;
 }
 
 int db_read(struct core_object *co, struct server_object *so, int type, void *object_dst, void *object_query)

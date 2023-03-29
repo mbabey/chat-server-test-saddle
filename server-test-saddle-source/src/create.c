@@ -371,6 +371,7 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
         return 0;
     }
     
+    DBM *db;
     datum user_key;
     datum user_value;
     
@@ -383,7 +384,17 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
         SET_ERROR(co->err);
         return -1;
     }
-    user_value = dbm_fetch(so->user_db, user_key); // NOLINT(concurrency-mt-unsafe) : Protected
+    // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
+    db = dbm_open(USER_DB_NAME, DB_FLAGS, DB_FILE_MODE);
+    if (db == (DBM *) 0)
+    {
+        SET_ERROR(co->err);
+        sem_post(so->user_db_sem);
+        return -1;
+    }
+    user_value = dbm_fetch(so->user_db, user_key);
+    dbm_close(db);
+    // NOLINTEND(concurrency-mt-unsafe) : Protected
     sem_post(so->user_db_sem);
     
     free_auth(co, auth);

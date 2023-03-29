@@ -31,6 +31,21 @@
 int db_create(struct core_object *co, struct server_object *so, int type, void *object);
 
 /**
+ * safe_dbm_store
+ * <p>
+ * Safely store an item in a database.
+ * </p>
+ * @param co the core object
+ * @param db_name the database name
+ * @param sem the database semaphore
+ * @param key the key under which to store
+ * @param value the value to store
+ * @param store_flags whether to insert or overwrite
+ * @return 0 on successful insert, 1 if insert and record already exists, -1 and set err on failure
+ */
+int safe_dbm_store(struct core_object *co, const char *db_name, sem_t *sem, datum *key, datum *value, int store_flags);
+
+/**
  * db_read
  * <p>
  * Read an object of type from the database into object_dst based on the contents of object_query.
