@@ -32,6 +32,8 @@
 #define CHANNEL_DB_NAME "dbch_3fda69"      /** Channel db name. */
 #define MESSAGE_DB_NAME "dbm_3fda69"       /** Message db name. */
 #define AUTH_DB_NAME "dbau_3fda69"         /** Auth db name. */
+#define CONN_USER_DB_NAME "dbna_3fda69"    /** Display name-Socket address database. */
+
 #define DB_FLAGS O_RDWR | O_CREAT          /** Flags for opening db. */
 #define DB_FILE_MODE S_IRUSR | S_IWUSR     /** File mode for opening db. */
 
@@ -45,7 +47,9 @@ struct core_object
 {
     struct sockaddr_in listen_addr;
     struct error_saver err;
+    
     TRACER_FUNCTION_AS(tracer);
+    
     struct memory_manager *mm;
     
     struct server_object *so;
@@ -142,5 +146,15 @@ typedef struct
     char *login_token;
     char *password;
 } Auth;
+
+/**
+ * NameAddrPair. Contains display name and associated socket address.
+ */
+typedef struct
+{
+    char      *display_name;
+    in_addr_t socket_ip;
+    in_port_t socket_port;
+} NameAddrPair;
 
 #endif //PROCESS_SERVER_OBJECTS_H

@@ -370,7 +370,7 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
         return 0;
     }
     
-    int   ret_val;
+    int     ret_val;
     uint8_t *serial_user;
     datum   user_key;
     
@@ -419,12 +419,17 @@ static int log_in_user(struct core_object *co, struct server_object *so, User *u
 {
     PRINT_STACK_TRACE(co->tracer);
     
+    struct sockaddr_in addr;
+    NameAddrPair       name_addr_pair;
+    
+    addr = so->child->client_addr;
+    
     /* TODO:
      * If the user is already logged in, remove the disconnect the currently
      * connected socket address and replace it with the new socket address.
      */
     
-    // update user online status to log user in
+    // If the user is not logged in, just log them in and add them to the name-addr database.
     if (user->online_status == 0)
     {
         user->online_status = 1;
@@ -432,9 +437,32 @@ static int log_in_user(struct core_object *co, struct server_object *so, User *u
         {
             return -1;
         }
+        name_addr_pair.display_name = mm_strdup(user->display_name);
+        name_addr_pair.socket_ip    = addr.sin_addr.s_addr;
+        name_addr_pair.socket_port  = addr.sin_port;
+        if (db_create(co, so, CONN_USER, &name_addr_pair) == -1)
+        {
+            return -1;
+        }
+    } else // If the user is already logged in, update the name-addr database. Disconnect the old client(?)
+    {
+    
     }
     
     // TODO: add user socket to server cache
+    
+    return 0;
+}
+
+static int log_out_user(struct core_object *co, struct server_object *so, User *user)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    user->online_status = 0;
+    if (db_update(co, so, USER, user) == -1)
+    {
+        return -1;
+    }
     
     return 0;
 }

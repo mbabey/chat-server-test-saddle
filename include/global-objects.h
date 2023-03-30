@@ -63,7 +63,8 @@ enum Object
     USER = 1,
     CHANNEL,
     MESSAGE,
-    AUTH
+    AUTH,
+    CONN_USER
 };
 
 #endif //CHAT_TEST_SADDLE_STATE_H

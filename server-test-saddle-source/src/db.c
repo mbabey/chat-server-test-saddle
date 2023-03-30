@@ -283,26 +283,7 @@ static int insert_user(struct core_object *co, struct server_object *so, User *u
     value.dptr  = serial_user;
     value.dsize = serial_user_size;
     
-    if (sem_wait(so->user_db_sem) == -1)
-    {
-        SET_ERROR(co->err);
-        return -1;
-    }
-    // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
-    db = dbm_open(USER_DB_NAME, DB_FLAGS, DB_FILE_MODE);
-    if (db == (DBM *) 0)
-    {
-        SET_ERROR(co->err);
-        return -1;
-    }
-    status = dbm_store(db, key, value, DBM_INSERT);
-    if (dbm_error(db)) // NOLINT(concurrency-mt-unsafe) : No threads here
-    {
-        print_db_error(db);
-    }
-    dbm_close(db);
-    // NOLINTEND(concurrency-mt-unsafe)
-    sem_post(so->user_db_sem);
+    status = safe_dbm_store(co, USER_DB_NAME, so->user_db_sem, &key, &value, DBM_INSERT);
     
     if (status == 1)
     {
@@ -441,26 +422,7 @@ static int insert_channel(struct core_object *co, struct server_object *so, Chan
     value.dptr  = serial_channel;
     value.dsize = serial_channel_size;
     
-    if (sem_wait(so->channel_db_sem) == -1)
-    {
-        SET_ERROR(co->err);
-        return -1;
-    }
-    // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
-    db = dbm_open(CHANNEL_DB_NAME, DB_FLAGS, DB_FILE_MODE);
-    if (db == (DBM *) 0)
-    {
-        SET_ERROR(co->err);
-        return -1;
-    }
-    status = dbm_store(db, key, value, DBM_INSERT);
-    if (dbm_error(db)) // NOLINT(concurrency-mt-unsafe) : No threads here
-    {
-        print_db_error(db);
-    }
-    dbm_close(db);
-    // NOLINTEND(concurrency-mt-unsafe)
-    sem_post(so->channel_db_sem);
+    status = safe_dbm_store(co, CHANNEL_DB_NAME, so->channel_db_sem, &key, &value, DBM_INSERT);
     
     if (status == 1)
     {
@@ -497,26 +459,7 @@ static int insert_message(struct core_object *co, struct server_object *so, Mess
     value.dptr  = serial_message;
     value.dsize = serial_message_size;
     
-    if (sem_wait(so->message_db_sem) == -1)
-    {
-        SET_ERROR(co->err);
-        return -1;
-    }
-    // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
-    db = dbm_open(MESSAGE_DB_NAME, DB_FLAGS, DB_FILE_MODE);
-    if (db == (DBM *) 0)
-    {
-        SET_ERROR(co->err);
-        return -1;
-    }
-    status = dbm_store(db, key, value, DBM_INSERT);
-    if (!key.dptr && dbm_error(db)) // NOLINT(concurrency-mt-unsafe) : No threads here
-    {
-        print_db_error(db);
-    }
-    dbm_close(db);
-    // NOLINTEND(concurrency-mt-unsafe)
-    sem_post(so->message_db_sem);
+    status = safe_dbm_store(co, MESSAGE_DB_NAME, so->message_db_sem, &key, &value, DBM_INSERT);
     
     if (status == 1)
     {
