@@ -255,7 +255,6 @@ static int insert_user(struct core_object *co, struct server_object *so, User *u
     int           status;
     datum         key;
     datum         value;
-    DBM           *db;
     
     // Determine if a user with the username already exists in the database.
     status = find_by_name(co, USER_DB_NAME, so->user_db_sem, NULL, user->display_name);
@@ -328,15 +327,15 @@ static int find_by_name(struct core_object *co, const char *db_name, sem_t *db_s
     {
         print_db_error(db);
     }
-    if (key.dptr)
-    {
-        printf("id: %d\n", *(int *) key.dptr);
-        printf("size: %zu\n", value.dsize);
-        printf("name: %s\n", (char *) (((int *) value.dptr) + 1));
-    } else
-    {
-        printf("key.dptr is null\n");
-    }
+//    if (key.dptr)
+//    {
+//        printf("id: %d\n", *(int *) key.dptr);
+//        printf("size: %zu\n", value.dsize);
+//        printf("name: %s\n", (char *) (((int *) value.dptr) + 1));
+//    } else
+//    {
+//        printf("key.dptr is null\n");
+//    }
     // Compare the display name to the name in the db
     while (key.dptr && strcmp((char *) (((int *) value.dptr) + 1), name) != 0)
     {
@@ -395,7 +394,6 @@ static int insert_channel(struct core_object *co, struct server_object *so, Chan
     int           status;
     datum         key;
     datum         value;
-    DBM           *db;
     
     // Determine if a channel with the channel name already exists in the database.
     status = find_by_name(co, CHANNEL_DB_NAME, so->channel_db_sem, NULL, channel->channel_name);
@@ -446,7 +444,6 @@ static int insert_message(struct core_object *co, struct server_object *so, Mess
     int           status;
     datum         key;
     datum         value;
-    DBM           *db;
     
     serial_message_size = serialize_message(co, &serial_message, message);
     if (serial_message_size == 0)
@@ -714,7 +711,7 @@ static int update_user(struct core_object *co, struct server_object *so, User *u
     uint8_t       *serial_user;
     datum         key;
     datum         value;
-    DBM           *db;
+    int           status;
     
     serial_user_size = serialize_user(co, &serial_user, user);
     if (serial_user_size == 0)
@@ -728,32 +725,9 @@ static int update_user(struct core_object *co, struct server_object *so, User *u
     value.dptr  = serial_user;
     value.dsize = serial_user_size;
     
-    if (sem_wait(so->user_db_sem) == -1)
-    {
-        SET_ERROR(co->err);
-        return -1;
-    }
-    // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
-    db = dbm_open(USER_DB_NAME, DB_FLAGS, DB_FILE_MODE);
-    if (db == (DBM *) 0)
-    {
-        SET_ERROR(co->err);
-        return -1;
-    }
-    if (dbm_store(db, key, value, DBM_REPLACE) == -1)
-    {
-        SET_ERROR(co->err);
-        return -1;
-    }
-    if (!key.dptr && dbm_error(db))
-    {
-        print_db_error(db);
-    }
-    dbm_close(db);
-    // NOLINTEND(concurrency-mt-unsafe)
-    sem_post(so->user_db_sem);
+    status = safe_dbm_store(co, USER_DB_NAME, so->user_db_sem, &key, &value, DBM_REPLACE);
     
-    return 0;
+    return status;
 }
 
 int db_destroy(struct core_object *co, struct server_object *so, int type, void *object)
@@ -889,8 +863,8 @@ int safe_dbm_fetch(struct core_object *co, const char *db_name, sem_t *sem, datu
 {
     PRINT_STACK_TRACE(co->tracer);
     
-    int ret_val;
-    DBM *db;
+    int   ret_val;
+    DBM   *db;
     datum value;
     
     if (sem_wait(sem) == -1)
