@@ -151,6 +151,31 @@ unsigned long serialize_auth(struct core_object *co, uint8_t **serial_auth, cons
     return serial_auth_size;
 }
 
+unsigned long serialize_name_addr_pair(struct core_object *co, uint8_t **name_addr_dst,
+                                       const char *display_name, struct sockaddr_in *addr)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    size_t name_size;
+    size_t name_addr_size;
+    
+    name_size = strlen(display_name) + 1;
+    (*name_addr_dst) = mm_malloc(name_size + sizeof(in_addr_t) + sizeof(in_port_t), co->mm);
+    if (!(*name_addr_dst))
+    {
+        SET_ERROR(co->err);
+        return 0;
+    }
+    memcpy((*name_addr_dst), display_name, name_size);
+    name_addr_size = name_size;
+    memcpy((*name_addr_dst) + name_addr_size, &(*addr).sin_addr.s_addr, sizeof(in_addr_t));
+    name_addr_size += sizeof(in_addr_t);
+    memcpy((*name_addr_dst) + name_addr_size, &(*addr).sin_port, sizeof(in_port_t));
+    name_addr_size += sizeof(in_port_t);
+    
+    return name_addr_size;
+}
+
 void deserialize_user(struct core_object *co, User **user_get, uint8_t *serial_user)
 {
     PRINT_STACK_TRACE(co->tracer);

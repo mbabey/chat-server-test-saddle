@@ -419,10 +419,9 @@ static int log_in_user(struct core_object *co, struct server_object *so, User *u
 {
     PRINT_STACK_TRACE(co->tracer);
     
-//    struct sockaddr_in addr;
-//    NameAddrPair       name_addr_pair;
-//
-//    addr = so->child->client_addr;
+    struct sockaddr_in addr;
+    
+    addr = so->child->client_addr;
     
     /* TODO:
      * If the user is already logged in, remove the disconnect the currently
@@ -437,14 +436,29 @@ static int log_in_user(struct core_object *co, struct server_object *so, User *u
         {
             return -1;
         }
-//        name_addr_pair.display_name = mm_strdup(user->display_name);
-//        name_addr_pair.socket_ip    = addr.sin_addr.s_addr;
-//        name_addr_pair.socket_port  = addr.sin_port;
-//        if (db_create(co, so, CONN_USER, &name_addr_pair) == -1)
-//        {
-//            return -1;
-//        }
-//        safe_dbm_store(co, , )
+        uint8_t *name_addr;
+        size_t  name_addr_size;
+        size_t  name_size;
+        name_addr_size = serialize_name_addr_pair(co, &name_addr, NULL, &addr);
+        if (name_addr_size == 0)
+        {
+            return -1;
+        }
+        
+        if (db_create(co, so, CONN_USER, &name_addr_pair) == -1)
+        {
+            return -1;
+        }
+        
+        datum key;
+        datum value;
+        
+        key.dptr    = name_addr;
+        key.dsize   = name_size;
+        value.dptr  = name_addr;
+        value.dsize = name_addr_size
+        
+        safe_dbm_store(co, CONN_USER_DB_NAME, so->conn_user_db_sem,)
         
     } else // If the user is already logged in, update the name-addr database. Disconnect the old client(?)
     {
