@@ -8,6 +8,11 @@
 #include <ndbm.h>
 #include <netinet/in.h>
 
+// TODO delet this when done
+#define PRINT_BYTES(array, size) \
+    int ocunt = 0; \
+    for (uint8_t *cp = serial_auth; ocunt < size; ++cp) { printf("%d: %hhx\n", ocunt++, *cp); }
+
 #define NUM_CHILD_PROCESSES 8              /** The number of worker processes to be spawned to handle network requests. */
 #define CONNECTION_QUEUE 100               /** The number of connections that can be queued on the listening socket. */
 #define MAX_CONNECTIONS 5                  /** The maximum number of connections that can be accepted by the process server. */

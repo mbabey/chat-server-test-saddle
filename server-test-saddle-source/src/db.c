@@ -404,7 +404,7 @@ static int save_dptr_to_serial_object(struct core_object *co, uint8_t **serial_o
                 SET_ERROR(co->err);
                 return -1;
             }
-            memcpy(value->dptr, *serial_object, value->dsize);
+            memcpy(*serial_object, value->dptr, value->dsize);
         }
     } else
     {
@@ -749,8 +749,6 @@ static int read_auth(struct core_object *co, struct server_object *so, Auth **au
         *auth_get = NULL;
         return 0;
     }
-    
-    printf("%s\n", serial_auth);
     
     *auth_get = mm_malloc(sizeof(Auth), co->mm);
     if (!*auth_get)

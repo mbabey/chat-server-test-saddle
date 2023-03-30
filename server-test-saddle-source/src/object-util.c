@@ -174,7 +174,6 @@ void deserialize_auth(struct core_object *co, Auth **auth_get, uint8_t *serial_a
     
     memcpy(&(*auth_get)->user_id, serial_auth, sizeof((*auth_get)->user_id));
     byte_offset = sizeof((*auth_get)->user_id);
-    printf("%s\n", (char *) (serial_auth + byte_offset));
     (*auth_get)->login_token = mm_strdup((char *) (serial_auth + byte_offset), co->mm);
     byte_offset += strlen((*auth_get)->login_token) + 1;
     (*auth_get)->password = mm_strdup((char *) (serial_auth + byte_offset), co->mm);
