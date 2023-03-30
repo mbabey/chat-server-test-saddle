@@ -152,25 +152,6 @@ static int open_semaphores(struct core_object *co, struct server_object *so)
     return 0;
 }
 
-int open_databases(struct core_object *co, struct server_object *so)
-{
-    PRINT_STACK_TRACE(co->tracer);
-    // NOLINTBEGIN(concurrency-mt-unsafe) : No threads here
-    so->user_db    = dbm_open(USER_DB_NAME, DB_FLAGS, DB_FILE_MODE);
-    so->channel_db = dbm_open(CHANNEL_DB_NAME, DB_FLAGS, DB_FILE_MODE);
-    so->message_db = dbm_open(MESSAGE_DB_NAME, DB_FLAGS, DB_FILE_MODE);
-    so->auth_db    = dbm_open(AUTH_DB_NAME, DB_FLAGS, DB_FILE_MODE);
-    // NOLINTEND(concurrency-mt-unsafe)
-    if (so->user_db == (DBM *) 0 || so->channel_db == (DBM *) 0 || so->message_db == (DBM *) 0 ||
-        so->auth_db == (DBM *) 0)
-    {
-        SET_ERROR(co->err);
-        return -1;
-    }
-    
-    return 0;
-}
-
 int fork_child_processes(struct core_object *co, struct server_object *so)
 {
     PRINT_STACK_TRACE(co->tracer);
@@ -338,30 +319,6 @@ void c_destroy_child_state(struct core_object *co, struct server_object *so, str
     close_fd_report_undefined_error(so->domain_fds[READ_END], "state of child domain socket is undefined.");
     
     mm_free(co->mm, child);
-}
-
-void close_databases(struct core_object *co, struct server_object *so)
-{
-    PRINT_STACK_TRACE(co->tracer);
-    
-    // NOLINTBEGIN(concurrency-mt-unsafe) : No threads here
-    if (so->user_db)
-    {
-        dbm_close(so->user_db);
-    }
-    if (so->channel_db)
-    {
-        dbm_close(so->channel_db);
-    }
-    if (so->message_db)
-    {
-        dbm_close(so->message_db);
-    }
-    if (so->auth_db)
-    {
-        dbm_close(so->auth_db);
-    }
-    // NOLINTEND(concurrency-mt-unsafe)
 }
 
 void close_fd_report_undefined_error(int fd, const char *err_msg)
