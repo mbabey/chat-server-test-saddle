@@ -118,7 +118,7 @@ static int open_semaphores(struct core_object *co, struct server_object *so)
     channel_db_sem   = sem_open(CHANNEL_SEM_NAME, O_CREAT, S_IRUSR | S_IWUSR, 1);
     message_db_sem   = sem_open(MESSAGE_SEM_NAME, O_CREAT, S_IRUSR | S_IWUSR, 1);
     auth_db_sem      = sem_open(AUTH_SEM_NAME, O_CREAT, S_IRUSR | S_IWUSR, 1);
-    name_addr_db_sem = sem_open(NAME_ADDR_DB_NAME, O_CREAT, S_IRUSR | S_IWUSR, 1);
+    name_addr_db_sem = sem_open(NAME_ADDR_SEM_NAME, O_CREAT, S_IRUSR | S_IWUSR, 1);
     if (pipe_write_sem == SEM_FAILED || domain_read_sem == SEM_FAILED || domain_write_sem == SEM_FAILED
         || user_db_sem == SEM_FAILED || channel_db_sem == SEM_FAILED || message_db_sem == SEM_FAILED ||
         auth_db_sem == SEM_FAILED || name_addr_db_sem == SEM_FAILED)
@@ -141,7 +141,7 @@ static int open_semaphores(struct core_object *co, struct server_object *so)
         sem_unlink(CHANNEL_SEM_NAME);
         sem_unlink(MESSAGE_SEM_NAME);
         sem_unlink(AUTH_SEM_NAME);
-        sem_unlink(NAME_ADDR_DB_NAME);
+        sem_unlink(NAME_ADDR_SEM_NAME);
         return -1;
     }
     
@@ -316,7 +316,7 @@ void p_destroy_parent_state(struct core_object *co, struct server_object *so, st
     sem_unlink(CHANNEL_SEM_NAME);
     sem_unlink(MESSAGE_SEM_NAME);
     sem_unlink(AUTH_SEM_NAME);
-    sem_unlink(NAME_ADDR_DB_NAME);
+    sem_unlink(NAME_ADDR_SEM_NAME);
 }
 
 void c_destroy_child_state(struct core_object *co, struct server_object *so, struct child *child)
