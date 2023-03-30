@@ -69,6 +69,7 @@ struct server_object
     sem_t         *channel_db_sem;
     sem_t         *message_db_sem;
     sem_t         *auth_db_sem;
+    sem_t         *name_addr_db_sem;
     struct parent *parent;
     struct child  *child;
 };

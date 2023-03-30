@@ -419,6 +419,8 @@ static int log_in_user(struct core_object *co, struct server_object *so, User *u
 {
     PRINT_STACK_TRACE(co->tracer);
     
+    int status;
+    
     /* TODO:
      * If the user is already logged in, remove the disconnect the currently
      * connected socket address and replace it with the new socket address.
@@ -450,16 +452,14 @@ static int log_in_user(struct core_object *co, struct server_object *so, User *u
         value.dptr  = name_addr;
         value.dsize = name_addr_size
         
-        safe_dbm_store(co, NAME_ADDR_DB_NAME, so->name_addr_db_sem,);
+        status = safe_dbm_store(co, NAME_ADDR_DB_NAME, so->name_addr_db_sem, &key, &value, DBM_INSERT);
         
     } else // If the user is already logged in, update the name-addr database. Disconnect the old client(?)
     {
     
     }
     
-    // TODO: add user socket to server cache
-    
-    return 0;
+    return status;
 }
 
 static int log_out_user(struct core_object *co, struct server_object *so, User *user)

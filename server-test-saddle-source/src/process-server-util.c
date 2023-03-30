@@ -108,6 +108,7 @@ static int open_semaphores(struct core_object *co, struct server_object *so)
     sem_t *channel_db_sem;
     sem_t *message_db_sem;
     sem_t *auth_db_sem;
+    sem_t *name_addr_db_sem;
     
     // Value 0 will block; value 1 will allow first process to enter, then behave as if value was 0.
     pipe_write_sem   = sem_open(PIPE_WRITE_SEM_NAME, O_CREAT, S_IRUSR | S_IWUSR, 1);
@@ -117,9 +118,10 @@ static int open_semaphores(struct core_object *co, struct server_object *so)
     channel_db_sem   = sem_open(CHANNEL_SEM_NAME, O_CREAT, S_IRUSR | S_IWUSR, 1);
     message_db_sem   = sem_open(MESSAGE_SEM_NAME, O_CREAT, S_IRUSR | S_IWUSR, 1);
     auth_db_sem      = sem_open(AUTH_SEM_NAME, O_CREAT, S_IRUSR | S_IWUSR, 1);
+    name_addr_db_sem = sem_open(NAME_ADDR_DB_NAME, O_CREAT, S_IRUSR | S_IWUSR, 1);
     if (pipe_write_sem == SEM_FAILED || domain_read_sem == SEM_FAILED || domain_write_sem == SEM_FAILED
         || user_db_sem == SEM_FAILED || channel_db_sem == SEM_FAILED || message_db_sem == SEM_FAILED ||
-        auth_db_sem == SEM_FAILED)
+        auth_db_sem == SEM_FAILED || name_addr_db_sem == SEM_FAILED)
     {
         SET_ERROR(co->err);
         // Closing an unopened semaphore will return -1 and set errno = EINVAL, which can be ignored.
@@ -130,6 +132,7 @@ static int open_semaphores(struct core_object *co, struct server_object *so)
         sem_close(channel_db_sem);
         sem_close(message_db_sem);
         sem_close(auth_db_sem);
+        sem_close(name_addr_db_sem);
         // Unlinking an unopened semaphore will return -1 and set errno = ENOENT, which can be ignored.
         sem_unlink(PIPE_WRITE_SEM_NAME);
         sem_unlink(DOMAIN_READ_SEM_NAME);
@@ -138,6 +141,7 @@ static int open_semaphores(struct core_object *co, struct server_object *so)
         sem_unlink(CHANNEL_SEM_NAME);
         sem_unlink(MESSAGE_SEM_NAME);
         sem_unlink(AUTH_SEM_NAME);
+        sem_unlink(NAME_ADDR_DB_NAME);
         return -1;
     }
     
@@ -148,6 +152,7 @@ static int open_semaphores(struct core_object *co, struct server_object *so)
     so->channel_db_sem = channel_db_sem;
     so->message_db_sem = message_db_sem;
     so->auth_db_sem    = auth_db_sem;
+    so->name_addr_db_sem = name_addr_db_sem;
     
     return 0;
 }
@@ -303,6 +308,7 @@ void p_destroy_parent_state(struct core_object *co, struct server_object *so, st
     sem_close(so->channel_db_sem);
     sem_close(so->message_db_sem);
     sem_close(so->auth_db_sem);
+    sem_close(so->name_addr_db_sem);
     sem_unlink(PIPE_WRITE_SEM_NAME);
     sem_unlink(DOMAIN_READ_SEM_NAME);
     sem_unlink(DOMAIN_WRITE_SEM_NAME);
@@ -310,6 +316,7 @@ void p_destroy_parent_state(struct core_object *co, struct server_object *so, st
     sem_unlink(CHANNEL_SEM_NAME);
     sem_unlink(MESSAGE_SEM_NAME);
     sem_unlink(AUTH_SEM_NAME);
+    sem_unlink(NAME_ADDR_DB_NAME);
 }
 
 void c_destroy_child_state(struct core_object *co, struct server_object *so, struct child *child)
