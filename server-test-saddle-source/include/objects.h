@@ -27,7 +27,7 @@
 #define CHANNEL_SEM_NAME "/ch_3fda69"      /** Channel db semaphore name. */
 #define MESSAGE_SEM_NAME "/m_3fda69"       /** Message db semaphore name. */
 #define AUTH_SEM_NAME "/au_3fda69"         /** Auth db semaphore name. */
-#define NAME_ADDR_SEM_NAME "/au_3fda69"         /** Auth db semaphore name. */
+#define NAME_ADDR_SEM_NAME "/na_3fda69"         /** Auth db semaphore name. */
 
 #define USER_DB_NAME "dbu_3fda69"          /** User db name. */
 #define CHANNEL_DB_NAME "dbch_3fda69"      /** Channel db name. */
