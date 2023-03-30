@@ -30,6 +30,20 @@ static int find_by_name(struct core_object *co, const char *db_name, sem_t *db_s
                         uint8_t **serial_object, const char *name);
 
 /**
+ * save_dptr_to_serial_object
+ * <p>
+ * Return 1 if value->dptr exists and 0 if value.dptr does not exist.
+ * If a byte array is provided and value->dptr exists, copy the value in a value->dptr into a byte array.
+ * Otherwise if a byte array is provide and value->dptr does not exist, set the byte array to NULL.
+ * </p>
+ * @param co the core object
+ * @param serial_object the byte array into which to copy value->dptr
+ * @param value the datum to copy
+ * @return 1 if value->dptr exists and 0 if value.dptr does not exist, -1 and set err on failure.
+ */
+static int save_dptr_to_serial_object(struct core_object *co, uint8_t **serial_object, datum *value);
+
+/**
  * insert_channel
  * <p>
  * Insert a new Channel into the Channel database.
@@ -204,20 +218,6 @@ static int delete_auth(struct core_object *co, struct server_object *so, Auth *a
  */
 static void print_db_error(DBM *db);
 
-/**
- * save_dptr_to_serial_object
- * <p>
- * Return 1 if value->dptr exists and 0 if value.dptr does not exist.
- * If a byte array is provided and value->dptr exists, copy the value in a value->dptr into a byte array.
- * Otherwise if a byte array is provide and value->dptr does not exist, set the byte array to NULL.
- * </p>
- * @param co the core object
- * @param serial_object the byte array into which to copy value->dptr
- * @param value the datum to copy
- * @return 1 if value->dptr exists and 0 if value.dptr does not exist, -1 and set err on failure.
- */
-static int save_dptr_to_serial_object(struct core_object *co, uint8_t **serial_object, datum *value);
-
 int db_create(struct core_object *co, struct server_object *so, int type, void *object)
 {
     PRINT_STACK_TRACE(co->tracer);
@@ -284,6 +284,8 @@ static int insert_user(struct core_object *co, struct server_object *so, User *u
     {
         return -1;
     }
+    
+    printf("serial user size: %lu\n", serial_user_size);
     
     key.dptr    = serial_user;
     key.dsize   = sizeof(user->id);
@@ -570,6 +572,8 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
     {
         return -1;
     }
+    
+    printf("serial auth size: %lu\n", serial_auth_size);
     
     key.dptr    = serial_auth;
     key.dsize   = sizeof(auth->user_id);

@@ -128,7 +128,7 @@ unsigned long serialize_auth(struct core_object *co, uint8_t **serial_auth, cons
     unsigned long serial_auth_size;
     
     serial_auth_size = sizeof(auth->user_id)
-                       * strlen(auth->login_token) + 1
+                       + strlen(auth->login_token) + 1
                        + strlen(auth->password) + 1;
     
     *serial_auth = mm_malloc(sizeof(auth->user_id)
