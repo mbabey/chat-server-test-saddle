@@ -319,7 +319,6 @@ static int insert_user(struct core_object *co, struct server_object *so, User *u
     return 0;
 }
 
-// TODO: this function returns an int 1 if the object is found and an int 0 if the object is not found
 static int find_by_name(struct core_object *co, const char *db_name, sem_t *db_sem,
                         uint8_t **serial_object, const char *name)
 {
@@ -389,13 +388,10 @@ static int save_dptr_to_serial_object(struct core_object *co, uint8_t **serial_o
         ret_val = 1;
         if (serial_object)
         {
-            *serial_object = mm_malloc(value->dsize, co->mm);
-            if (!*serial_object)
+            if (copy_dptr_to_buffer(co, serial_object, value) == -1)
             {
-                SET_ERROR(co->err);
                 return -1;
             }
-            memcpy(*serial_object, value->dptr, value->dsize);
         }
     } else
     {
@@ -586,36 +582,6 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
     }
     
     return 0;
-}
-
-int safe_dbm_store(struct core_object *co, const char *db_name, sem_t *sem, datum *key, datum *value, int store_flags)
-{
-    DBM *db;
-    int status;
-    
-    if (sem_wait(sem) == -1)
-    {
-        SET_ERROR(co->err);
-        return -1;
-    }
-    // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
-    db = dbm_open(db_name, DB_FLAGS, DB_FILE_MODE);
-    if (db == (DBM *) 0)
-    {
-        SET_ERROR(co->err);
-        sem_post(sem);
-        return -1;
-    }
-    status = dbm_store(db, *key, *value, store_flags);
-    if (!key->dptr && dbm_error(db)) // NOLINT(concurrency-mt-unsafe) : No threads here
-    {
-        print_db_error(db);
-    }
-    dbm_close(db);
-    // NOLINTEND(concurrency-mt-unsafe)
-    sem_post(sem);
-    
-    return status;
 }
 
 int db_read(struct core_object *co, struct server_object *so, int type, void *object_dst, void *object_query)
@@ -896,40 +862,6 @@ static int delete_user(struct core_object *co, struct server_object *so, User *u
     return 0;
 }
 
-int safe_dbm_delete(struct core_object *co, const char *db_name, sem_t *sem, datum *key)
-{
-    DBM *db;
-    
-    if (sem_wait(sem) == -1)
-    {
-        SET_ERROR(co->err);
-        return -1;
-    }
-    // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
-    db = dbm_open(db_name, DB_FLAGS, DB_FILE_MODE);
-    if (db == (DBM *) 0)
-    {
-        SET_ERROR(co->err);
-        sem_post(sem);
-        return -1;
-    }
-    if (dbm_delete(db, *key) == -1)
-    {
-        SET_ERROR(co->err);
-        dbm_close(db);
-        sem_post(sem);
-        return -1;
-    }
-    if (!(*key).dptr && dbm_error(db))
-    {
-        print_db_error(db);
-    }
-    dbm_close(db);
-    // NOLINTEND(concurrency-mt-unsafe)
-    sem_post(sem);
-    return 0;
-}
-
 static int delete_channel(struct core_object *co, struct server_object *so, Channel *channel)
 {
     PRINT_STACK_TRACE(co->tracer);
@@ -978,6 +910,129 @@ static int delete_auth(struct core_object *co, struct server_object *so, Auth *a
     }
     
     return 0;
+}
+
+int safe_dbm_store(struct core_object *co, const char *db_name, sem_t *sem, datum *key, datum *value, int store_flags)
+{
+    DBM *db;
+    int status;
+    
+    if (sem_wait(sem) == -1)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
+    // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
+    db = dbm_open(db_name, DB_FLAGS, DB_FILE_MODE);
+    if (db == (DBM *) 0)
+    {
+        SET_ERROR(co->err);
+        sem_post(sem);
+        return -1;
+    }
+    status = dbm_store(db, *key, *value, store_flags);
+    if (!key->dptr && dbm_error(db)) // NOLINT(concurrency-mt-unsafe) : No threads here
+    {
+        print_db_error(db);
+    }
+    dbm_close(db);
+    // NOLINTEND(concurrency-mt-unsafe)
+    sem_post(sem);
+    
+    return status;
+}
+
+int safe_dbm_fetch(struct core_object *co, const char *db_name, sem_t *sem, datum *key, uint8_t **serial_buffer)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    int ret_val;
+    DBM *db;
+    datum value;
+    
+    if (sem_wait(sem) == -1)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
+    // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
+    db = dbm_open(db_name, DB_FLAGS, DB_FILE_MODE);
+    if (db == (DBM *) 0)
+    {
+        SET_ERROR(co->err);
+        sem_post(sem);
+        return -1;
+    }
+    value = dbm_fetch(db, (*key));
+    if (!value.dptr && dbm_error(db))
+    {
+        print_db_error(db);
+    }
+    ret_val = copy_dptr_to_buffer(co, serial_buffer, &value);
+    dbm_close(db);
+    // NOLINTEND(concurrency-mt-unsafe) : Protected
+    sem_post(sem);
+    
+    return ret_val;
+}
+
+int safe_dbm_delete(struct core_object *co, const char *db_name, sem_t *sem, datum *key)
+{
+    DBM *db;
+    
+    if (sem_wait(sem) == -1)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
+    // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
+    db = dbm_open(db_name, DB_FLAGS, DB_FILE_MODE);
+    if (db == (DBM *) 0)
+    {
+        SET_ERROR(co->err);
+        sem_post(sem);
+        return -1;
+    }
+    if (dbm_delete(db, *key) == -1)
+    {
+        SET_ERROR(co->err);
+        dbm_close(db);
+        sem_post(sem);
+        return -1;
+    }
+    if (!(*key).dptr && dbm_error(db))
+    {
+        print_db_error(db);
+    }
+    dbm_close(db);
+    // NOLINTEND(concurrency-mt-unsafe)
+    sem_post(sem);
+    return 0;
+}
+
+int copy_dptr_to_buffer(struct core_object *co, uint8_t **buffer, datum *value)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    int ret_val;
+    
+    if (value->dptr)
+    {
+        *buffer = mm_malloc(value->dsize, co->mm);
+        if (!*buffer)
+        {
+            SET_ERROR(co->err);
+            return -1;
+        }
+        memcpy(*buffer, value->dptr, value->dsize);
+        
+        ret_val = 0;
+    } else
+    {
+        ret_val = 1;
+    }
+    
+    return ret_val;
 }
 
 void print_db_error(DBM *db)

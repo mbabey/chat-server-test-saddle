@@ -31,21 +31,6 @@
 int db_create(struct core_object *co, struct server_object *so, int type, void *object);
 
 /**
- * safe_dbm_store
- * <p>
- * Safely store an item in a database.
- * </p>
- * @param co the core object
- * @param db_name the database name
- * @param sem the database semaphore
- * @param key the key under which to store
- * @param value the value to store
- * @param store_flags whether to insert or overwrite
- * @return 0 on successful insert, 1 if insert and record already exists, -1 and set err on failure
- */
-int safe_dbm_store(struct core_object *co, const char *db_name, sem_t *sem, datum *key, datum *value, int store_flags);
-
-/**
  * db_read
  * <p>
  * Read an object of type from the database into object_dst based on the contents of object_query.
@@ -71,6 +56,35 @@ int db_update(struct core_object *co, struct server_object *so, int type, void *
 int db_destroy(struct core_object *co, struct server_object *so, int type, void *object);
 
 /**
+ * safe_dbm_store
+ * <p>
+ * Safely store an item in a database.
+ * </p>
+ * @param co the core object
+ * @param db_name the database name
+ * @param sem the database semaphore
+ * @param key the key under which to store
+ * @param value the value to store
+ * @param store_flags whether to insert or overwrite
+ * @return 0 on successful insert, 1 if insert and record already exists, -1 and set err on failure
+ */
+int safe_dbm_store(struct core_object *co, const char *db_name, sem_t *sem, datum *key, datum *value, int store_flags);
+
+/**
+ * safe_dbm_fetch
+ * <p>
+ * Safely fetch an item from a database.
+ * </p>
+ * @param co the core object
+ * @param db_name the name of the db from which to fetch
+ * @param sem the db semaphore
+ * @param key the key of the item to fetch
+ * @param serial_buffer the buffer into which to copy the fetched item
+ * @return 0 if successful and copy occurs, 1 if item not found, -1 and set err on failure
+ */
+int safe_dbm_fetch(struct core_object *co, const char *db_name, sem_t *sem, datum *key, uint8_t **serial_buffer);
+
+/**
  * safe_dbm_delete
  * <p>
  * Safely delete an item from a database.
@@ -82,6 +96,18 @@ int db_destroy(struct core_object *co, struct server_object *so, int type, void 
  * @return 0 on success, -1 and set err on failure.
  */
 int safe_dbm_delete(struct core_object *co, const char *db_name, sem_t *sem, datum *key);
+
+/**
+ * copy_dptr_to_buffer
+ * <p>
+ * Allocate memory for and copy the contents of a datum dptr into a buffer. If the dptr is NULL, return 1.
+ * </p>
+ * @param co the core object
+ * @param buffer the buffer into which to allocate
+ * @param value the datum from which to copy
+ * @return 0 if successful and copy occurs, 1 if datum dptr is NULL, -1 and set err on failure.
+ */
+int copy_dptr_to_buffer(struct core_object *co, uint8_t **buffer, datum *value);
 
 /**
  * print_db_error
