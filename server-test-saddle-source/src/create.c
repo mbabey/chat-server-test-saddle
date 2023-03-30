@@ -89,6 +89,32 @@ static int assemble_200_create_auth_response(struct core_object *co, struct disp
  */
 static int log_in_user(struct core_object *co, struct server_object *so, User *user);
 
+/**
+ * copy_dptr_to_buffer
+ * <p>
+ * Allocate memory for and copy the contents of a datum dptr into a buffer. If the dptr is NULL, return 1.
+ * </p>
+ * @param co the core object
+ * @param buffer the buffer into which to allocate
+ * @param value the datum from which to copy
+ * @return 0 if successful and copy occurs, 1 if datum dptr is NULL, -1 and set err on failure.
+ */
+int copy_dptr_to_buffer(struct core_object *co, uint8_t **buffer, datum *value);
+
+/**
+ * safe_dbm_fetch
+ * <p>
+ * Safely fetch an item from a database.
+ * </p>
+ * @param co the core object
+ * @param db_name the name of the db from which to fetch
+ * @param sem the db semaphore
+ * @param key the key of the item to fetch
+ * @param serial_buffer the buffer into which to copy the fetched item
+ * @return 0 if successful and copy occurs, 1 if item not found, -1 and set err on failure
+ */
+int safe_dbm_fetch(struct core_object *co, const char *db_name, sem_t *sem, datum *key, uint8_t **serial_buffer);
+
 int handle_create(struct core_object *co, struct server_object *so, struct dispatch *dispatch, char **body_tokens)
 {
     PRINT_STACK_TRACE(co->tracer);
@@ -370,35 +396,21 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
         return 0;
     }
     
-    DBM *db;
-    datum user_key;
-    datum user_value;
+    int   ret_val;
+    uint8_t *serial_user;
+    datum   user_key;
     
     // get user_id, get user with id
     user_key.dptr  = &auth->user_id;
     user_key.dsize = sizeof(auth->user_id);
     
-    if (sem_wait(so->user_db_sem) == -1)
-    {
-        SET_ERROR(co->err);
-        return -1;
-    }
-    // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
-    db = dbm_open(USER_DB_NAME, DB_FLAGS, DB_FILE_MODE);
-    if (db == (DBM *) 0)
-    {
-        SET_ERROR(co->err);
-        sem_post(so->user_db_sem);
-        return -1;
-    }
-    user_value = dbm_fetch(db, user_key);
-    dbm_close(db);
-    // NOLINTEND(concurrency-mt-unsafe) : Protected
-    sem_post(so->user_db_sem);
-    
+    ret_val = safe_dbm_fetch(co, USER_DB_NAME, so->user_db_sem, &user_key, &serial_user);
     free_auth(co, auth);
-    
-    if (user_value.dptr == NULL) // This should never happen.
+    if (ret_val == -1)
+    {
+        return -1;
+    }
+    if (ret_val == 1) // This should never happen, but just in case.
     {
         (void) fprintf(stdout, "Create-Auth: User with id \"%d\" not found in User database.\n", auth->user_id);
         dispatch->body      = mm_strdup("500\x03""Database Error: Auth exists with no existing referenced User.\x03",
@@ -415,7 +427,7 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
         SET_ERROR(co->err);
         return -1;
     }
-    deserialize_user(co, &user, user_value.dptr);
+    deserialize_user(co, &user, serial_user);
     if (log_in_user(co, so, user) == -1)
     {
         return -1;
@@ -429,8 +441,69 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     return 0;
 }
 
+int safe_dbm_fetch(struct core_object *co, const char *db_name, sem_t *sem, datum *key, uint8_t **serial_buffer)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    int ret_val;
+    DBM *db;
+    datum value;
+    
+    if (sem_wait(sem) == -1)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
+    // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
+    db = dbm_open(db_name, DB_FLAGS, DB_FILE_MODE);
+    if (db == (DBM *) 0)
+    {
+        SET_ERROR(co->err);
+        sem_post(sem);
+        return -1;
+    }
+    value = dbm_fetch(db, (*key));
+    if (!value.dptr && dbm_error(db))
+    {
+        print_db_error(db);
+    }
+    ret_val = copy_dptr_to_buffer(co, serial_buffer, &value);
+    dbm_close(db);
+    // NOLINTEND(concurrency-mt-unsafe) : Protected
+    sem_post(sem);
+    
+    return ret_val;
+}
+
+int copy_dptr_to_buffer(struct core_object *co, uint8_t **buffer, datum *value)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    int ret_val;
+    
+    if (value->dptr)
+    {
+        *buffer = mm_malloc(value->dsize, co->mm);
+        if (!*buffer)
+        {
+            SET_ERROR(co->err);
+            return -1;
+        }
+        memcpy(*buffer, value->dptr, value->dsize);
+        
+        ret_val = 0;
+    } else
+    {
+        ret_val = 1;
+    }
+    
+    return ret_val;
+}
+
 static int log_in_user(struct core_object *co, struct server_object *so, User *user)
 {
+    PRINT_STACK_TRACE(co->tracer);
+    
     /* TODO:
      * If the user is already logged in, remove the disconnect the currently
      * connected socket address and replace it with the new socket address.
@@ -453,6 +526,8 @@ static int log_in_user(struct core_object *co, struct server_object *so, User *u
 
 static int assemble_200_create_auth_response(struct core_object *co, struct dispatch *dispatch, const User *user)
 {
+    PRINT_STACK_TRACE(co->tracer);
+    
     // assemble body with user info
     char   *body_buffer;
     int    id_size;

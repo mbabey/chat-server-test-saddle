@@ -83,4 +83,13 @@ int db_destroy(struct core_object *co, struct server_object *so, int type, void 
  */
 int safe_dbm_delete(struct core_object *co, const char *db_name, sem_t *sem, datum *key);
 
+/**
+ * print_db_error
+ * <p>
+ * Print an error message based on the error code of passed.
+ * </p>
+ * @param err_code the error code
+ */
+void print_db_error(DBM *db);
+
 #endif //SERVER_TEST_SADDLE_DB_H

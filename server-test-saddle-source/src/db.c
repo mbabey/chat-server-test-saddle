@@ -209,15 +209,6 @@ static int delete_message(struct core_object *co, struct server_object *so, Mess
  */
 static int delete_auth(struct core_object *co, struct server_object *so, Auth *auth);
 
-/**
- * print_db_error
- * <p>
- * Print an error message based on the error code of passed.
- * </p>
- * @param err_code the error code
- */
-static void print_db_error(DBM *db);
-
 int db_create(struct core_object *co, struct server_object *so, int type, void *object)
 {
     PRINT_STACK_TRACE(co->tracer);
@@ -925,6 +916,7 @@ int safe_dbm_delete(struct core_object *co, const char *db_name, sem_t *sem, dat
     if (dbm_delete(db, *key) == -1)
     {
         SET_ERROR(co->err);
+        dbm_close(db);
         sem_post(sem);
         return -1;
     }
@@ -988,7 +980,7 @@ static int delete_auth(struct core_object *co, struct server_object *so, Auth *a
     return 0;
 }
 
-static void print_db_error(DBM *db)
+void print_db_error(DBM *db)
 {
     int err_code;
     
