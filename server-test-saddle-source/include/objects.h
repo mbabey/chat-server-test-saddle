@@ -67,11 +67,6 @@ struct server_object
     sem_t         *auth_db_sem;
     struct parent *parent;
     struct child  *child;
-    
-    DBM *user_db;
-    DBM *channel_db;
-    DBM *message_db;
-    DBM *auth_db;
 };
 
 /**

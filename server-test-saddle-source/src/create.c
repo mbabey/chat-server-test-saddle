@@ -353,7 +353,6 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     Auth *auth;
     
     // Read database to find Auth.
-    
     if (db_read(co, so, AUTH, &auth, *body_tokens) == -1)
     {
         return -1;
@@ -392,7 +391,7 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
         sem_post(so->user_db_sem);
         return -1;
     }
-    user_value = dbm_fetch(so->user_db, user_key);
+    user_value = dbm_fetch(db, user_key);
     dbm_close(db);
     // NOLINTEND(concurrency-mt-unsafe) : Protected
     sem_post(so->user_db_sem);
