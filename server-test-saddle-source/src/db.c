@@ -204,6 +204,20 @@ static int delete_auth(struct core_object *co, struct server_object *so, Auth *a
  */
 static void print_db_error(DBM *db);
 
+/**
+ * save_dptr_to_serial_object
+ * <p>
+ * Return 1 if value->dptr exists and 0 if value.dptr does not exist.
+ * If a byte array is provided and value->dptr exists, copy the value in a value->dptr into a byte array.
+ * Otherwise if a byte array is provide and value->dptr does not exist, set the byte array to NULL.
+ * </p>
+ * @param co the core object
+ * @param serial_object the byte array into which to copy value->dptr
+ * @param value the datum to copy
+ * @return 1 if value->dptr exists and 0 if value.dptr does not exist, -1 and set err on failure.
+ */
+static int save_dptr_to_serial_object(struct core_object *co, uint8_t **serial_object, datum *value);
+
 int db_create(struct core_object *co, struct server_object *so, int type, void *object)
 {
     PRINT_STACK_TRACE(co->tracer);
@@ -361,26 +375,34 @@ static int find_by_name(struct core_object *co, const char *db_name, sem_t *db_s
         }
     }
     
-    // IF dptr is found,
-    // if serial object is not null
-    //  assign serial object and return 1
+    // Returns 0 if no value.dptr, returns 1 if value.dptr, returns -1 if error.
+    int ret_val = save_dptr_to_serial_object(co, serial_object, &value);
+    
+    dbm_close(db);
+    // NOLINTEND(concurrency-mt-unsafe) : Protected
+    sem_post(db_sem);
+    
+    return ret_val;
+}
+
+static int save_dptr_to_serial_object(struct core_object *co, uint8_t **serial_object, datum *value)
+{
+    PRINT_STACK_TRACE(co->tracer);
     
     int ret_val;
     
-    if (value.dptr)
+    if (value->dptr)
     {
         ret_val = 1;
         if (serial_object)
         {
-            *serial_object = mm_malloc(value.dsize, co->mm);
+            *serial_object = mm_malloc(value->dsize, co->mm);
             if (!*serial_object)
             {
                 SET_ERROR(co->err);
-                dbm_close(db);
-                sem_post(db_sem);
                 return -1;
             }
-            memcpy(value.dptr, *serial_object, value.dsize);
+            memcpy(value->dptr, *serial_object, value->dsize);
         }
     } else
     {
@@ -390,10 +412,6 @@ static int find_by_name(struct core_object *co, const char *db_name, sem_t *db_s
             *serial_object = NULL;
         }
     }
-    
-    dbm_close(db);
-    // NOLINTEND(concurrency-mt-unsafe) : Protected
-    sem_post(db_sem);
     
     return ret_val;
 }
@@ -533,7 +551,6 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
     int           status;
     datum         key;
     datum         value;
-    DBM           *db;
     
     // Determine if an auth with the login token already exists in the database.
     status = find_by_name(co, AUTH_DB_NAME, so->auth_db_sem, NULL, auth->login_token);
@@ -559,27 +576,7 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
     value.dptr  = serial_auth;
     value.dsize = serial_auth_size;
     
-    if (sem_wait(so->auth_db_sem) == -1)
-    {
-        SET_ERROR(co->err);
-        return -1;
-    }
-    // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
-    db = dbm_open(AUTH_DB_NAME, DB_FLAGS, DB_FILE_MODE);
-    if (db == (DBM *) 0)
-    {
-        SET_ERROR(co->err);
-        sem_post(so->auth_db_sem);
-        return -1;
-    }
-    status = dbm_store(db, key, value, DBM_INSERT);
-    if (!key.dptr && dbm_error(db)) // NOLINT(concurrency-mt-unsafe) : No threads here
-    {
-        print_db_error(db);
-    }
-    dbm_close(db);
-    // NOLINTEND(concurrency-mt-unsafe)
-    sem_post(so->auth_db_sem);
+    status = safe_dbm_store(co, AUTH_DB_NAME, so->auth_db_sem, &key, &value, DBM_INSERT);
     
     if (status == 1)
     {
@@ -615,7 +612,7 @@ int safe_dbm_store(struct core_object *co, const char *db_name, sem_t *sem, datu
         return -1;
     }
     status = dbm_store(db, *key, *value, store_flags);
-    if (!key.dptr && dbm_error(db)) // NOLINT(concurrency-mt-unsafe) : No threads here
+    if (!key->dptr && dbm_error(db)) // NOLINT(concurrency-mt-unsafe) : No threads here
     {
         print_db_error(db);
     }
@@ -748,6 +745,8 @@ static int read_auth(struct core_object *co, struct server_object *so, Auth **au
         *auth_get = NULL;
         return 0;
     }
+    
+    printf("%s\n", serial_auth);
     
     *auth_get = mm_malloc(sizeof(Auth), co->mm);
     if (!*auth_get)
@@ -918,11 +917,13 @@ int safe_dbm_delete(struct core_object *co, const char *db_name, sem_t *sem, dat
     if (db == (DBM *) 0)
     {
         SET_ERROR(co->err);
+        sem_post(sem);
         return -1;
     }
     if (dbm_delete(db, *key) == -1)
     {
         SET_ERROR(co->err);
+        sem_post(sem);
         return -1;
     }
     if (!(*key).dptr && dbm_error(db))
