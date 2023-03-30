@@ -450,7 +450,7 @@ static int log_in_user(struct core_object *co, struct server_object *so, User *u
         value.dptr  = name_addr;
         value.dsize = name_addr_size
         
-        safe_dbm_store(co, CONN_USER_DB_NAME, so->conn_user_db_sem,);
+        safe_dbm_store(co, NAME_ADDR_DB_NAME, so->name_addr_db_sem,);
         
     } else // If the user is already logged in, update the name-addr database. Disconnect the old client(?)
     {
@@ -466,13 +466,21 @@ static int log_out_user(struct core_object *co, struct server_object *so, User *
 {
     PRINT_STACK_TRACE(co->tracer);
     
+    datum key;
+    int status;
+    
     user->online_status = 0;
     if (db_update(co, so, USER, user) == -1)
     {
         return -1;
     }
     
-    return 0;
+    key.dptr = user->display_name;
+    key.dsize = strlen(user->display_name) + 1;
+    
+    status = safe_dbm_delete(co, NAME_ADDR_DB_NAME, so->name_addr_db_sem, &key);
+    
+    return status;
 }
 
 static int assemble_200_create_auth_response(struct core_object *co, struct dispatch *dispatch, const User *user)

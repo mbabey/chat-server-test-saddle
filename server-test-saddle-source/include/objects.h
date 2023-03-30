@@ -32,7 +32,7 @@
 #define CHANNEL_DB_NAME "dbch_3fda69"      /** Channel db name. */
 #define MESSAGE_DB_NAME "dbm_3fda69"       /** Message db name. */
 #define AUTH_DB_NAME "dbau_3fda69"         /** Auth db name. */
-#define CONN_USER_DB_NAME "dbna_3fda69"    /** Display name-Socket address database. */
+#define NAME_ADDR_DB_NAME "dbna_3fda69"    /** Display name-Socket address database. */
 
 #define DB_FLAGS O_RDWR | O_CREAT          /** Flags for opening db. */
 #define DB_FILE_MODE S_IRUSR | S_IWUSR     /** File mode for opening db. */
