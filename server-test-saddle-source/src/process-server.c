@@ -650,6 +650,7 @@ static int c_handle_network_dispatch(struct core_object *co, struct server_objec
     {
         dispatch.body      = mm_strdup("500\x03", co->mm);
         dispatch.body_size = strlen(dispatch.body);
+        GET_ERROR(co->err); // NOLINT(mt-concurrency-unsafe) : No threads here.
     }
     
     free_body_tokens((struct state *) co, body_tokens); // Free the body tokens after performing the operation.

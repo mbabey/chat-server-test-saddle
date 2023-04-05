@@ -52,19 +52,19 @@ unsigned long serialize_message(struct core_object *co, uint8_t **serial_message
 unsigned long serialize_auth(struct core_object *co, uint8_t **serial_auth, const Auth *auth);
 
 /**
- * serialize_name_addr_pair
+ * serialize_addr_id_pair
  * <p>
  * Given a display name and a socket address, allocate memory for and create a byte
  * stream in the format [name, ip-addr, port-num].
  * </p>
  * @param co the core object
  * @param name_addr_dst the destination buffer
- * @param display_name the display name
+ * @param user_id the display name
  * @param addr the socket addr
  * @return the size of the buffer on success, -1 and set err on failure.
  */
-unsigned long serialize_name_addr_pair(struct core_object *co, uint8_t **name_addr_dst,
-                                       const char *display_name, struct sockaddr_in *addr);
+unsigned long
+serialize_addr_id_pair(struct core_object *co, uint8_t **name_addr_dst, struct sockaddr_in *addr, int *user_id);
 
 /**
  * deserialize_user

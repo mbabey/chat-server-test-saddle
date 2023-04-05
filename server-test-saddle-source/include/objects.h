@@ -27,7 +27,7 @@
 #define CHANNEL_SEM_NAME "/ch_3fda69"      /** Channel db semaphore name. */
 #define MESSAGE_SEM_NAME "/m_3fda69"       /** Message db semaphore name. */
 #define AUTH_SEM_NAME "/au_3fda69"         /** Auth db semaphore name. */
-#define NAME_ADDR_SEM_NAME "/na_3fda69"         /** Auth db semaphore name. */
+#define NAME_ADDR_SEM_NAME "/na_3fda69"    /** Auth db semaphore name. */
 
 #define USER_DB_NAME "dbu_3fda69"          /** User db name. */
 #define CHANNEL_DB_NAME "dbch_3fda69"      /** Channel db name. */
@@ -37,6 +37,8 @@
 
 #define DB_FLAGS O_RDWR | O_CREAT          /** Flags for opening db. */
 #define DB_FILE_MODE S_IRUSR | S_IWUSR     /** File mode for opening db. */
+
+#define SOCKET_ADDR_SIZE (sizeof(in_addr_t) + sizeof(in_port_t)) /** The size of an ip:port combination. */
 
 #define FOR_EACH_CHILD_c_IN_CHILD_PIDS for (size_t c = 0; c < NUM_CHILD_PROCESSES; ++c) /** For each loop macro for looping over child processes. */
 #define FOR_EACH_SOCKET_POLLFD_p_IN_POLLFDS for (size_t p = 2; p < POLLFDS_SIZE; ++p)   /** For each loop macro for looping over socket pollfds. */

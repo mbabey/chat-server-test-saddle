@@ -270,7 +270,11 @@ int handle_create_channel(struct core_object *co, struct server_object *so, stru
         return 0;
     }
     
-    detemine_request_sender(co, so, &request_sender)
+    if (determine_request_sender(co, so, &request_sender) == -1)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
     
     if (db_create(co, so, CHANNEL, &new_channel) == -1)
     {
@@ -291,7 +295,9 @@ static int determine_request_sender(struct core_object *co, struct server_object
 {
     PRINT_STACK_TRACE(co->tracer);
     
-    //
+    // Use the socket address to find the user id.
+    
+    // Use the user id to find the user.
     
     return 0;
 }
@@ -448,7 +454,7 @@ static int log_in_user(struct core_object *co, struct server_object *so, User *u
     uint8_t *name_addr;
     size_t  name_addr_size;
     
-    name_addr_size = serialize_name_addr_pair(co, &name_addr, user->display_name, &so->child->client_addr);
+    name_addr_size = serialize_addr_id_pair(co, &name_addr, &so->child->client_addr, user->display_name);
     if (name_addr_size == 0)
     {
         return -1;
@@ -459,7 +465,6 @@ static int log_in_user(struct core_object *co, struct server_object *so, User *u
     
     key.dptr  = name_addr;
     key.dsize = strlen((char *) name_addr) + 1; // The first thing in here is a null-terminated string.
-    printf("name addr key.dsize %lu\n", key.dsize);
     value.dptr  = name_addr;
     value.dsize = name_addr_size;
     
