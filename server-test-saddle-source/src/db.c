@@ -327,19 +327,11 @@ static int find_by_name(struct core_object *co, const char *db_name, sem_t *db_s
     {
         print_db_error(db);
     }
-//    if (key.dptr)
-//    {
-//        printf("id: %d\n", *(int *) key.dptr);
-//        printf("size: %zu\n", value.dsize);
-//        printf("name: %s\n", (char *) (((int *) value.dptr) + 1));
-//    } else
-//    {
-//        printf("key.dptr is null\n");
-//    }
+
     // Compare the display name to the name in the db
     while (key.dptr && strcmp((char *) (((int *) value.dptr) + 1), name) != 0)
     {
-        key   = dbm_firstkey(db);
+        key   = dbm_nextkey(db);
         value = dbm_fetch(db, key);
         if (!key.dptr && dbm_error(db))
         {
@@ -353,6 +345,16 @@ static int find_by_name(struct core_object *co, const char *db_name, sem_t *db_s
     dbm_close(db);
     // NOLINTEND(concurrency-mt-unsafe) : Protected
     sem_post(db_sem);
+    
+    //    if (key.dptr)
+//    {
+//        printf("id: %d\n", *(int *) key.dptr);
+//        printf("size: %zu\n", value.dsize);
+//        printf("name: %s\n", (char *) (((int *) value.dptr) + 1));
+//    } else
+//    {
+//        printf("key.dptr is null\n");
+//    }
     
     return ret_val;
 }

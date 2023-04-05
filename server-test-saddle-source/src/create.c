@@ -226,34 +226,17 @@ int handle_create_channel(struct core_object *co, struct server_object *so, stru
     PRINT_STACK_TRACE(co->tracer);
     
     Channel new_channel;
-    size_t  offset;
+    size_t offset;
     
     offset = 0;
-    new_channel.id           = (int) strtol(*body_tokens, NULL, BASE);
-    new_channel.channel_name = *(body_tokens + ++offset);
-    new_channel.creator      = *(body_tokens + ++offset);
+    new_channel.id = generate_channel_id(co->tracer);
+    new_channel.channel_name = *(body_tokens);
+    new_channel.creator = *(body_tokens + ++offset);
     
-    new_channel.users_count = (size_t) strtol(*(body_tokens + ++offset), NULL, BASE);
-    if (create_name_list(co, &new_channel.users, (body_tokens + ++offset),
-                         new_channel.users_count, &new_channel.users_size_bytes) == -1)
+    if (**(body_tokens + ++offset) == '1') // Publicity is set to 1 in the dispatch.
     {
-        return -1;
-    }
-    offset += new_channel.users_count;
-    
-    new_channel.administrators_count = (size_t) strtol(*(body_tokens + ++offset), NULL, BASE);
-    if (create_name_list(co, &new_channel.administrators, (body_tokens + ++offset),
-                         new_channel.administrators_count, &new_channel.administrators_size_bytes) == -1)
-    {
-        return -1;
-    }
-    offset += new_channel.administrators_count;
-    
-    new_channel.banned_users_count = (size_t) strtol(*(body_tokens + ++offset), NULL, BASE);
-    if (create_name_list(co, &new_channel.banned_users, (body_tokens + ++offset),
-                         new_channel.banned_users_count, &new_channel.banned_users_size_bytes) == -1)
-    {
-        return -1;
+        (void) fprintf(stdout, "Note: Private channels are not supported. Channel \"%s\" defaulted to public.\n",
+                       new_channel.channel_name);
     }
     
     if (db_create(co, so, CHANNEL, &new_channel) == -1)
@@ -437,10 +420,6 @@ static int log_in_user(struct core_object *co, struct server_object *so, User *u
     printf("name addr key.dsize %lu\n", key.dsize);
     value.dptr  = name_addr;
     value.dsize = name_addr_size;
-    /* TODO:
-     * If the user is already logged in, remove the disconnect the currently
-     * connected socket address and replace it with the new socket address.
-     */
     
     // If the user is not logged in, just log them in and add them to the name-addr database.
     if (user->online_status == 0)
@@ -453,7 +432,7 @@ static int log_in_user(struct core_object *co, struct server_object *so, User *u
         
         status = safe_dbm_store(co, NAME_ADDR_DB_NAME, so->name_addr_db_sem, &key, &value, DBM_INSERT);
         
-    } else // If the user is already logged in, update the name-addr database.
+    } else // If the user is already logged in, update the name-addr database. The last connected user will be refused on all routes.
     {
         status = safe_dbm_store(co, NAME_ADDR_DB_NAME, so->name_addr_db_sem, &key, &value, DBM_REPLACE);
     }
