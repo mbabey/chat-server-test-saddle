@@ -152,7 +152,7 @@ static int open_semaphores(struct core_object *co, struct server_object *so)
     so->channel_db_sem = channel_db_sem;
     so->message_db_sem = message_db_sem;
     so->auth_db_sem    = auth_db_sem;
-    so->name_addr_db_sem = name_addr_db_sem;
+    so->addr_id_db_sem = name_addr_db_sem;
     
     return 0;
 }
@@ -308,7 +308,7 @@ void p_destroy_parent_state(struct core_object *co, struct server_object *so, st
     sem_close(so->channel_db_sem);
     sem_close(so->message_db_sem);
     sem_close(so->auth_db_sem);
-    sem_close(so->name_addr_db_sem);
+    sem_close(so->addr_id_db_sem);
     sem_unlink(PIPE_WRITE_SEM_NAME);
     sem_unlink(DOMAIN_READ_SEM_NAME);
     sem_unlink(DOMAIN_WRITE_SEM_NAME);

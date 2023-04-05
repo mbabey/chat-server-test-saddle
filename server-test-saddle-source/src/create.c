@@ -454,7 +454,7 @@ static int log_in_user(struct core_object *co, struct server_object *so, User *u
     uint8_t *name_addr;
     size_t  name_addr_size;
     
-    name_addr_size = serialize_addr_id_pair(co, &name_addr, &so->child->client_addr, user->display_name);
+    name_addr_size = serialize_addr_id_pair(co, &name_addr, &so->child->client_addr, &user->id);
     if (name_addr_size == 0)
     {
         return -1;
@@ -464,7 +464,7 @@ static int log_in_user(struct core_object *co, struct server_object *so, User *u
     datum value;
     
     key.dptr  = name_addr;
-    key.dsize = strlen((char *) name_addr) + 1; // The first thing in here is a null-terminated string.
+    key.dsize = SOCKET_ADDR_SIZE; // The first thing in here is a socket address.
     value.dptr  = name_addr;
     value.dsize = name_addr_size;
     
@@ -477,11 +477,11 @@ static int log_in_user(struct core_object *co, struct server_object *so, User *u
             return -1;
         }
         
-        status = safe_dbm_store(co, NAME_ADDR_DB_NAME, so->name_addr_db_sem, &key, &value, DBM_INSERT);
+        status = safe_dbm_store(co, ADDR_ID_DB_NAME, so->addr_id_db_sem, &key, &value, DBM_INSERT);
         
     } else // If the user is already logged in, update the name-addr database. The last connected user will be refused on all routes.
     {
-        status = safe_dbm_store(co, NAME_ADDR_DB_NAME, so->name_addr_db_sem, &key, &value, DBM_REPLACE);
+        status = safe_dbm_store(co, ADDR_ID_DB_NAME, so->addr_id_db_sem, &key, &value, DBM_REPLACE);
     }
     
     return status;
@@ -503,7 +503,7 @@ static int log_out_user(struct core_object *co, struct server_object *so, User *
     key.dptr  = user->display_name;
     key.dsize = strlen(user->display_name) + 1;
     
-    status = safe_dbm_delete(co, NAME_ADDR_DB_NAME, so->name_addr_db_sem, &key);
+    status = safe_dbm_delete(co, ADDR_ID_DB_NAME, so->addr_id_db_sem, &key);
     
     return status;
 }
