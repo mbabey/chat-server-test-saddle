@@ -38,6 +38,18 @@ static int generate_user_id(TRACER_FUNCTION_AS(tracer));
 static int generate_channel_id(TRACER_FUNCTION_AS(tracer));
 
 /**
+ * determine_request_sender
+ * <p>
+ * Given a socket address on which a dispatch was sent, find the User that sent the dispatch.
+ * </p>
+ * @param co the core object
+ * @param so the server object
+ * @param request_sender the User object into which to store the request sender
+ * @return 0 on success, -1 and set err on failure
+ */
+static int determine_request_sender(struct core_object *co, struct server_object *so, User *request_sender);
+
+/**
  * create_name_list
  * <p>
  * Allocate memory for a list of count names. Fill the list with names from src_list up to count. Add a NULL
@@ -163,7 +175,7 @@ int handle_create_user(struct core_object *co, struct server_object *so, struct 
     // Validate fields
     // If invalid, assemble 400
     if (!(VALIDATE_LOGIN_TOKEN(new_auth.login_token)
-          && VALIDATE_DISPLAY_NAME(new_user.display_name)
+          && VALIDATE_NAME(new_user.display_name)
           && VALIDATE_PASSWORD(new_auth.password)))
     {
         dispatch->body      = mm_strdup("400\x03Invalid fields\x03", co->mm);
@@ -226,18 +238,39 @@ int handle_create_channel(struct core_object *co, struct server_object *so, stru
     PRINT_STACK_TRACE(co->tracer);
     
     Channel new_channel;
-    size_t offset;
+    size_t  offset;
+    size_t  count;
+    char    **body_tokens_cpy;
+    User    request_sender;
+    
+    count           = 0;
+    body_tokens_cpy = body_tokens;
+    COUNT_TOKENS(count, body_tokens_cpy);
+    if (count != CREATE_CHANNEL_BODY_TOKEN_SIZE)
+    {
+        dispatch->body      = mm_strdup("400\x03Invalid number of fields\x03", co->mm);
+        dispatch->body_size = strlen(dispatch->body);
+        return 0;
+    }
     
     offset = 0;
-    new_channel.id = generate_channel_id(co->tracer);
+    new_channel.id           = generate_channel_id(co->tracer);
     new_channel.channel_name = *(body_tokens);
-    new_channel.creator = *(body_tokens + ++offset);
-    
+    new_channel.creator      = *(body_tokens + ++offset);
     if (**(body_tokens + ++offset) == '1') // Publicity is set to 1 in the dispatch.
     {
         (void) fprintf(stdout, "Note: Private channels are not supported. Channel \"%s\" defaulted to public.\n",
                        new_channel.channel_name);
     }
+    
+    if (!(VALIDATE_NAME(new_channel.creator) && VALIDATE_NAME(new_channel.channel_name)))
+    {
+        dispatch->body      = mm_strdup("400\x03Invalid fields\x03", co->mm);
+        dispatch->body_size = strlen(dispatch->body);
+        return 0;
+    }
+    
+    detemine_request_sender(co, so, &request_sender)
     
     if (db_create(co, so, CHANNEL, &new_channel) == -1)
     {
@@ -252,6 +285,15 @@ static int generate_channel_id(TRACER_FUNCTION_AS(tracer))
     PRINT_STACK_TRACE(tracer);
     static int channel_id = 1;
     return channel_id++;
+}
+
+static int determine_request_sender(struct core_object *co, struct server_object *so, User *request_sender)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    //
+    
+    return 0;
 }
 
 static int create_name_list(struct core_object *co, const char ***dst_list, char **src_list,
@@ -402,7 +444,7 @@ static int log_in_user(struct core_object *co, struct server_object *so, User *u
 {
     PRINT_STACK_TRACE(co->tracer);
     
-    int status;
+    int     status;
     uint8_t *name_addr;
     size_t  name_addr_size;
     
@@ -445,7 +487,7 @@ static int log_out_user(struct core_object *co, struct server_object *so, User *
     PRINT_STACK_TRACE(co->tracer);
     
     datum key;
-    int status;
+    int   status;
     
     user->online_status = 0;
     if (db_update(co, so, USER, user) == -1)
@@ -453,7 +495,7 @@ static int log_out_user(struct core_object *co, struct server_object *so, User *
         return -1;
     }
     
-    key.dptr = user->display_name;
+    key.dptr  = user->display_name;
     key.dsize = strlen(user->display_name) + 1;
     
     status = safe_dbm_delete(co, NAME_ADDR_DB_NAME, so->name_addr_db_sem, &key);
