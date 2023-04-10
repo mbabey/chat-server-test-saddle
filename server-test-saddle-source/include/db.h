@@ -98,6 +98,19 @@ int safe_dbm_fetch(struct core_object *co, const char *db_name, sem_t *sem, datu
 int safe_dbm_delete(struct core_object *co, const char *db_name, sem_t *sem, datum *key);
 
 /**
+ * find_addr_id_pair_by_id
+ * <p>
+ * Search the database for an Address-User ID pair by User ID.
+ * </p>
+ * @param co the core object
+ * @param so the server object
+ * @param addr_id_pair the address id pair
+ * @param id the id
+ * @return 0 on success, -1 and set on failure
+ */
+int find_addr_id_pair_by_id(struct core_object *co, struct server_object *so, AddrIdPair *addr_id_pair, int id);
+
+/**
  * copy_dptr_to_buffer
  * <p>
  * Allocate memory for and copy the contents of a datum dptr into a buffer. If the dptr is NULL, return 1.

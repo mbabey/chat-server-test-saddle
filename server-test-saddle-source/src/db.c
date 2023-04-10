@@ -15,35 +15,6 @@
 static int insert_user(struct core_object *co, struct server_object *so, User *user);
 
 /**
- * find_by_name
- * <p>
- * Find an entry in the database by a string name. The name must be the second parameter of the object following an int.
- * </p>
- * @param co the core object
- * @param db the database in which to search
- * @param db_sem the semaphore for the database
- * @param serial_object the object to store the result, or NULL if no resuilt is needed
- * @param name the
- * @return 0 on success and record not located, 1 on success and record located, -1 and set err on failure
- */
-static int find_by_name(struct core_object *co, const char *db_name, sem_t *db_sem,
-                        uint8_t **serial_object, const char *name);
-
-/**
- * save_dptr_to_serial_object
- * <p>
- * Return 1 if value->dptr exists and 0 if value.dptr does not exist.
- * If a byte array is provided and value->dptr exists, copy the value in a value->dptr into a byte array.
- * Otherwise if a byte array is provide and value->dptr does not exist, set the byte array to NULL.
- * </p>
- * @param co the core object
- * @param serial_object the byte array into which to copy value->dptr
- * @param value the datum to copy
- * @return 1 if value->dptr exists and 0 if value.dptr does not exist, -1 and set err on failure.
- */
-static int save_dptr_to_serial_object(struct core_object *co, uint8_t **serial_object, datum *value);
-
-/**
  * insert_channel
  * <p>
  * Insert a new Channel into the Channel database.
@@ -209,6 +180,35 @@ static int delete_message(struct core_object *co, struct server_object *so, Mess
  */
 static int delete_auth(struct core_object *co, struct server_object *so, Auth *auth);
 
+/**
+ * find_by_name
+ * <p>
+ * Find an entry in the database by a string name. The name must be the second parameter of the object following an int.
+ * </p>
+ * @param co the core object
+ * @param db the database in which to search
+ * @param db_sem the semaphore for the database
+ * @param serial_object the object to store the result, or NULL if no resuilt is needed
+ * @param name the
+ * @return 0 on success and record not located, 1 on success and record located, -1 and set err on failure
+ */
+static int find_by_name(struct core_object *co, const char *db_name, sem_t *db_sem,
+                        uint8_t **serial_object, const char *name);
+
+/**
+ * save_dptr_to_serial_object
+ * <p>
+ * Return 1 if value->dptr exists and 0 if value.dptr does not exist.
+ * If a byte array is provided and value->dptr exists, copy the value in a value->dptr into a byte array.
+ * Otherwise if a byte array is provide and value->dptr does not exist, set the byte array to NULL.
+ * </p>
+ * @param co the core object
+ * @param serial_object the byte array into which to copy value->dptr
+ * @param value the datum to copy
+ * @return 1 if value->dptr exists and 0 if value.dptr does not exist, -1 and set err on failure.
+ */
+static int save_dptr_to_serial_object(struct core_object *co, uint8_t **serial_object, datum *value);
+
 int db_create(struct core_object *co, struct server_object *so, int type, void *object)
 {
     PRINT_STACK_TRACE(co->tracer);
@@ -297,94 +297,6 @@ static int insert_user(struct core_object *co, struct server_object *so, User *u
     }
     
     return 0;
-}
-
-static int find_by_name(struct core_object *co, const char *db_name, sem_t *db_sem,
-                        uint8_t **serial_object, const char *name)
-{
-    PRINT_STACK_TRACE(co->tracer);
-    
-    DBM   *db;
-    datum key;
-    datum value;
-    
-    // Get first thing in the db
-    if (sem_wait(db_sem) == -1)
-    {
-        SET_ERROR(co->err);
-        return -1;
-    }
-    // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
-    db = dbm_open(db_name, DB_FLAGS, DB_FILE_MODE);
-    if (db == (DBM *) 0)
-    {
-        SET_ERROR(co->err);
-        return -1;
-    }
-    key   = dbm_firstkey(db);
-    value = dbm_fetch(db, key);
-    if (!key.dptr && dbm_error(db))
-    {
-        print_db_error(db);
-    }
-
-    // Compare the display name to the name in the db
-    while (key.dptr && strcmp((char *) (((int *) value.dptr) + 1), name) != 0)
-    {
-        key   = dbm_nextkey(db);
-        value = dbm_fetch(db, key);
-        if (!key.dptr && dbm_error(db))
-        {
-            print_db_error(db);
-        }
-    }
-    
-    // Returns 0 if no value.dptr, returns 1 if value.dptr, returns -1 if error.
-    int ret_val = save_dptr_to_serial_object(co, serial_object, &value);
-    
-    dbm_close(db);
-    // NOLINTEND(concurrency-mt-unsafe) : Protected
-    sem_post(db_sem);
-    
-    //    if (key.dptr)
-//    {
-//        printf("id: %d\n", *(int *) key.dptr);
-//        printf("size: %zu\n", value.dsize);
-//        printf("name: %s\n", (char *) (((int *) value.dptr) + 1));
-//    } else
-//    {
-//        printf("key.dptr is null\n");
-//    }
-    
-    return ret_val;
-}
-
-static int save_dptr_to_serial_object(struct core_object *co, uint8_t **serial_object, datum *value)
-{
-    PRINT_STACK_TRACE(co->tracer);
-    
-    int ret_val;
-    
-    if (value->dptr)
-    {
-        ret_val = 1;
-        if (serial_object)
-        {
-            if (copy_dptr_to_buffer(co, serial_object, value) == -1)
-            {
-                return -1;
-            }
-        }
-    } else
-    {
-        ret_val = 0;
-        if (serial_object)
-        {
-            *serial_object = NULL;
-        }
-    }
-    
-    return ret_val;
 }
 
 static int insert_channel(struct core_object *co, struct server_object *so, Channel *channel)
@@ -927,6 +839,146 @@ int safe_dbm_delete(struct core_object *co, const char *db_name, sem_t *sem, dat
     // NOLINTEND(concurrency-mt-unsafe)
     sem_post(sem);
     return 0;
+}
+
+
+static int find_by_name(struct core_object *co, const char *db_name, sem_t *db_sem,
+                        uint8_t **serial_object, const char *name)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    DBM   *db;
+    datum key;
+    datum value;
+    
+    // Get first thing in the db
+    if (sem_wait(db_sem) == -1)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
+    // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
+    db = dbm_open(db_name, DB_FLAGS, DB_FILE_MODE);
+    if (db == (DBM *) 0)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
+    key   = dbm_firstkey(db);
+    value = dbm_fetch(db, key);
+    if (!key.dptr && dbm_error(db))
+    {
+        print_db_error(db);
+    }
+    
+    // Compare the display name to the name in the db
+    while (key.dptr && strcmp((char *) (((int *) value.dptr) + 1), name) != 0)
+    {
+        key   = dbm_nextkey(db);
+        value = dbm_fetch(db, key);
+        if (!key.dptr && dbm_error(db))
+        {
+            print_db_error(db);
+        }
+    }
+    
+    // Returns 0 if no value.dptr, returns 1 if value.dptr, returns -1 if error.
+    int ret_val = save_dptr_to_serial_object(co, serial_object, &value);
+    
+    dbm_close(db);
+    // NOLINTEND(concurrency-mt-unsafe) : Protected
+    sem_post(db_sem);
+    
+    //    if (key.dptr)
+//    {
+//        printf("id: %d\n", *(int *) key.dptr);
+//        printf("size: %zu\n", value.dsize);
+//        printf("name: %s\n", (char *) (((int *) value.dptr) + 1));
+//    } else
+//    {
+//        printf("key.dptr is null\n");
+//    }
+    
+    return ret_val;
+}
+
+int find_addr_id_pair_by_id(struct core_object *co, struct server_object *so, AddrIdPair *addr_id_pair, int id)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    DBM   *db;
+    datum key;
+    datum value;
+    
+    // Get first thing in the db
+    if (sem_wait(so->addr_id_db_sem) == -1)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
+    // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
+    db = dbm_open(ADDR_ID_DB_NAME, DB_FLAGS, DB_FILE_MODE);
+    if (db == (DBM *) 0)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
+    key   = dbm_firstkey(db);
+    value = dbm_fetch(db, key);
+    if (!key.dptr && dbm_error(db))
+    {
+        print_db_error(db);
+    }
+    
+    // Compare the ID to the name in the db
+    while (key.dptr && *(int *) ((uint8_t *) key.dptr + SOCKET_ADDR_SIZE) == id)
+    {
+        key   = dbm_nextkey(db);
+        value = dbm_fetch(db, key);
+        if (!key.dptr && dbm_error(db))
+        {
+            print_db_error(db);
+        }
+    }
+    
+    // Returns 0 if no value.dptr, returns 1 if value.dptr, returns -1 if error.
+    int ret_val = save_dptr_to_serial_object(co, serial_object, &value);
+    
+    dbm_close(db);
+    // NOLINTEND(concurrency-mt-unsafe) : Protected
+    sem_post(so->addr_id_db_sem);
+    
+    deserialize_addr_id_pair(co, &addr_id_pair);
+    
+    return 0;
+}
+
+static int save_dptr_to_serial_object(struct core_object *co, uint8_t **serial_object, datum *value)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    int ret_val;
+    
+    if (value->dptr)
+    {
+        ret_val = 1;
+        if (serial_object)
+        {
+            if (copy_dptr_to_buffer(co, serial_object, value) == -1)
+            {
+                return -1;
+            }
+        }
+    } else
+    {
+        ret_val = 0;
+        if (serial_object)
+        {
+            *serial_object = NULL;
+        }
+    }
+    
+    return ret_val;
 }
 
 int copy_dptr_to_buffer(struct core_object *co, uint8_t **buffer, datum *value)

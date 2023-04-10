@@ -463,8 +463,8 @@ static int log_in_user(struct core_object *co, struct server_object *so, User *u
     datum key;
     datum value;
     
-    key.dptr  = name_addr;
-    key.dsize = SOCKET_ADDR_SIZE; // The first thing in here is a socket address.
+    key.dptr    = name_addr;
+    key.dsize   = SOCKET_ADDR_SIZE; // The first thing in here is a socket address.
     value.dptr  = name_addr;
     value.dsize = name_addr_size;
     
@@ -507,6 +507,7 @@ static int log_out_user(struct core_object *co, struct server_object *so, User *
     
     return status;
 }
+
 
 static int assemble_200_create_auth_response(struct core_object *co, struct dispatch *dispatch, const User *user)
 {
