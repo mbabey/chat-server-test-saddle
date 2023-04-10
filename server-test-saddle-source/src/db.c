@@ -577,7 +577,7 @@ int db_update(struct core_object *co, struct server_object *so, int type, void *
 {
     PRINT_STACK_TRACE(co->tracer);
     
-    switch (type)
+    switch (type) // NOLINT(hicpp-multiway-paths-covered) : TODO: temp nolint while other routes commented.
     {
         case USER:
         {
@@ -941,16 +941,19 @@ int find_addr_id_pair_by_id(struct core_object *co, struct server_object *so, Ad
         }
     }
     
+    uint8_t *serial_object;
     // Returns 0 if no value.dptr, returns 1 if value.dptr, returns -1 if error.
-    int ret_val = save_dptr_to_serial_object(co, serial_object, &value);
+    int ret_val = save_dptr_to_serial_object(co, &serial_object, &value);
     
     dbm_close(db);
     // NOLINTEND(concurrency-mt-unsafe) : Protected
     sem_post(so->addr_id_db_sem);
+    if (ret_val == 0)
+    {
+        deserialize_addr_id_pair(co, &addr_id_pair, serial_object);
+    }
     
-    deserialize_addr_id_pair(co, &addr_id_pair);
-    
-    return 0;
+    return ret_val;
 }
 
 static int save_dptr_to_serial_object(struct core_object *co, uint8_t **serial_object, datum *value)
