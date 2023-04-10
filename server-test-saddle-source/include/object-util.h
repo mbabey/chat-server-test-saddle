@@ -94,10 +94,10 @@ void deserialize_auth(struct core_object *co, Auth **auth_get, uint8_t *serial_a
  * Deserialize a buffer into an AddrIdPair.
  * </p>
  * @param co the core object
- * @param addr_id_pair the address-id pair object in which to store the deserialized buffer
+ * @param addr_id_pair_get the address-id pair object in which to store the deserialized buffer
  * @param serial_addr_id the buffer to deserialize
  */
-void deserialize_addr_id_pair(struct core_object *co, AddrIdPair **addr_id_pair, uint8_t *serial_addr_id);
+void deserialize_addr_id_pair(struct core_object *co, AddrIdPair **addr_id_pair_get, uint8_t *serial_addr_id);
 
 /**
  * free_user
