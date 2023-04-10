@@ -44,8 +44,11 @@ unsigned long serialize_channel(struct core_object *co, uint8_t **serial_channel
     serial_channel_size = sizeof(channel->id)
                           + strlen(channel->channel_name) + 1
                           + strlen(channel->creator) + 1
+                          + sizeof(channel->users_count)
                           + channel->users_size_bytes
+                          + sizeof(channel->administrators_count)
                           + channel->administrators_size_bytes
+                          + sizeof(channel->banned_users_count)
                           + channel->banned_users_size_bytes;
     
     *serial_channel = mm_malloc(serial_channel_size, co->mm);
@@ -55,8 +58,9 @@ unsigned long serialize_channel(struct core_object *co, uint8_t **serial_channel
         return -1;
     }
     
-    size_t     byte_offset;
+    size_t byte_offset;
     
+    printf("%lu\n", serial_channel_size);
     
     memcpy(*serial_channel, &channel->id, sizeof(channel->id));
     byte_offset = sizeof(channel->id);
@@ -65,17 +69,30 @@ unsigned long serialize_channel(struct core_object *co, uint8_t **serial_channel
     memcpy((*serial_channel + byte_offset), channel->creator, strlen(channel->creator) + 1);
     byte_offset += strlen(channel->creator) + 1;
     
+    printf("%s\n", *channel->users);
+    printf("%lu\n", byte_offset);
     
+    memcpy((*serial_channel + byte_offset), &channel->users_count, sizeof(channel->users_count));
+    byte_offset += sizeof(channel->users_count);
     for (const char **list = channel->users; list && *list != NULL; ++list)
     {
         memcpy((*serial_channel + byte_offset), *list, strlen(*list) + 1);
         byte_offset += strlen(*list) + 1;
     }
+    // How big is a NULL pointer?
+    printf("%lu\n", byte_offset);
+    printf("%s\n", *channel->administrators);
+    
+    memcpy((*serial_channel + byte_offset), &channel->administrators_count, sizeof(channel->administrators_count));
+    byte_offset += sizeof(channel->administrators_count);
     for (const char **list = channel->administrators; list && *list != NULL; ++list)
     {
         memcpy((*serial_channel + byte_offset), *list, strlen(*list) + 1);
         byte_offset += strlen(*list) + 1;
     }
+    
+    memcpy((*serial_channel + byte_offset), &channel->banned_users_count, sizeof(channel->banned_users_count));
+    byte_offset += sizeof(channel->banned_users_count);
     for (const char **list = channel->banned_users; list && *list != NULL; ++list)
     {
         memcpy((*serial_channel + byte_offset), *list, strlen(*list) + 1);
@@ -207,6 +224,7 @@ void deserialize_addr_id_pair(struct core_object *co, AddrIdPair **addr_id_pair_
     
     size_t byte_offset;
     
+    printf("%d\n", *(int *) serial_addr_id);
     memcpy(&(*addr_id_pair_get)->socket_ip, serial_addr_id, sizeof(in_addr_t));
     byte_offset = sizeof(in_addr_t);
     memcpy(&(*addr_id_pair_get)->socket_port, serial_addr_id + byte_offset, sizeof(in_port_t));

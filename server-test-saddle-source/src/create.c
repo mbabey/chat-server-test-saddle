@@ -390,6 +390,8 @@ static int determine_request_sender(struct core_object *co, struct server_object
     {
         return -1;
     }
+    
+    addr_id_pair = mm_malloc(sizeof(AddrIdPair), co->mm);
     deserialize_addr_id_pair(co, &addr_id_pair, addr_id_buffer);
     mm_free(co->mm, addr_buffer);
     mm_free(co->mm, addr_id_buffer);
@@ -403,6 +405,7 @@ static int determine_request_sender(struct core_object *co, struct server_object
         return -1;
     }
     deserialize_user(co, &request_sender, user_buffer);
+    mm_free(co->mm, addr_id_pair);
     mm_free(co->mm, user_buffer);
     
     return 0;
