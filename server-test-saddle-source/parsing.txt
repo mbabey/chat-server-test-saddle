@@ -1,5 +1,5 @@
 Parsing user
-    new_user.id              = (int) strtol(*body_tokens, NULL, 10); // TODO: function to generate user ID
+    new_user.id              = (int) strtol(*body_tokens, NULL, 10);
     new_user.display_name    = *(body_tokens + ++offset);
     new_user.privilege_level = (int) strtol(*(body_tokens + ++offset), NULL, 10);
     new_user.online_status   = (int) strtol(*(body_tokens + ++offset), NULL, 10);

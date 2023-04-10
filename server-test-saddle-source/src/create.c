@@ -238,10 +238,10 @@ int handle_create_channel(struct core_object *co, struct server_object *so, stru
     PRINT_STACK_TRACE(co->tracer);
     
     Channel new_channel;
-    size_t  offset;
-    size_t  count;
-    char    **body_tokens_cpy;
     User    request_sender;
+    
+    size_t count;
+    char   **body_tokens_cpy;
     
     count           = 0;
     body_tokens_cpy = body_tokens;
@@ -252,6 +252,8 @@ int handle_create_channel(struct core_object *co, struct server_object *so, stru
         dispatch->body_size = strlen(dispatch->body);
         return 0;
     }
+    
+    size_t offset;
     
     offset = 0;
     new_channel.id           = generate_channel_id(co->tracer);
@@ -269,7 +271,7 @@ int handle_create_channel(struct core_object *co, struct server_object *so, stru
         dispatch->body_size = strlen(dispatch->body);
         return 0;
     }
-
+    
     if (determine_request_sender(co, so, &request_sender) == -1)
     {
         SET_ERROR(co->err);
@@ -291,7 +293,8 @@ int handle_create_channel(struct core_object *co, struct server_object *so, stru
             return 0;
         }
         free_user(co, litmus_user);
-    } else { // is it the request sender?
+    } else
+    { // is it the request sender?
         if (strcmp(request_sender.display_name, new_channel.creator) != 0)
         {
             dispatch->body      = mm_strdup("403\x03User name must match channel creator name.\x03", co->mm);
@@ -302,6 +305,27 @@ int handle_create_channel(struct core_object *co, struct server_object *so, stru
     
     int insert_status;
     
+    // need to add the user to the list off users in channel
+    new_channel.users_count = 1;
+    if (create_name_list(co, &new_channel.users, &new_channel.creator,
+                         new_channel.users_count,
+                         &new_channel.users_size_bytes) == -1)
+    {
+        return -1;
+    }
+    // need to add the user to the list off admins in channel
+    new_channel.administrators_count = 1;
+    if (create_name_list(co, &new_channel.administrators, &new_channel.creator,
+                         new_channel.administrators_count,
+                         &new_channel.administrators_size_bytes) == -1)
+    {
+        return -1;
+    }
+    // need to set the banned user list to null
+    new_channel.banned_users_count = 0;
+    new_channel.banned_users = NULL;
+    new_channel.banned_users_size_bytes = 0;
+    
     insert_status = db_create(co, so, CHANNEL, &new_channel);
     if (insert_status == -1)
     {
@@ -311,8 +335,15 @@ int handle_create_channel(struct core_object *co, struct server_object *so, stru
     {
         dispatch->body      = mm_strdup("409\x03Channel already exists.\x03", co->mm);
         dispatch->body_size = strlen(dispatch->body);
-        return 0;
+    } else if (insert_status == 0)
+    {
+        dispatch->body      = mm_strdup("201\x03Channel created.\x03", co->mm);
+        dispatch->body_size = strlen(dispatch->body);
     }
+    
+    // free the memory of the lists.
+    mm_free(co->mm, new_channel.users);
+    mm_free(co->mm, new_channel.administrators);
     
     return 0;
 }
@@ -360,6 +391,8 @@ static int determine_request_sender(struct core_object *co, struct server_object
         return -1;
     }
     deserialize_addr_id_pair(co, &addr_id_pair, addr_id_buffer);
+    mm_free(co->mm, addr_buffer);
+    mm_free(co->mm, addr_id_buffer);
     
     // Find the user associated with the addr in the addr_id_buffer
     user_key.dptr  = &addr_id_pair->id;
@@ -370,6 +403,7 @@ static int determine_request_sender(struct core_object *co, struct server_object
         return -1;
     }
     deserialize_user(co, &request_sender, user_buffer);
+    mm_free(co->mm, user_buffer);
     
     return 0;
 }

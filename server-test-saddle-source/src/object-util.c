@@ -56,7 +56,7 @@ unsigned long serialize_channel(struct core_object *co, uint8_t **serial_channel
     }
     
     size_t     byte_offset;
-    const char **list;
+    
     
     memcpy(*serial_channel, &channel->id, sizeof(channel->id));
     byte_offset = sizeof(channel->id);
@@ -65,20 +65,18 @@ unsigned long serialize_channel(struct core_object *co, uint8_t **serial_channel
     memcpy((*serial_channel + byte_offset), channel->creator, strlen(channel->creator) + 1);
     byte_offset += strlen(channel->creator) + 1;
     
-    list = channel->users;
-    for (; *list != NULL; ++list)
+    
+    for (const char **list = channel->users; list && *list != NULL; ++list)
     {
         memcpy((*serial_channel + byte_offset), *list, strlen(*list) + 1);
         byte_offset += strlen(*list) + 1;
     }
-    list = channel->administrators;
-    for (; *list != NULL; ++list)
+    for (const char **list = channel->administrators; list && *list != NULL; ++list)
     {
         memcpy((*serial_channel + byte_offset), *list, strlen(*list) + 1);
         byte_offset += strlen(*list) + 1;
     }
-    list = channel->banned_users;
-    for (; *list != NULL; ++list)
+    for (const char **list = channel->banned_users; list && *list != NULL; ++list)
     {
         memcpy((*serial_channel + byte_offset), *list, strlen(*list) + 1);
         byte_offset += strlen(*list) + 1;
