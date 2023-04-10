@@ -269,16 +269,49 @@ int handle_create_channel(struct core_object *co, struct server_object *so, stru
         dispatch->body_size = strlen(dispatch->body);
         return 0;
     }
-    
+
     if (determine_request_sender(co, so, &request_sender) == -1)
     {
         SET_ERROR(co->err);
         return -1;
     }
     
-    if (db_create(co, so, CHANNEL, &new_channel) == -1)
+    if (request_sender.privilege_level == 1) // is it a global admin?
+    {
+        // does the user exist?
+        User *litmus_user;
+        if (db_read(co, so, USER, new_channel.creator, &litmus_user) == -1)
+        {
+            return -1;
+        }
+        if (!litmus_user)
+        {
+            dispatch->body      = mm_strdup("404\x03User set as creator does not exist.\x03", co->mm);
+            dispatch->body_size = strlen(dispatch->body);
+            return 0;
+        }
+        free_user(co, litmus_user);
+    } else { // is it the request sender?
+        if (strcmp(request_sender.display_name, new_channel.creator) != 0)
+        {
+            dispatch->body      = mm_strdup("403\x03User name must match channel creator name.\x03", co->mm);
+            dispatch->body_size = strlen(dispatch->body);
+            return 0;
+        }
+    }
+    
+    int insert_status;
+    
+    insert_status = db_create(co, so, CHANNEL, &new_channel);
+    if (insert_status == -1)
     {
         return -1;
+    }
+    if (insert_status == 1) // Channel with channel name already exists.
+    {
+        dispatch->body      = mm_strdup("409\x03Channel already exists.\x03", co->mm);
+        dispatch->body_size = strlen(dispatch->body);
+        return 0;
     }
     
     return 0;
