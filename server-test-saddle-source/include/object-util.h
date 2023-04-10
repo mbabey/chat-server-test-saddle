@@ -63,8 +63,8 @@ unsigned long serialize_auth(struct core_object *co, uint8_t **serial_auth, cons
  * @param addr the socket addr
  * @return the size of the buffer on success, -1 and set err on failure.
  */
-unsigned long
-serialize_addr_id_pair(struct core_object *co, uint8_t **name_addr_dst, struct sockaddr_in *addr, int *user_id);
+unsigned long serialize_addr_id_pair(struct core_object *co, uint8_t **name_addr_dst, struct sockaddr_in *addr,
+                                     int *user_id);
 
 /**
  * deserialize_user
@@ -89,6 +89,17 @@ void deserialize_user(struct core_object *co, User **user_get, uint8_t *serial_u
 void deserialize_auth(struct core_object *co, Auth **auth_get, uint8_t *serial_auth);
 
 /**
+ * deserialize_addr_id_pair
+ * <p>
+ * Deserialize a buffer into an AddrIdPair.
+ * </p>
+ * @param co the core object
+ * @param addr_id_pair the address-id pair object in which to store the deserialized buffer
+ * @param serial_addr_id the buffer to deserialize
+ */
+void deserialize_addr_id_pair(struct core_object *co, AddrIdPair **addr_id_pair, uint8_t *serial_addr_id);
+
+/**
  * free_user
  * <p>
  * Free a user's fields then the user. Must be allocated in the memory manager.
@@ -97,7 +108,6 @@ void deserialize_auth(struct core_object *co, Auth **auth_get, uint8_t *serial_a
  * @param user the user to deallocate
  */
 void free_user(struct core_object *co, User *user);
-
 /**
  * free_auth
  * <p>
@@ -107,5 +117,6 @@ void free_user(struct core_object *co, User *user);
  * @param auth the user to deallocate
  */
 void free_auth(struct core_object *co, Auth *auth);
+
 
 #endif //TEST_SERVER_OBJECT_UTIL_H

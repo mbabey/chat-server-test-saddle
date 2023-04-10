@@ -203,6 +203,19 @@ void deserialize_auth(struct core_object *co, Auth **auth_get, uint8_t *serial_a
     (*auth_get)->password = mm_strdup((char *) (serial_auth + byte_offset), co->mm);
 }
 
+void deserialize_addr_id_pair(struct core_object *co, AddrIdPair **addr_id_pair, uint8_t *serial_addr_id)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    size_t byte_offset;
+    
+    memcpy(&(*addr_id_pair)->socket_ip, serial_addr_id, sizeof(in_addr_t));
+    byte_offset = sizeof(in_addr_t);
+    memcpy(&(*addr_id_pair)->socket_port, serial_addr_id + byte_offset, sizeof(in_port_t));
+    byte_offset += sizeof(in_port_t);
+    memcpy(&(*addr_id_pair)->id, serial_addr_id + byte_offset, sizeof(int));
+}
+
 void free_user(struct core_object *co, User *user)
 {
     PRINT_STACK_TRACE(co->tracer);
