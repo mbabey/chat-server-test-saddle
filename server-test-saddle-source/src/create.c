@@ -427,11 +427,10 @@ static int create_name_list(struct core_object *co, const char ***dst_list, char
     for (size_t i = 0; i < count; ++i)
     {
         *(*dst_list + i) = *(src_list + i);
-        *byte_count += strlen(*(src_list + i) + 1);
+        *byte_count += strlen(*(src_list + i)) + 1;
     }
     
     *(*dst_list + count) = NULL;
-    
     return 0;
 }
 

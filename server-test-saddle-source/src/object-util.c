@@ -59,18 +59,12 @@ unsigned long serialize_channel(struct core_object *co, uint8_t **serial_channel
     }
     
     size_t byte_offset;
-    
-    printf("%lu\n", serial_channel_size);
-    
     memcpy(*serial_channel, &channel->id, sizeof(channel->id));
     byte_offset = sizeof(channel->id);
     memcpy((*serial_channel + byte_offset), channel->channel_name, strlen(channel->channel_name) + 1);
     byte_offset += strlen(channel->channel_name) + 1;
     memcpy((*serial_channel + byte_offset), channel->creator, strlen(channel->creator) + 1);
     byte_offset += strlen(channel->creator) + 1;
-    
-    printf("%s\n", *channel->users);
-    printf("%lu\n", byte_offset);
     
     memcpy((*serial_channel + byte_offset), &channel->users_count, sizeof(channel->users_count));
     byte_offset += sizeof(channel->users_count);
@@ -79,9 +73,6 @@ unsigned long serialize_channel(struct core_object *co, uint8_t **serial_channel
         memcpy((*serial_channel + byte_offset), *list, strlen(*list) + 1);
         byte_offset += strlen(*list) + 1;
     }
-    // How big is a NULL pointer?
-    printf("%lu\n", byte_offset);
-    printf("%s\n", *channel->administrators);
     
     memcpy((*serial_channel + byte_offset), &channel->administrators_count, sizeof(channel->administrators_count));
     byte_offset += sizeof(channel->administrators_count);
