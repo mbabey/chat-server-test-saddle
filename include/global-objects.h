@@ -10,8 +10,8 @@
 
 /**
  * State struct containing information necessary for the execution of the program.
- * MUST not alter order of fields unless similar order is kept in client-test-saddle-source/include/state.h and
- * client-test-saddle-source/include/state.h.
+ * MUST not alter order of fields unless similar order is kept in test-client-source/include/state.h and
+ * benchmark-server-source/include/state.h.
  */
 struct state {
     struct sockaddr_in addr;
