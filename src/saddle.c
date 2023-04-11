@@ -10,12 +10,12 @@
 #define OPTS_LIST "l:i:p:t"
 #define USAGE_MESSAGE                                                                           \
     "usage: chat-test-saddle -l <server | client> -i <ip address> -p <port number> [-t]\n"      \
-    "-l <server | client>, whether to run the test server or test client\n"                     \
-    "-i <ip address>, if server selected for -l, will run the server at this ip address.\n"     \
-    "\tif client selected for -l, will connect to a server at this ip address.\n"               \
-    "-p <port number>, if server selected for -l, will run the server at this port number.\n"   \
-    "\tif client selected for -l, will connect to a server at this port number.\n"              \
-    "[-t], optionally trace the execution of the program.\n"
+    "\t-l <server | client>, whether to run the test server or test client\n"                     \
+    "\t-i <ip address>, if server selected for -l, will run the server at this ip address.\n"     \
+    "\t\tif client selected for -l, will connect to a server at this ip address.\n"               \
+    "\t-p <port number>, if server selected for -l, will run the server at this port number.\n"   \
+    "\t\tif client selected for -l, will connect to a server at this port number.\n"              \
+    "\t[-t], optionally trace the execution of the program.\n"
 
 /**
  * trace_reporter
