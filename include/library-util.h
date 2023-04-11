@@ -9,7 +9,7 @@
 #define SERVER_SADDLE "../server-test-saddle-source/build/libserver-test-saddle.so"
 #define CLIENT_SADDLE "../client-test-saddle-source/build/libclient-test-saddle.so"
 #elif defined(__APPLE__) && defined(__MACH__)
-#define SERVER_SADDLE "../server-test-saddle-source/build/libserver-test-saddle.dylib"
+#define SERVER_SADDLE "../benchmark-server-source/build/libserver-test-saddle.dylib"
 #define CLIENT_SADDLE "../client-test-saddle-source/build/libclient-test-saddle.dylib"
 #endif
 
