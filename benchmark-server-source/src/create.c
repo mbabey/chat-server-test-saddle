@@ -474,6 +474,20 @@ int handle_create_message(struct core_object *co, struct server_object *so, stru
         return 0;
     }
     
+    int find_status;
+    
+    find_status = find_by_name(co, CHANNEL_DB_NAME, so->channel_db_sem, NULL, channel_name_in_dispatch);
+    if (find_status == -1)
+    {
+        return -1;
+    }
+    if (find_status == 0)
+    {
+        dispatch->body      = mm_strdup("404\x03Channel not found.\x03", co->mm);
+        dispatch->body_size = strlen(dispatch->body);
+        return 0;
+    }
+    
     
     
     if (db_create(co, so, MESSAGE, &new_message) == -1)
