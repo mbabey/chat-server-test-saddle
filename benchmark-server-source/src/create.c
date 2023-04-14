@@ -5,8 +5,10 @@
 
 #include <stdlib.h>
 
-// NOLINTNEXTLINE(modernize-macro-to-enum) : No
+// NOLINTBEGIN(modernize-macro-to-enum)
 #define BASE 10 // Base for strtol calls, DO NOT CHANGE
+#define HEX_BASE 16
+// NOLINTEND(modernize-macro-to-enum)
 
 /** Number of tokens that should be present in Create Type Dispatches. */
 enum BodyTokenSizes
@@ -434,8 +436,6 @@ static int create_name_list(struct core_object *co, const char ***dst_list, char
     return 0;
 }
 
-#define HEX_BASE 16
-
 int handle_create_message(struct core_object *co, struct server_object *so, struct dispatch *dispatch,
                           char **body_tokens)
 {
@@ -473,6 +473,7 @@ int handle_create_message(struct core_object *co, struct server_object *so, stru
         dispatch->body_size = strlen(dispatch->body);
         return 0;
     }
+    
     
     
     if (db_create(co, so, MESSAGE, &new_message) == -1)

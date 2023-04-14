@@ -98,6 +98,21 @@ int safe_dbm_fetch(struct core_object *co, const char *db_name, sem_t *sem, datu
 int safe_dbm_delete(struct core_object *co, const char *db_name, sem_t *sem, datum *key);
 
 /**
+ * find_by_name
+ * <p>
+ * Find an entry in the database by a string name. The name must be the second parameter of the object following an int.
+ * </p>
+ * @param co the core object
+ * @param db the database in which to search
+ * @param db_sem the semaphore for the database
+ * @param serial_object the object to store the result, or NULL if no resuilt is needed
+ * @param name the
+ * @return 0 on success and record not located, 1 on success and record located, -1 and set err on failure
+ */
+int find_by_name(struct core_object *co, const char *db_name, sem_t *db_sem,
+                 uint8_t **serial_object, const char *name);
+
+/**
  * find_addr_id_pair_by_id
  * <p>
  * Search the database for an Address-User ID pair by User ID.
