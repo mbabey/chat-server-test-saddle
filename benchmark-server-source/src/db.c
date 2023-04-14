@@ -427,53 +427,44 @@ int db_read(struct core_object *co, struct server_object *so, int type, void *ob
 {
     PRINT_STACK_TRACE(co->tracer);
     
+    int read_status;
+    
     switch (type)
     {
         case USER:
         {
-            int status;
-            
             if (object_query)
             {
-                status = read_user(co, so, (User **) object_dst, (const char *) object_query);
+                read_status = read_user(co, so, (User **) object_dst, (const char *) object_query);
             } else
             {
-                status = read_online_users(co, so, (User ***) object_dst);
-            }
-            if (status == -1)
-            {
-                return -1;
+                read_status = read_online_users(co, so, (User ***) object_dst);
             }
             break;
         }
         case CHANNEL:
         {
-            if (read_channel(co, so, (Channel **) object_dst, (const char *) object_query) == -1)
-            {
-                return -1;
-            }
+            read_status = read_channel(co, so, (Channel **) object_dst, (const char *) object_query);
             break;
         }
         case MESSAGE:
         {
-            if (read_messages(co, so, (Message ***) object_dst,
-                              *(int *) object_query, *(((int *) object_query) + 1)) == -1)
-            {
-                return -1;
-            }
+            read_status = read_messages(co, so, (Message ***) object_dst,
+                                        *(int *) object_query, *(((int *) object_query) + 1));
             break;
         }
         case AUTH:
         {
-            if (read_auth(co, so, (Auth **) object_dst, (const char *) object_query) == -1)
-            {
-                return -1;
-            }
+            read_status = read_auth(co, so, (Auth **) object_dst, (const char *) object_query);
+            break;
         }
-        default:;
+        default:
+        {
+            read_status = -1;
+        }
     }
     
-    return 0;
+    return read_status;
 }
 
 static int read_user(struct core_object *co, struct server_object *so, User **user_get, const char *display_name)
@@ -481,30 +472,33 @@ static int read_user(struct core_object *co, struct server_object *so, User **us
     PRINT_STACK_TRACE(co->tracer);
     
     uint8_t *serial_user;
+    int     read_status;
     
     // Read the database to find the User
-    if (find_by_name(co, USER_DB_NAME, so->user_db_sem, &serial_user, display_name) == -1)
+    read_status = find_by_name(co, USER_DB_NAME, so->user_db_sem, &serial_user, display_name);
+    if (read_status == -1) // Error
     {
         return -1;
     }
-    
-    if (!serial_user) // User not found.
+    if (user_get) // If the query must return something, return something.
     {
-        *user_get = NULL;
-        return 0;
+        if (read_status == 1) // User found.
+        {
+            *user_get = mm_malloc(sizeof(User), co->mm);
+            if (!*user_get)
+            {
+                SET_ERROR(co->err);
+                return -1;
+            }
+            deserialize_user(co, user_get, serial_user);
+        } else if (read_status == 0) // User not found.
+        {
+            *user_get = NULL;
+        }
     }
     
-    // deserialize the user and put it in *user_get
-    *user_get = mm_malloc(sizeof(User), co->mm);
-    if (!*user_get)
-    {
-        SET_ERROR(co->err);
-        return -1;
-    }
-    
-    deserialize_user(co, user_get, serial_user);
-    
-    return 0;
+    // Return whether the object was found.
+    return read_status;
 }
 
 static int read_online_users(struct core_object *co, struct server_object *so, User ***users_get)
@@ -828,7 +822,7 @@ int safe_dbm_delete(struct core_object *co, const char *db_name, sem_t *sem, dat
 
 
 int find_by_name(struct core_object *co, const char *db_name, sem_t *db_sem,
-                        uint8_t **serial_object, const char *name)
+                 uint8_t **serial_object, const char *name)
 {
     PRINT_STACK_TRACE(co->tracer);
     
@@ -928,7 +922,7 @@ int find_addr_id_pair_by_id(struct core_object *co, struct server_object *so, Ad
     
     uint8_t *serial_object;
     // Returns 0 if no value.dptr, returns 1 if value.dptr, returns -1 if error.
-    int ret_val = save_dptr_to_serial_object(co, &serial_object, &value);
+    int     ret_val = save_dptr_to_serial_object(co, &serial_object, &value);
     
     dbm_close(db);
     // NOLINTEND(concurrency-mt-unsafe) : Protected

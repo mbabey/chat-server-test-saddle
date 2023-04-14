@@ -474,8 +474,12 @@ int handle_create_message(struct core_object *co, struct server_object *so, stru
         return 0;
     }
     
-    int find_status;
+    int     find_status;
+    Channel message_in_channel;
+    User    user_sender;
     
+    
+    // Retrieve the channel for the channel ID
     find_status = find_by_name(co, CHANNEL_DB_NAME, so->channel_db_sem, NULL, channel_name_in_dispatch);
     if (find_status == -1)
     {
@@ -495,6 +499,7 @@ int handle_create_message(struct core_object *co, struct server_object *so, stru
     
     if (request_sender.privilege_level == GLOBAL_ADMIN)
     {
+        // Retrieve the user for the user ID.
         find_status = find_by_name(co, USER_DB_NAME, so->user_db_sem, NULL, display_name_in_dispatch);
         if (find_status == -1)
         {
@@ -515,6 +520,8 @@ int handle_create_message(struct core_object *co, struct server_object *so, stru
             return 0;
         }
     }
+    
+    new_message.id = generate_message_id(co->tracer);
     
     if (db_create(co, so, MESSAGE, &new_message) == -1)
     {
