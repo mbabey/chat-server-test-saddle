@@ -515,7 +515,34 @@ static int read_channel(struct core_object *co, struct server_object *so, Channe
 {
     PRINT_STACK_TRACE(co->tracer);
     
-    return 0;
+    int read_status;
+    
+    if (channel_get) // If the query must return something, return something.
+    {
+        uint8_t *serial_user;
+        
+        read_status = find_by_name(co, CHANNEL_DB_NAME, so->channel_db_sem, &serial_user, channel_name);
+        if (read_status == -1) // Error
+        {
+            return -1;
+        }
+        if (read_status == 1) // Channel found.
+        {
+            deserialize_channel(co, channel_get, serial_user);
+        } else if (read_status == 0) // User not found.
+        {
+            *channel_get = NULL;
+        }
+    } else // if the query is merely a check.
+    {
+        read_status = find_by_name(co, CHANNEL_DB_NAME, so->channel_db_sem, NULL, channel_name);
+        if (read_status == -1) // Error
+        {
+            return -1;
+        }
+    }
+    
+    return read_status;
 }
 
 static int read_messages(struct core_object *co, struct server_object *so, Message ***messages_get,

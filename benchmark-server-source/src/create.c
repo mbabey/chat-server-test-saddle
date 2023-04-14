@@ -283,18 +283,19 @@ int handle_create_channel(struct core_object *co, struct server_object *so, stru
     if (request_sender.privilege_level == GLOBAL_ADMIN)
     {
         // does the user exist?
-        User *litmus_user; // TODO: pass null and just check the return value
-        if (db_read(co, so, USER, new_channel.creator, &litmus_user) == -1)
+        int read_status;
+        
+        read_status = db_read(co, so, USER, NULL, new_channel.creator);
+        if (read_status == -1)
         {
             return -1;
         }
-        if (!litmus_user)
+        if (read_status == 0)
         {
             dispatch->body      = mm_strdup("404\x03User set as creator does not exist.\x03", co->mm);
             dispatch->body_size = strlen(dispatch->body);
             return 0;
         }
-        free_user(co, litmus_user);
     } else
     { // is it the request sender?
         if (strcmp(request_sender.display_name, new_channel.creator) != 0)
@@ -474,12 +475,11 @@ int handle_create_message(struct core_object *co, struct server_object *so, stru
         return 0;
     }
     
-    int     find_status;
-    Channel message_in_channel;
-    User    user_sender;
+    Channel *channel;
+    User    *user;
+    int read_status;
     
-    
-    // Retrieve the channel for the channel ID
+    // TODO Retrieve the channel for the channel ID
     find_status = find_by_name(co, CHANNEL_DB_NAME, so->channel_db_sem, NULL, channel_name_in_dispatch);
     if (find_status == -1)
     {
@@ -499,13 +499,15 @@ int handle_create_message(struct core_object *co, struct server_object *so, stru
     
     if (request_sender.privilege_level == GLOBAL_ADMIN)
     {
-        // Retrieve the user for the user ID.
-        find_status = find_by_name(co, USER_DB_NAME, so->user_db_sem, NULL, display_name_in_dispatch);
-        if (find_status == -1)
+        // TODO: Retrieve the user for the user ID.
+        
+        
+        read_status = db_read(co, so, USER, &user_sender, display_name_in_dispatch);
+        if (read_status == -1)
         {
             return -1;
         }
-        if (find_status == 0)
+        if (read_status == 0)
         {
             dispatch->body      = mm_strdup("404\x03User not found.\x03", co->mm);
             dispatch->body_size = strlen(dispatch->body);
