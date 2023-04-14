@@ -471,29 +471,30 @@ static int read_user(struct core_object *co, struct server_object *so, User **us
 {
     PRINT_STACK_TRACE(co->tracer);
     
-    uint8_t *serial_user;
-    int     read_status;
+    int read_status;
     
-    // Read the database to find the User
-    read_status = find_by_name(co, USER_DB_NAME, so->user_db_sem, &serial_user, display_name);
-    if (read_status == -1) // Error
-    {
-        return -1;
-    }
     if (user_get) // If the query must return something, return something.
     {
+        uint8_t *serial_user;
+        
+        read_status = find_by_name(co, USER_DB_NAME, so->user_db_sem, &serial_user, display_name);
+        if (read_status == -1) // Error
+        {
+            return -1;
+        }
         if (read_status == 1) // User found.
         {
-            *user_get = mm_malloc(sizeof(User), co->mm);
-            if (!*user_get)
-            {
-                SET_ERROR(co->err);
-                return -1;
-            }
             deserialize_user(co, user_get, serial_user);
         } else if (read_status == 0) // User not found.
         {
             *user_get = NULL;
+        }
+    } else // if the query is merely a check.
+    {
+        read_status = find_by_name(co, USER_DB_NAME, so->user_db_sem, NULL, display_name);
+        if (read_status == -1) // Error
+        {
+            return -1;
         }
     }
     
@@ -528,29 +529,30 @@ static int read_auth(struct core_object *co, struct server_object *so, Auth **au
 {
     PRINT_STACK_TRACE(co->tracer);
     
-    uint8_t *serial_auth;
     int read_status;
     
-    // Read the database to find the Auth
-    read_status = find_by_name(co, AUTH_DB_NAME, so->auth_db_sem, &serial_auth, login_token);
-    if (read_status == -1) // Error
+    if (auth_get) // If the query must return something.
     {
-        return -1;
-    }
-    if (auth_get) // If the query must return something, return something.
-    {
+        uint8_t *serial_auth;
+        
+        read_status = find_by_name(co, AUTH_DB_NAME, so->auth_db_sem, &serial_auth, login_token);
+        if (read_status == -1) // Error
+        {
+            return -1;
+        }
         if (read_status == 1) // User found.
         {
-            *auth_get = mm_malloc(sizeof(User), co->mm);
-            if (!*auth_get)
-            {
-                SET_ERROR(co->err);
-                return -1;
-            }
             deserialize_auth(co, auth_get, serial_auth);
         } else if (read_status == 0) // User not found.
         {
             *auth_get = NULL;
+        }
+    } else // if the query is merely a check.
+    {
+        read_status = find_by_name(co, AUTH_DB_NAME, so->auth_db_sem, NULL, login_token);
+        if (read_status == -1) // Error
+        {
+            return -1;
         }
     }
     
