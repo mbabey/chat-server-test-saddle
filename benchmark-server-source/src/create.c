@@ -454,7 +454,7 @@ int handle_create_message(struct core_object *co, struct server_object *so, stru
     count           = 0;
     body_tokens_cpy = body_tokens;
     COUNT_TOKENS(count, body_tokens_cpy);
-    if (count != CREATE_CHANNEL_BODY_TOKEN_SIZE)
+    if (count != CREATE_MESSAGE_BODY_TOKEN_SIZE)
     {
         dispatch->body      = mm_strdup("400\x03Invalid number of fields\x03", co->mm);
         dispatch->body_size = strlen(dispatch->body);
@@ -537,6 +537,8 @@ int handle_create_message(struct core_object *co, struct server_object *so, stru
         return -1;
     }
     
+    dispatch->body      = mm_strdup("201\x03", co->mm); // need to send this to the sender.
+    dispatch->body_size = strlen(dispatch->body);
     mm_free(co->mm, serial_channel_buffer);
     mm_free(co->mm, serial_user_buffer);
     return 0;

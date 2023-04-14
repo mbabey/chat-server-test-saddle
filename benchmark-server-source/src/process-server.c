@@ -658,11 +658,17 @@ static int c_handle_network_dispatch(struct core_object *co, struct server_objec
     print_dispatch((struct state *) co, &dispatch, "Response");
     
     status = assemble_message_send((struct state *) co, child->client_fd_local, &dispatch);
+    if (status != -1 && dispatch.type == CREATE && dispatch.object == MESSAGE)
+    {
+        status = broadcast_message_to_channel(co, so, &dispatch, body_tokens);
+    }
     mm_free(co->mm, dispatch.body);
     if (status == -1)
     {
+        
         return -1;
     }
+    
     
     return 0;
 }
