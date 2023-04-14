@@ -484,7 +484,6 @@ static int read_user(struct core_object *co, struct server_object *so, User **us
         }
         if (read_status == 1) // User found.
         {
-
             deserialize_user(co, user_get, serial_user);
         } else if (read_status == 0) // User not found.
         {
@@ -528,7 +527,7 @@ static int read_channel(struct core_object *co, struct server_object *so, Channe
         }
         if (read_status == 1) // Channel found.
         {
-            deserialize_channel(co, channel_get, serial_user);
+//            deserialize_channel(co, channel_get, serial_user);
         } else if (read_status == 0) // User not found.
         {
             *channel_get = NULL;

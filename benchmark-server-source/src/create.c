@@ -475,17 +475,17 @@ int handle_create_message(struct core_object *co, struct server_object *so, stru
         return 0;
     }
     
-    Channel *channel;
-    User    *user;
-    int read_status;
-    
-    // TODO Retrieve the channel for the channel ID
-    find_status = find_by_name(co, CHANNEL_DB_NAME, so->channel_db_sem, NULL, channel_name_in_dispatch);
-    if (find_status == -1)
+    uint8_t *serial_channel_buffer;
+    uint8_t *serial_user_buffer;
+    int channel_read_status;
+    int user_read_status;
+
+    channel_read_status = find_by_name(co, CHANNEL_DB_NAME, so->channel_db_sem, &serial_channel_buffer, channel_name_in_dispatch);
+    if (channel_read_status == -1)
     {
         return -1;
     }
-    if (find_status == 0)
+    if (channel_read_status == 0)
     {
         dispatch->body      = mm_strdup("404\x03Channel not found.\x03", co->mm);
         dispatch->body_size = strlen(dispatch->body);
@@ -494,23 +494,24 @@ int handle_create_message(struct core_object *co, struct server_object *so, stru
     
     if (determine_request_sender(co, so, &request_sender) == -1)
     {
+        mm_free(co->mm, serial_channel_buffer);
+        return -1;
+    }
+    
+    user_read_status = find_by_name(co, USER_DB_NAME, so->user_db_sem, &serial_user_buffer, display_name_in_dispatch);
+    if (user_read_status == -1)
+    {
+        mm_free(co->mm, serial_channel_buffer);
         return -1;
     }
     
     if (request_sender.privilege_level == GLOBAL_ADMIN)
     {
-        // TODO: Retrieve the user for the user ID.
-        
-        
-        read_status = db_read(co, so, USER, &user_sender, display_name_in_dispatch);
-        if (read_status == -1)
-        {
-            return -1;
-        }
-        if (read_status == 0)
+        if (user_read_status == 0)
         {
             dispatch->body      = mm_strdup("404\x03User not found.\x03", co->mm);
             dispatch->body_size = strlen(dispatch->body);
+            mm_free(co->mm, serial_channel_buffer);
             return 0;
         }
     } else
@@ -519,17 +520,25 @@ int handle_create_message(struct core_object *co, struct server_object *so, stru
         {
             dispatch->body      = mm_strdup("403\x03User name must match message sender name.\x03", co->mm);
             dispatch->body_size = strlen(dispatch->body);
+            mm_free(co->mm, serial_channel_buffer);
+            mm_free(co->mm, serial_user_buffer);
             return 0;
         }
     }
     
     new_message.id = generate_message_id(co->tracer);
+    new_message.user_id = *(int *) serial_user_buffer;
+    new_message.channel_id = *(int *) serial_channel_buffer;
     
     if (db_create(co, so, MESSAGE, &new_message) == -1)
     {
+        mm_free(co->mm, serial_channel_buffer);
+        mm_free(co->mm, serial_user_buffer);
         return -1;
     }
     
+    mm_free(co->mm, serial_channel_buffer);
+    mm_free(co->mm, serial_user_buffer);
     return 0;
 }
 
