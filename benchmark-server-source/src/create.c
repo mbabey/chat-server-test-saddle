@@ -280,7 +280,7 @@ int handle_create_channel(struct core_object *co, struct server_object *so, stru
         return -1;
     }
     
-    if (request_sender.privilege_level == 1) // is it a global admin?
+    if (request_sender.privilege_level == GLOBAL_ADMIN)
     {
         // does the user exist?
         User *litmus_user;
@@ -488,7 +488,33 @@ int handle_create_message(struct core_object *co, struct server_object *so, stru
         return 0;
     }
     
+    if (determine_request_sender(co, so, &request_sender) == -1)
+    {
+        return -1;
+    }
     
+    if (request_sender.privilege_level == GLOBAL_ADMIN)
+    {
+        find_status = find_by_name(co, USER_DB_NAME, so->user_db_sem, NULL, display_name_in_dispatch);
+        if (find_status == -1)
+        {
+            return -1;
+        }
+        if (find_status == 0)
+        {
+            dispatch->body      = mm_strdup("404\x03User not found.\x03", co->mm);
+            dispatch->body_size = strlen(dispatch->body);
+            return 0;
+        }
+    } else
+    {
+        if (strcmp(request_sender.display_name, display_name_in_dispatch) != 0)
+        {
+            dispatch->body      = mm_strdup("403\x03User name must match message sender name.\x03", co->mm);
+            dispatch->body_size = strlen(dispatch->body);
+            return 0;
+        }
+    }
     
     if (db_create(co, so, MESSAGE, &new_message) == -1)
     {

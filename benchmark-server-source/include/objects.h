@@ -97,15 +97,22 @@ struct child
     struct sockaddr_in client_addr;
 };
 
+enum PrivilegeLevel
+{
+    GLOBAL_BAN = -1,
+    NORMAL,
+    GLOBAL_ADMIN
+};
+
 /**
  * User. Contains information about a User.
  */
 typedef struct
 {
-    int  id;
-    char *display_name;
-    int  privilege_level;
-    int  online_status;
+    int                 id;
+    char                *display_name;
+    enum PrivilegeLevel privilege_level;
+    int                 online_status;
 } User;
 
 /**
