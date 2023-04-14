@@ -322,8 +322,8 @@ int handle_create_channel(struct core_object *co, struct server_object *so, stru
         return -1;
     }
     // need to set the banned user list to null
-    new_channel.banned_users_count = 0;
-    new_channel.banned_users = NULL;
+    new_channel.banned_users_count      = 0;
+    new_channel.banned_users            = NULL;
     new_channel.banned_users_size_bytes = 0;
     
     insert_status = db_create(co, so, CHANNEL, &new_channel);
@@ -434,20 +434,45 @@ static int create_name_list(struct core_object *co, const char ***dst_list, char
     return 0;
 }
 
+#define HEX_BASE 16
 int handle_create_message(struct core_object *co, struct server_object *so, struct dispatch *dispatch,
                           char **body_tokens)
 {
     PRINT_STACK_TRACE(co->tracer);
     
     Message new_message;
+    char    *display_name_in_dispatch;
+    char    *channel_name_in_dispatch;
+    User    request_sender;
     size_t  offset;
     
+    size_t count;
+    char   **body_tokens_cpy;
+    
+    count           = 0;
+    body_tokens_cpy = body_tokens;
+    COUNT_TOKENS(count, body_tokens_cpy);
+    if (count != CREATE_CHANNEL_BODY_TOKEN_SIZE)
+    {
+        dispatch->body      = mm_strdup("400\x03Invalid number of fields\x03", co->mm);
+        dispatch->body_size = strlen(dispatch->body);
+        return 0;
+    }
+    
     offset = 0;
-    new_message.id              = (int) strtol(*body_tokens, NULL, BASE);
-    new_message.user_id         = (int) strtol(*(body_tokens + ++offset), NULL, BASE);
-    new_message.channel_id      = (int) strtol(*(body_tokens + ++offset), NULL, BASE);
+    display_name_in_dispatch = *body_tokens;
+    channel_name_in_dispatch = *(body_tokens + ++offset);
     new_message.message_content = *(body_tokens + ++offset);
-    new_message.timestamp       = strtol(*(body_tokens + ++offset), NULL, BASE);
+    new_message.timestamp = strtol(*(body_tokens + ++offset), NULL, HEX_BASE);
+    
+    if (!(VALIDATE_NAME(display_name_in_dispatch) && VALIDATE_NAME(channel_name_in_dispatch)))
+    {
+        dispatch->body      = mm_strdup("400\x03Invalid fields\x03", co->mm);
+        dispatch->body_size = strlen(dispatch->body);
+        return 0;
+    }
+    
+    
     
     if (db_create(co, so, MESSAGE, &new_message) == -1)
     {
