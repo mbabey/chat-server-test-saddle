@@ -174,7 +174,7 @@ int handle_create_user(struct core_object *co, struct server_object *so, struct 
     
     // Validate fields
     // If invalid, assemble 400
-    if (!(VALIDATE_LOGIN_TOKEN(new_auth.login_token)
+    if (!(VALIDATE_NAME(new_auth.login_token)
           && VALIDATE_NAME(new_user.display_name)
           && VALIDATE_PASSWORD(new_auth.password)))
     {
@@ -435,6 +435,7 @@ static int create_name_list(struct core_object *co, const char ***dst_list, char
 }
 
 #define HEX_BASE 16
+
 int handle_create_message(struct core_object *co, struct server_object *so, struct dispatch *dispatch,
                           char **body_tokens)
 {
@@ -459,19 +460,19 @@ int handle_create_message(struct core_object *co, struct server_object *so, stru
         return 0;
     }
     
-    offset = 0;
+    offset                   = 0;
     display_name_in_dispatch = *body_tokens;
     channel_name_in_dispatch = *(body_tokens + ++offset);
     new_message.message_content = *(body_tokens + ++offset);
-    new_message.timestamp = strtol(*(body_tokens + ++offset), NULL, HEX_BASE);
+    new_message.timestamp       = strtol(*(body_tokens + ++offset), NULL, HEX_BASE);
     
-    if (!(VALIDATE_NAME(display_name_in_dispatch) && VALIDATE_NAME(channel_name_in_dispatch)))
+    if (!(VALIDATE_NAME(display_name_in_dispatch) && VALIDATE_NAME(channel_name_in_dispatch)
+          && VALIDATE_TIMESTAMP(new_message.timestamp)))
     {
         dispatch->body      = mm_strdup("400\x03Invalid fields\x03", co->mm);
         dispatch->body_size = strlen(dispatch->body);
         return 0;
     }
-    
     
     
     if (db_create(co, so, MESSAGE, &new_message) == -1)
@@ -507,7 +508,7 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
         dispatch->body_size = strlen(dispatch->body);
         return 0;
     }
-    if (!(VALIDATE_LOGIN_TOKEN(*body_tokens) && VALIDATE_PASSWORD(*(body_tokens + 1))))
+    if (!(VALIDATE_NAME(*body_tokens) && VALIDATE_PASSWORD(*(body_tokens + 1))))
     {
         dispatch->body      = mm_strdup("400\x03Invalid fields\x03", co->mm);
         dispatch->body_size = strlen(dispatch->body);

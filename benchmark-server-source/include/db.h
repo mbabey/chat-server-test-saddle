@@ -8,9 +8,9 @@
 #define PASSWORD_MIN_SIZE 6                /** Minimum size for passwords. */
 #define PASSWORD_MAX_SIZE 30               /** Maximum size for passwords. */
 
-#define VALIDATE_LOGIN_TOKEN(login_token) (strlen(login_token) <= LOGIN_TOKEN_MAX_SIZE)
 #define VALIDATE_NAME(name) (strlen(name) <= NAME_MAX_SIZE)
 #define VALIDATE_PASSWORD(password) (strlen(password) >= PASSWORD_MIN_SIZE && strlen(password) <= PASSWORD_MAX_SIZE)
+#define VALIDATE_TIMESTAMP(timestamp) (timestamp > 0)
 
 /**
  * Count the number of tokens in a NULL-terminated list of pointers. Modifies the pointer passed.
