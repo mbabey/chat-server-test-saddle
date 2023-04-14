@@ -529,27 +529,33 @@ static int read_auth(struct core_object *co, struct server_object *so, Auth **au
     PRINT_STACK_TRACE(co->tracer);
     
     uint8_t *serial_auth;
+    int read_status;
     
-    if (find_by_name(co, AUTH_DB_NAME, so->auth_db_sem, &serial_auth, login_token) == -1)
+    // Read the database to find the Auth
+    read_status = find_by_name(co, AUTH_DB_NAME, so->auth_db_sem, &serial_auth, login_token);
+    if (read_status == -1) // Error
     {
         return -1;
     }
-    if (!serial_auth)
+    if (auth_get) // If the query must return something, return something.
     {
-        *auth_get = NULL;
-        return 0;
+        if (read_status == 1) // User found.
+        {
+            *auth_get = mm_malloc(sizeof(User), co->mm);
+            if (!*auth_get)
+            {
+                SET_ERROR(co->err);
+                return -1;
+            }
+            deserialize_auth(co, auth_get, serial_auth);
+        } else if (read_status == 0) // User not found.
+        {
+            *auth_get = NULL;
+        }
     }
     
-    *auth_get = mm_malloc(sizeof(Auth), co->mm);
-    if (!*auth_get)
-    {
-        SET_ERROR(co->err);
-        return -1;
-    }
-    
-    deserialize_auth(co, auth_get, serial_auth);
-    
-    return 0;
+    // Return whether the object was found.
+    return read_status;
 }
 
 int db_update(struct core_object *co, struct server_object *so, int type, void *object_src)
