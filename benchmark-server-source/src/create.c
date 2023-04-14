@@ -283,7 +283,7 @@ int handle_create_channel(struct core_object *co, struct server_object *so, stru
     if (request_sender.privilege_level == GLOBAL_ADMIN)
     {
         // does the user exist?
-        User *litmus_user;
+        User *litmus_user; // TODO: pass null and just check the return value
         if (db_read(co, so, USER, new_channel.creator, &litmus_user) == -1)
         {
             return -1;
@@ -566,6 +566,12 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     Auth *auth;
     
     // Read database to find Auth.
+    auth = mm_malloc(sizeof(Auth), co->mm);
+    if (!auth)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
     if (db_read(co, so, AUTH, &auth, *body_tokens) == -1)
     {
         return -1;

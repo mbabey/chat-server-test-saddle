@@ -484,6 +484,7 @@ static int read_user(struct core_object *co, struct server_object *so, User **us
         }
         if (read_status == 1) // User found.
         {
+
             deserialize_user(co, user_get, serial_user);
         } else if (read_status == 0) // User not found.
         {
