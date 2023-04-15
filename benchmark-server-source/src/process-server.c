@@ -642,6 +642,10 @@ static int c_handle_network_dispatch(struct core_object *co, struct server_objec
         return -1;
     }
     
+    if (dispatch.body_size == 0)
+    {
+        body_tokens = NULL;
+    }
     print_dispatch((struct state *) co, &dispatch, "Request");
     
     mm_free(co->mm, dispatch.body); // Free the body after tokenizing.
