@@ -177,6 +177,10 @@ static int run_create_test(struct client_state *state)
             }
             break;
         }
+        default:
+        {
+            return -1;
+        }
     }
     
     return 0;
@@ -251,6 +255,10 @@ static int run_read_test(struct client_state *state)
                 return -1;
             }
             break;
+        }
+        default:
+        {
+            return -1;
         }
     }
     
@@ -368,6 +376,10 @@ static int run_update_test(struct client_state *state) // NOLINT(readability-fun
             }
             break;
         }
+        default:
+        {
+            return -1;
+        }
     }
     
     return 0;
@@ -418,6 +430,10 @@ static int run_destroy_test(struct client_state *state)
                 return -1;
             }
             break;
+        }
+        default:
+        {
+            return -1;
         }
     }
     

@@ -21,11 +21,7 @@ int create_user_test(struct client_state *state)
     printf("\nCreating user \"thedog\"\n");
     
     struct dispatch dispatch;
-    
-//    const char      *login_token;
-//    const char      *display_name;
-//    const char      *password;
-    
+
     dispatch.version   = (unsigned int) 1;
     dispatch.type      = (unsigned int) CREATE;
     dispatch.object    = (unsigned int) USER;
@@ -74,9 +70,6 @@ int create_channel_test(struct client_state *state)
     printf("\nCreating public channel \"the doghouse\".\n");
     
     struct dispatch dispatch;
-//    const char      *channel_name;
-//    const char      *display_name;
-//    const char      *publicity;
     
     dispatch.version   = (unsigned int) 1;
     dispatch.type      = (unsigned int) CREATE;
@@ -97,11 +90,7 @@ int create_message_test(struct client_state *state)
     printf("\nCreating message in channel \"the doghouse\".\n");
     
     struct dispatch dispatch;
-//    const char      *display_name;
-//    const char      *channel_name;
-//    const char      *message_content;
-//    time_t          timestamp;
-    
+
     dispatch.version   = (unsigned int) 1;
     dispatch.type      = (unsigned int) CREATE;
     dispatch.object    = (unsigned int) MESSAGE;
