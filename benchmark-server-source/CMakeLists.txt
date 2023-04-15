@@ -41,7 +41,7 @@ set(HEADER_LIST
         ${INCLUDE_DIR}/core.h
         )
 
-set(COMPILE_AS_LIBRARY FALSE) # FALSE = Compile as executable
+set(COMPILE_AS_LIBRARY TRUE) # FALSE = Compile as executable
 set(SANITIZE TRUE)
 
 add_compile_definitions(_POSIX_C_SOURCE=200809L)
