@@ -2,8 +2,9 @@
 
 #include <dlfcn.h>
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/syslimits.h>
 
 /**
  * get_saddle_lib
@@ -19,9 +20,11 @@ int open_lib(struct state *state, struct library *library)
 {
     PRINT_STACK_TRACE(state->tracer);
     
-    char resolved_name[BUFSIZ];
+    char resolved_name[PATH_MAX];
     
-    library->lib = dlopen(realpath(library->lib_name, resolved_name), RTLD_LAZY);
+    realpath(library->lib_name, resolved_name);
+    
+    library->lib = dlopen(resolved_name, RTLD_LAZY);
     if (!library->lib)
     {
         // NOLINTNEXTLINE(concurrency-mt-unsafe) : No threads here
