@@ -179,8 +179,4 @@ else()
     add_executable(test-client ${SOURCE_LIST})
 endif()
 
-if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-    target_link_libraries(test-client -lgdbm -lgdbm_compat)
-endif()
-
 add_dependencies(test-client doxygen)
