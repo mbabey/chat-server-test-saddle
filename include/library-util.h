@@ -19,6 +19,7 @@
  * Open a given library and attempt to load functions into the saddle_lib struct.
  * </p>
  * @param state state object
+ * @param library the struct in which to store the library
  * @return 0 on success, -1 and set err on failure
  */
 int open_lib(struct state *state, struct library *library);
