@@ -3,6 +3,7 @@
 #include "../include/db.h"
 
 #include <pthread.h>
+#include <stdlib.h>
 
 static void *forward_message(void *);
 
@@ -61,12 +62,13 @@ int broadcast_message_to_channel(struct core_object *co, struct server_object *s
         pthread_create(thread_array + i, NULL, forward_message, args);
     }
     
-    // Get the user by name.
-    // Get the IP address of by user ID.
-    // Send to that IP address.
-    // Wait for the response.
     
     // Join each thread.
+    for (size_t i = 0; i < channel->users_count; ++i)
+    {
+        pthread_join(*(thread_array + i), NULL);
+    }
+    
     mm_free(co->mm, channel);
     mm_free(co->mm, thread_array);
     mm_free(co->mm, args_array);
@@ -79,6 +81,10 @@ void *forward_message(void *args)
     struct server_object *so;
     struct dispatch      *dispatch;
     const char           *display_name;
+    uint8_t              *serial_user;
+    AddrIdPair           *addr_id_pair;
+    int                  read_status;
+    struct sockaddr_in   socket;
     
     co           = ((struct forward_message_args *) args)->co;
     so           = ((struct forward_message_args *) args)->so;
@@ -87,7 +93,41 @@ void *forward_message(void *args)
     
     PRINT_STACK_TRACE(co->tracer);
     
+    // Get the user by name.
+    read_status = find_by_name(co, USER_DB_NAME, so->user_db_sem, &serial_user, display_name);
+    if (read_status == -1)
+    {
+        // return -1; TODO ??
+    }
+    if (read_status == 0)
+    {
+        // return 0; TODO ??
+    }
+    // Get the IP address of by user ID.
+    addr_id_pair = malloc(sizeof(AddrIdPair));
+    if (!addr_id_pair)
+    {
+        SET_ERROR(co->err);
+        // return -1; TODO ??
+    }
+    if (find_addr_id_pair_by_id(co, so, addr_id_pair, *(int *) serial_user) == -1)
+    {
+        // return -1; TODO ??
+    }
     
+    // Send to that IP address.
+    for (size_t i = 0; i < MAX_CONNECTIONS; ++i) // Haha version 1
+    {
+        if (so->parent->client_addrs[i].sin_addr.s_addr == addr_id_pair->socket_ip
+            && so->parent->client_addrs[i].sin_port == addr_id_pair->socket_port) // If the port and the ip match...
+        {
+            // this fucking process doesn't even have the sockets of all the dudes.
+            // are you fucking serious
+            // this is ridiculous. This is unimplementable.
+        }
+    }
+    
+    // Wait for the response.
     
     return NULL;
 }

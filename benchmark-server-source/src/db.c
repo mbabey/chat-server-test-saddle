@@ -965,6 +965,7 @@ int find_addr_id_pair_by_id(struct core_object *co, struct server_object *so, Ad
     if (ret_val == 0)
     {
         deserialize_addr_id_pair(co, &addr_id_pair, serial_object);
+        mm_free(co->mm, serial_object);
     }
     
     return ret_val;
