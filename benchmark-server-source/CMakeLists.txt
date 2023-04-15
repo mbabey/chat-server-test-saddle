@@ -16,6 +16,7 @@ set(SOURCE_LIST
         ${SOURCE_DIR}/server-state.c
         ${SOURCE_DIR}/chat.c
         ${SOURCE_DIR}/create.c
+        ${SOURCE_DIR}/broadcast.c
         ${SOURCE_DIR}/read.c
         ${SOURCE_DIR}/update.c
         ${SOURCE_DIR}/destroy.c
@@ -34,6 +35,7 @@ set(HEADER_LIST
         ${INCLUDE_DIR}/server-state.h
         ${INCLUDE_DIR}/chat.h
         ${INCLUDE_DIR}/create.h
+        ${INCLUDE_DIR}/broadcast.h
         ${INCLUDE_DIR}/read.h
         ${INCLUDE_DIR}/update.h
         ${INCLUDE_DIR}/destroy.h
