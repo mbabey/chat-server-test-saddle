@@ -13,13 +13,13 @@
  */
 static int log_out_user(struct core_object *co, struct server_object *so, User *user);
 
-int handle_destroy(struct core_object *co, struct dispatch *dispatch, char **body_tokens)
+int handle_destroy(struct core_object *co, struct server_object *so, struct dispatch *dispatch, char **body_tokens)
 {
     PRINT_STACK_TRACE(co->tracer);
     
     if (dispatch->object == AUTH)
     {
-        if (handle_destroy_auth(co, dispatch, body_tokens) == -1)
+        if (handle_destroy_auth(co, so, dispatch, body_tokens) == -1)
         {
             return -1;
         }
@@ -32,12 +32,13 @@ int handle_destroy(struct core_object *co, struct dispatch *dispatch, char **bod
     return 0;
 }
 
-int handle_destroy_auth(struct core_object *co, struct dispatch *dispatch, char **body_tokens)
+int handle_destroy_auth(struct core_object *co, struct server_object *so, struct dispatch *dispatch, char **body_tokens)
 {
     PRINT_STACK_TRACE(co->tracer);
     
     char **body_tokens_cpy;
     size_t count;
+    User request_sender;
     
     body_tokens_cpy = body_tokens;
     count = 0;
@@ -50,7 +51,7 @@ int handle_destroy_auth(struct core_object *co, struct dispatch *dispatch, char 
         return -1;
     }
    
-    determine_request_sender
+    determine_request_sender(co, so, &request_sender);
     
     return 0;
 }
