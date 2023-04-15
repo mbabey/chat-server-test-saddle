@@ -44,15 +44,16 @@
     "|18.\tUpdate User Online Status Reset                                        |\n"\
     "|19.\tUpdate User All Test                                                   |\n"\
     "|20.\tUpdate User All Reset                                                  |\n"\
-    "|21.\tUpdate Channel Test                                                    |\n"\
-    "|22.\tUpdate Message Test                                                    |\n"\
-    "|23.\tUpdate Auth Test                                                       |\n"\
-    "|24.\tUpdate Auth No Password Test                                           |\n"\
-    "|25.\tDestroy User Test                                                      |\n"\
-    "|26.\tDestroy User No Password Test                                          |\n"\
-    "|27.\tDestroy Channel Test                                                   |\n"\
-    "|28.\tDestroy Message Test                                                   |\n"\
-    "|29.\tDestroy Auth Test                                                      |\n"\
+    "|21.\tUpdate Channel Test                                                    |\n"  \
+    "|22.\tUpdate Channel Reset                                                   |\n"\
+    "|23.\tUpdate Message Test                                                    |\n"\
+    "|24.\tUpdate Auth Test                                                       |\n"\
+    "|25.\tUpdate Auth No Password Test                                           |\n"\
+    "|26.\tDestroy User Test                                                      |\n"\
+    "|27.\tDestroy User No Password Test                                          |\n"\
+    "|28.\tDestroy Channel Test                                                   |\n"\
+    "|29.\tDestroy Message Test                                                   |\n"\
+    "|30.\tDestroy Auth Test                                                      |\n"\
     "+------------------------------------------------------------------------------+\n"\
     "Enter number or type \"q\" to quit:\n"
 

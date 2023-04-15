@@ -92,6 +92,7 @@ int run_client_saddle(struct client_state *state)
             case UPDATE_USER_ALL:
             case UPDATE_USER_ALL_RESET:
             case UPDATE_CHANNEL_NAME:
+            case UPDATE_CHANNEL_NAME_RESET:
             case UPDATE_MESSAGE:
             case UPDATE_AUTH:
             case UPDATE_AUTH_NO_PASSWORD:
