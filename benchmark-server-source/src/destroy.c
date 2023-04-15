@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "../include/db.h"
 #include "../include/destroy.h"
 #include "../include/object-util.h"
@@ -37,12 +38,12 @@ int handle_destroy_auth(struct core_object *co, struct server_object *so, struct
 {
     PRINT_STACK_TRACE(co->tracer);
     
-    char **body_tokens_cpy;
+    char   **body_tokens_cpy;
     size_t count;
-    User request_sender;
+    User   request_sender;
     
     body_tokens_cpy = body_tokens;
-    count = 0;
+    count           = 0;
     
     COUNT_TOKENS(count, body_tokens_cpy);
     if (count > 1 || !VALIDATE_NAME(*body_tokens)) // NOLINT(clang-analyzer-unix.cstring.NullArg): Nope
@@ -51,13 +52,13 @@ int handle_destroy_auth(struct core_object *co, struct server_object *so, struct
         dispatch->body_size = strlen(dispatch->body);
         return -1;
     }
-   
+    
     if (determine_request_sender(co, so, &request_sender) == -1)
     {
         return -1;
     }
     
-    int read_status;
+    int  read_status;
     User *user_to_log_out;
     
     user_to_log_out = mm_malloc(sizeof(User), co->mm);
@@ -100,8 +101,10 @@ static int log_out_user(struct core_object *co, struct server_object *so, User *
 {
     PRINT_STACK_TRACE(co->tracer);
     
-    datum key;
-    int   status;
+    datum      key;
+    AddrIdPair addr_id_pair;
+    uint8_t    *addr_key;
+    int        status;
     
     user->online_status = 0;
     if (db_update(co, so, USER, user) == -1)
@@ -109,8 +112,23 @@ static int log_out_user(struct core_object *co, struct server_object *so, User *
         return -1;
     }
     
-    key.dptr  = user->display_name;
-    key.dsize = strlen(user->display_name) + 1;
+    if (find_addr_id_pair_by_id(co, so, &addr_id_pair, user->id) == -1)
+    {
+        return -1;
+    }
+    
+    addr_key = malloc(sizeof(in_addr_t) + sizeof(in_port_t));
+    if (!addr_key)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
+    
+    memcpy(addr_key, &addr_id_pair.socket_ip, sizeof(in_addr_t));
+    memcpy(addr_key + sizeof(in_addr_t), &addr_id_pair.socket_port, sizeof(in_port_t));
+    
+    key.dptr  = addr_key;
+    key.dsize = SOCKET_ADDR_SIZE;
     
     status = safe_dbm_delete(co, ADDR_ID_DB_NAME, so->addr_id_db_sem, &key);
     

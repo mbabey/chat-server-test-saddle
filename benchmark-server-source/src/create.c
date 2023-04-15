@@ -584,10 +584,10 @@ static int log_in_user(struct core_object *co, struct server_object *so, User *u
     PRINT_STACK_TRACE(co->tracer);
     
     int     status;
-    uint8_t *name_addr;
+    uint8_t *addr_id;
     size_t  name_addr_size;
     
-    name_addr_size = serialize_addr_id_pair(co, &name_addr, &so->child->client_addr, &user->id);
+    name_addr_size = serialize_addr_id_pair(co, &addr_id, &so->child->client_addr, &user->id);
     if (name_addr_size == 0)
     {
         return -1;
@@ -596,9 +596,9 @@ static int log_in_user(struct core_object *co, struct server_object *so, User *u
     datum key;
     datum value;
     
-    key.dptr    = name_addr;
+    key.dptr    = addr_id;
     key.dsize   = SOCKET_ADDR_SIZE; // The first thing in here is a socket address.
-    value.dptr  = name_addr;
+    value.dptr  = addr_id;
     value.dsize = name_addr_size;
     
     // If the user is not logged in, just log them in and add them to the name-addr database.

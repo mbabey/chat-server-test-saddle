@@ -759,6 +759,8 @@ static int delete_auth(struct core_object *co, struct server_object *so, Auth *a
 
 int safe_dbm_store(struct core_object *co, const char *db_name, sem_t *sem, datum *key, datum *value, int store_flags)
 {
+    PRINT_STACK_TRACE(co->tracer);
+    
     DBM *db;
     int status;
     
@@ -823,6 +825,8 @@ int safe_dbm_fetch(struct core_object *co, const char *db_name, sem_t *sem, datu
 
 int safe_dbm_delete(struct core_object *co, const char *db_name, sem_t *sem, datum *key)
 {
+    PRINT_STACK_TRACE(co->tracer);
+    
     DBM *db;
     
     if (sem_wait(sem) == -1)
@@ -902,16 +906,6 @@ int find_by_name(struct core_object *co, const char *db_name, sem_t *db_sem,
     dbm_close(db);
     // NOLINTEND(concurrency-mt-unsafe) : Protected
     sem_post(db_sem);
-    
-    //    if (key.dptr)
-//    {
-//        printf("id: %d\n", *(int *) key.dptr);
-//        printf("size: %zu\n", value.dsize);
-//        printf("name: %s\n", (char *) (((int *) value.dptr) + 1));
-//    } else
-//    {
-//        printf("key.dptr is null\n");
-//    }
     
     return ret_val;
 }

@@ -157,25 +157,25 @@ unsigned long serialize_auth(struct core_object *co, uint8_t **serial_auth, cons
     return serial_auth_size;
 }
 
-unsigned long serialize_addr_id_pair(struct core_object *co, uint8_t **name_addr_dst,
+unsigned long serialize_addr_id_pair(struct core_object *co, uint8_t **addr_id_dst,
                                      struct sockaddr_in *addr, int *user_id)
 {
     PRINT_STACK_TRACE(co->tracer);
     
     size_t addr_id_size;
     
-    (*name_addr_dst) = mm_malloc(SOCKET_ADDR_SIZE + sizeof(int), co->mm);
-    if (!(*name_addr_dst))
+    (*addr_id_dst) = mm_malloc(SOCKET_ADDR_SIZE + sizeof(int), co->mm);
+    if (!(*addr_id_dst))
     {
         SET_ERROR(co->err);
         return 0;
     }
     
-    memcpy((*name_addr_dst), &(*addr).sin_addr.s_addr, sizeof(in_addr_t));
+    memcpy((*addr_id_dst), &(*addr).sin_addr.s_addr, sizeof(in_addr_t));
     addr_id_size = sizeof(in_addr_t);
-    memcpy((*name_addr_dst) + addr_id_size, &(*addr).sin_port, sizeof(in_port_t));
+    memcpy((*addr_id_dst) + addr_id_size, &(*addr).sin_port, sizeof(in_port_t));
     addr_id_size += sizeof(in_port_t);
-    memcpy((*name_addr_dst) + addr_id_size, user_id, sizeof(int));
+    memcpy((*addr_id_dst) + addr_id_size, user_id, sizeof(int));
     addr_id_size += sizeof(int);
     
     return addr_id_size;
@@ -214,8 +214,7 @@ void deserialize_addr_id_pair(struct core_object *co, AddrIdPair **addr_id_pair_
     PRINT_STACK_TRACE(co->tracer);
     
     size_t byte_offset;
-    
-    printf("%d\n", *(int *) serial_addr_id);
+
     memcpy(&(*addr_id_pair_get)->socket_ip, serial_addr_id, sizeof(in_addr_t));
     byte_offset = sizeof(in_addr_t);
     memcpy(&(*addr_id_pair_get)->socket_port, serial_addr_id + byte_offset, sizeof(in_port_t));
