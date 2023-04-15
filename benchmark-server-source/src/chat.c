@@ -44,38 +44,43 @@ int perform_dispatch_operation(struct core_object *co, struct server_object *so,
 {
     PRINT_STACK_TRACE(co->tracer);
     
+    int ret_val;
+    
     switch (dispatch->type)
     {
         case CREATE:
         {
-            handle_create(co, so, dispatch, body_tokens);
+            ret_val = handle_create(co, so, dispatch, body_tokens);
             break;
         }
         case READ:
         {
-            handle_read(co, dispatch);
+            ret_val = handle_read(co, dispatch);
             break;
         }
         case UPDATE:
         {
-            handle_update(co, dispatch);
+            ret_val = handle_update(co, dispatch);
             break;
         }
         case DESTROY:
         {
-            handle_destroy(co, so, dispatch, body_tokens);
+            ret_val = handle_destroy(co, so, dispatch, body_tokens);
             break;
         }
         case PINGUSER:
         case PINGCHANNEL:
         {
-            handle_ping(co, dispatch);
+            ret_val = handle_ping(co, dispatch);
             break;
         }
-        default:;
+        default:
+        {
+            ret_val = -1;
+        }
     }
     
-    return 0;
+    return ret_val;
 }
 
 static int handle_read(struct core_object *co, struct dispatch *dispatch)
