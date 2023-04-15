@@ -3,7 +3,11 @@
 #include "../include/object-util.h"
 
 #include <fcntl.h>
+
+#ifndef NDBM_H
+#define NDBM_H
 #include <ndbm.h>
+#endif // NDBM_H
 
 /**
  * insert_user

@@ -5,7 +5,10 @@
 
 #include <semaphore.h>
 #include <poll.h>
+#ifndef NDBM_H
+#define NDBM_H
 #include <ndbm.h>
+#endif // NDBM_H
 #include <netinet/in.h>
 
 // TODO delet this when done
