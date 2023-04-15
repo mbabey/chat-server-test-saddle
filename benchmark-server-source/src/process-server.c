@@ -393,9 +393,17 @@ static int p_read_pipe_reenable_fd(struct core_object *co, struct server_object 
     
     FOR_EACH_SOCKET_POLLFD_p_IN_POLLFDS
     {
+        // Case: the fd has disconnected
+        if (pollfds[p].fd == fd) // pollfd.fd here is negative.
+        {
+            pollfds[p].fd = pollfds[p].fd * -1;  // Invert pollfd.fd so it will be read from in poll loop.
+            pollfds[p].revents = POLLHUP;
+        }
+        // Case: reenable the fd
         if (pollfds[p].fd == fd * -1) // pollfd.fd here is negative.
         {
             pollfds[p].fd = pollfds[p].fd * -1; // Invert pollfd.fd so it will be read from in poll loop.
+            break;
         }
     }
     
@@ -538,6 +546,8 @@ static int c_receive_and_handle_messages(struct core_object *co, struct server_o
 {
     PRINT_STACK_TRACE(co->tracer);
     
+    int status;
+    
     // Child processes will loop here.
     while (GOGO_PROCESS)
     {
@@ -553,10 +563,15 @@ static int c_receive_and_handle_messages(struct core_object *co, struct server_o
         {
             break;
         }
-        
-        if (c_handle_network_dispatch(co, so, child) == -1)
+    
+        status = c_handle_network_dispatch(co, so, child);
+        if (status == -1)
         {
             return -1;
+        }
+        if (status == 1)
+        {
+            child->client_fd_parent *= -1; // Indicate to the parent that the client has disconnected
         }
         
         if (c_inform_parent_recv_finished(co, so, child) == -1)
@@ -646,7 +661,7 @@ static int c_handle_network_dispatch(struct core_object *co, struct server_objec
     }
     if (status == 1)
     {
-        return 0;
+        return 1;
     }
     
     if (dispatch.body_size == 0)
@@ -689,6 +704,7 @@ static int c_inform_parent_recv_finished(struct core_object *co, struct server_o
         return (errno == EINTR) ? 0 : -1;
     }
     
+    // FD will be negative if the parent should close it.
     bytes_written = write(so->c_to_p_pipe_fds[WRITE_END], &child->client_fd_parent, sizeof(int));
     
     if (bytes_written == -1)
