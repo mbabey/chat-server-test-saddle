@@ -133,7 +133,7 @@ set(DOXYGEN_QUIET YES)
 
 doxygen_add_docs(doxygen
         ${HEADER_LIST}
-        WORKING_DIRECTORY /Users/mud/Projects/cProjects/projects/chat-server-test-saddle/benchmark-server-source
+        WORKING_DIRECTORY ..
         COMMENT "Generating Doxygen documentation for test-server")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
