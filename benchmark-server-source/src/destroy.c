@@ -16,6 +16,7 @@ static int log_out_user(struct core_object *co, struct server_object *so, User *
 int handle_destroy(struct core_object *co, struct dispatch *dispatch, char **body_tokens)
 {
     PRINT_STACK_TRACE(co->tracer);
+    
     return 0;
 }
 

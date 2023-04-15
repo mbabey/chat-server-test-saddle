@@ -6,7 +6,6 @@
 #include <stdlib.h>
 
 // NOLINTBEGIN(modernize-macro-to-enum)
-#define BASE 10 // Base for strtol calls, DO NOT CHANGE
 #define HEX_BASE 16
 // NOLINTEND(modernize-macro-to-enum)
 
