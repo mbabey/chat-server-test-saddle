@@ -243,9 +243,12 @@ void free_body_tokens(struct state *state, char **body_tokens)
 {
     PRINT_STACK_TRACE(state->tracer);
     
-    for (; *body_tokens != NULL; ++body_tokens)
+    if (body_tokens)
     {
-        mm_free(state->mm, *body_tokens);
+        for (; *body_tokens != NULL; ++body_tokens)
+        {
+            mm_free(state->mm, *body_tokens);
+        }
     }
 }
 
@@ -258,7 +261,7 @@ void print_dispatch(struct state *state, struct dispatch *dispatch, const char *
     
     type_string   = type_to_string(dispatch->type);
     object_string = object_to_string(dispatch->object);
-    
+
 //    (void) fprintf(stdout, "\n--- Dispatch %s ---\n"
 //                           "Version:\t%d\n"
 //                           "Type:\t\t%d (%s)\n"
