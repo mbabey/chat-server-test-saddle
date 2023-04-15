@@ -6,11 +6,11 @@
 #include <dc_env/env.h>
 
 #if defined(__unix__) || defined(__unix) || defined(unix)
-#define SERVER_SADDLE "../server-test-saddle-source/build/libserver-test-saddle.so"
-#define CLIENT_SADDLE "../client-test-saddle-source/build/libclient-test-saddle.so"
+#define SERVER_SADDLE "../benchmark-server-source/build/libtest-server.so"
+#define CLIENT_SADDLE "../test-client-source/build/libtest-client.so"
 #elif defined(__APPLE__) && defined(__MACH__)
-#define SERVER_SADDLE "../benchmark-server-source/build/libserver-test-saddle.dylib"
-#define CLIENT_SADDLE "../client-test-saddle-source/build/libclient-test-saddle.dylib"
+#define SERVER_SADDLE "../benchmark-server-source/build/libtest-server.dylib"
+#define CLIENT_SADDLE "../test-client-source/build/libtest-client.dylib"
 #endif
 
 /**
