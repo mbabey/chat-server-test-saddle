@@ -3,6 +3,7 @@
 #include "../include/object-util.h"
 
 #include <fcntl.h>
+#include <ndbm.h>
 
 /**
  * insert_user
