@@ -59,11 +59,6 @@ int run_client_saddle(struct client_state *state)
         
         switch (state->test_number)
         {
-            case INVALID:
-            {
-                (void) fprintf(stdout, "Invalid test, try again.\n");
-                break;
-            }
             case CREATE_USER:
             case CREATE_CHANNEL:
             case CREATE_MESSAGE:
@@ -125,6 +120,12 @@ int run_client_saddle(struct client_state *state)
             case STOP:
             {
                 run = 0;
+                break;
+            }
+            case INVALID:
+            default:
+            {
+                (void) fprintf(stdout, "Invalid test, try again.\n");
                 break;
             }
         }
