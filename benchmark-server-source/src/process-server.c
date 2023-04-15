@@ -637,10 +637,16 @@ static int c_handle_network_dispatch(struct core_object *co, struct server_objec
     
     // receive the dispatch
     memset(&dispatch, 0, sizeof(dispatch));
-    if (recv_parse_message((struct state *) co, child->client_fd_local,
-                           &dispatch, &body_tokens) == -1)
+    
+    status = recv_parse_message((struct state *) co, child->client_fd_local,
+                                &dispatch, &body_tokens);
+    if (status == -1)
     {
         return -1;
+    }
+    if (status == 1)
+    {
+        return 0;
     }
     
     if (dispatch.body_size == 0)
