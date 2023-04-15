@@ -125,7 +125,7 @@ static int open_semaphores(struct core_object *co, struct server_object *so)
     {
         SET_ERROR(co->err);
         // Closing an unopened semaphore will return -1 and set errno = EINVAL, which can be ignored.
-        // NOLINTBEGIN(clang-analyzer-core.NonNullParamChecker: intentional
+        // NOLINTBEGIN(clang-analyzer-core.NonNullParamChecker): intentional
         sem_close(pipe_write_sem);
         sem_close(domain_read_sem);
         sem_close(domain_write_sem);
