@@ -19,7 +19,7 @@ int recv_parse_message(struct state *state, int socket_fd, struct dispatch *disp
 /**
  * assemble_message_send
  * <p>
- * Assemble and send message .
+ * Assemble and send a message.
  * </p>
  * @param state the state object
  * @param socket_fd the socket on which to send a message

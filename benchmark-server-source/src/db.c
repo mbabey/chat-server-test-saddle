@@ -23,7 +23,7 @@ static int insert_user(struct core_object *co, struct server_object *so, User *u
  * @param co the core object
  * @param so the server object
  * @param user the Channel to insert
- * @return 0 on success, -1 and set err on failure.
+ * @return 0 on success, 1 if duplicate exists, -1 and set err on failure.
  */
 static int insert_channel(struct core_object *co, struct server_object *so, Channel *channel);
 
@@ -35,7 +35,7 @@ static int insert_channel(struct core_object *co, struct server_object *so, Chan
  * @param co the core object
  * @param so the server object
  * @param user the Message to insert
- * @return 0 on success, -1 and set err on failure.
+ * @return 0 on success, 1 if duplicate exists, -1 and set err on failure.
  */
 static int insert_message(struct core_object *co, struct server_object *so, Message *message);
 
@@ -47,7 +47,7 @@ static int insert_message(struct core_object *co, struct server_object *so, Mess
  * @param co the core object
  * @param so the server object
  * @param user the Auth to insert
- * @return 0 on success, -1 and set err on failure.
+ * @return 0 on success, 1 if duplicate exists, -1 and set err on failure.
  */
 static int insert_auth(struct core_object *co, struct server_object *so, Auth *auth);
 
@@ -59,9 +59,9 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
  * </p>
  * @param co the core object
  * @param so the server object
- * @param user_get memory in which to store pointer to read User
+ * @param user_get memory in which to store pointer to read User, or NULL if not required
  * @param display_name name of the User for which to search
- * @return 0 on success, -1 and set err on failure
+ * @return 0 on success on not located, 1 on success and located, -1 and set err on failure
  */
 static int read_user(struct core_object *co, struct server_object *so, User **user_get, const char *display_name);
 
@@ -132,6 +132,42 @@ static int read_auth(struct core_object *co, struct server_object *so, Auth **au
  * @return 0 on success, -1 and set err on failure
  */
 static int update_user(struct core_object *co, struct server_object *so, User *user);
+
+/**
+ * update_channel
+ * <p>
+ * Update a channel. Not implemented.
+ * </p>
+ * @param co the core object
+ * @param so the server object
+ * @param channel the channel to update
+ * @return 0 on success, -1 and set err on failure
+ */
+static int update_channel(struct core_object *co, struct server_object *so, Channel *channel);
+
+/**
+ * update_message
+ * <p>
+ * Update a message. Not implemented.
+ * </p>
+ * @param co the core object
+ * @param so the server object
+ * @param message the message to update
+ * @return 0 on success, -1 and set err on failure
+ */
+static int update_message(struct core_object *co, struct server_object *so, Message *message);
+
+/**
+ * update_auth
+ * <p>
+ * Update a auth. Not implemented.
+ * </p>
+ * @param co the core object
+ * @param so the server object
+ * @param auth the auth to update
+ * @return 0 on success, -1 and set err on failure
+ */
+static int update_auth(struct core_object *co, struct server_object *so, Auth *auth);
 
 /**
  * delete_user
@@ -241,6 +277,7 @@ static int insert_user(struct core_object *co, struct server_object *so, User *u
     int           status;
     datum         key;
     datum         value;
+    s
     
     // Determine if a user with the username already exists in the database.
     status = find_by_name(co, USER_DB_NAME, so->user_db_sem, NULL, user->display_name);
@@ -592,7 +629,7 @@ int db_update(struct core_object *co, struct server_object *so, int type, void *
 {
     PRINT_STACK_TRACE(co->tracer);
     
-    switch (type) // NOLINT(hicpp-multiway-paths-covered) : TODO: temp nolint while other routes commented.
+    switch (type)
     {
         case USER:
         {
@@ -602,30 +639,30 @@ int db_update(struct core_object *co, struct server_object *so, int type, void *
             }
             break;
         }
-//        case CHANNEL:
-//        {
-//            if (update_channel(co, so, (Channel *) object_src) == -1)
-//            {
-//                return -1;
-//            }
-//            break;
-//        }
-//        case MESSAGE:
-//        {
-//            if (update_message(co, so, (Channel *) object_src) == -1)
-//            {
-//                return -1;
-//            }
-//            break;
-//        }
-//        case AUTH:
-//        {
-//            if (update_auth(co, so, (Channel *) object_src) == -1)
-//            {
-//                return -1;
-//            }
-//            break;
-//        }
+        case CHANNEL:
+        {
+            if (update_channel(co, so, (Channel *) object_src) == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case MESSAGE:
+        {
+            if (update_message(co, so, (Message *) object_src) == -1)
+            {
+                return -1;
+            }
+            break;
+        }
+        case AUTH:
+        {
+            if (update_auth(co, so, (Auth *) object_src) == -1)
+            {
+                return -1;
+            }
+            break;
+        }
         default:;
     }
     
@@ -659,36 +696,62 @@ static int update_user(struct core_object *co, struct server_object *so, User *u
     return status;
 }
 
+static int update_channel(struct core_object *co, struct server_object *so, Channel *channel)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    return 0;
+}
+
+static int update_message(struct core_object *co, struct server_object *so, Message *message)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    return 0;
+}
+
+static int update_auth(struct core_object *co, struct server_object *so, Auth *auth)
+{
+    PRINT_STACK_TRACE(co->tracer);
+    
+    return 0;
+}
+
 int db_destroy(struct core_object *co, struct server_object *so, int type, void *object)
 {
     PRINT_STACK_TRACE(co->tracer);
+    
+    int ret_val;d
     
     switch (type)
     {
         case USER:
         {
-            delete_user(co, so, (User *) object);
+            ret_val = delete_user(co, so, (User *) object);
             break;
         }
         case CHANNEL:
         {
-            delete_channel(co, so, (Channel *) object);
+            ret_val = delete_channel(co, so, (Channel *) object);
             break;
         }
         case MESSAGE:
         {
-            delete_message(co, so, (Message *) object);
+            ret_val = delete_message(co, so, (Message *) object);
             break;
         }
         case AUTH:
         {
-            delete_auth(co, so, (Auth *) object);
+            ret_val = delete_auth(co, so, (Auth *) object);
             break;
         }
-        default:;
+        default:
+        {
+            ret_val = -1;
+        }
     }
     
-    return 0;
+    return ret_val;
 }
 
 static int delete_user(struct core_object *co, struct server_object *so, User *user)
@@ -1051,6 +1114,7 @@ int determine_request_sender(struct core_object *co, struct server_object *so, U
     addr_id_key.dptr  = addr_buffer;
     addr_id_key.dsize = SOCKET_ADDR_SIZE;
     
+    // Get the user id associated with the socket addr
     int ret_val = safe_dbm_fetch(co, ADDR_ID_DB_NAME, so->addr_id_db_sem, &addr_id_key, &addr_id_buffer);
     if (ret_val == -1 || ret_val == 1)
     {
@@ -1062,11 +1126,12 @@ int determine_request_sender(struct core_object *co, struct server_object *so, U
     mm_free(co->mm, addr_buffer);
     mm_free(co->mm, addr_id_buffer);
     
-    // Find the user associated with the addr in the addr_id_buffer
+    // Find the user associated with the id in the addr_id_buffer
     user_key.dptr  = &addr_id_pair->id;
     user_key.dsize = sizeof(int);
     
-    if (safe_dbm_fetch(co, USER_DB_NAME, so->user_db_sem, &user_key, &user_buffer) == -1)
+    ret_val = safe_dbm_fetch(co, USER_DB_NAME, so->user_db_sem, &user_key, &user_buffer);
+    if (ret_val == -1 || ret_val == 1)
     {
         return -1;
     }

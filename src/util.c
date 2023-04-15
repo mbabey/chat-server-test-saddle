@@ -261,19 +261,6 @@ void print_dispatch(struct state *state, struct dispatch *dispatch, const char *
     
     type_string   = type_to_string(dispatch->type);
     object_string = object_to_string(dispatch->object);
-
-//    (void) fprintf(stdout, "\n--- Dispatch %s ---\n"
-//                           "Version:\t%d\n"
-//                           "Type:\t\t%d (%s)\n"
-//                           "Object:\t\t%d (%s)\n"
-//                           "Body size:\t%d Bytes\n"
-//                           "Body:\t\t%s\n\n",
-//                           req_res_str,
-//                           dispatch->version,
-//                           dispatch->type, type_string,
-//                           dispatch->object, object_string,
-//                           dispatch->body_size,
-//                           dispatch->body);
     
     (void) fprintf(stdout, "\n--- Dispatch %s ---\n", req_res_str);
     (void) fprintf(stdout, "Version:\t%d\n", dispatch->version);
@@ -281,7 +268,6 @@ void print_dispatch(struct state *state, struct dispatch *dispatch, const char *
     (void) fprintf(stdout, "Object:\t\t%d (%s)\n", dispatch->object, object_string);
     (void) fprintf(stdout, "Body size:\t%d Bytes\n", dispatch->body_size);
     (void) fprintf(stdout, "Body:\t\t%s\n\n", dispatch->body);
-    
 }
 
 static const char *type_to_string(uint8_t type)

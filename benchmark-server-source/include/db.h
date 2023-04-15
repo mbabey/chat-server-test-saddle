@@ -46,13 +46,35 @@ int db_create(struct core_object *co, struct server_object *so, int type, void *
  * @param so the server object
  * @param type the type of object to query
  * @param object_dst the destination for the query
- * @param object_query the query
+ * @param object_query the query parameter
  * @return 1 on success and record found, 0 on success and record not found, -1 and set err on failure
  */
 int db_read(struct core_object *co, struct server_object *so, int type, void *object_dst, void *object_query);
 
+/**
+ * db_update
+ * <p>
+ * Update an item in the database
+ * </p>
+ * @param co the core object
+ * @param so the state object
+ * @param type the type of object to update
+ * @param object_src the update to make
+ * @return
+ */
 int db_update(struct core_object *co, struct server_object *so, int type, void *object_src);
 
+/**
+ * db_destroy
+ * <p>
+ * Destroy an object in a database.
+ * </p>
+ * @param co the core object
+ * @param so the server object
+ * @param type the type of object to destroy
+ * @param object the object to destroy
+ * @return
+ */
 int db_destroy(struct core_object *co, struct server_object *so, int type, void *object);
 
 /**

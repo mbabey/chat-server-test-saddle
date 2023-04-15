@@ -10,7 +10,6 @@
  * </p>
  * @param co the core object
  * @param dispatch the dispatch
- * @param body_tokens the tokenized dispatch body
  * @return 0 on success, -1 and set err on failure
  */
 static int handle_read(struct core_object *co, struct dispatch *dispatch);
@@ -22,7 +21,6 @@ static int handle_read(struct core_object *co, struct dispatch *dispatch);
  * </p>
  * @param co the core object
  * @param dispatch the dispatch
- * @param body_tokens the tokenized dispatch body
  * @return 0 on success, -1 and set err on failure
  */
 static int handle_update(struct core_object *co, struct dispatch *dispatch);
@@ -34,7 +32,6 @@ static int handle_update(struct core_object *co, struct dispatch *dispatch);
  * </p>
  * @param co the core object
  * @param dispatch the dispatch
- * @param body_tokens the tokenized dispatch body
  * @return 0 on success, -1 and set err on failure
  */
 static int handle_ping(struct core_object *co, struct dispatch *dispatch);
