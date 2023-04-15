@@ -17,24 +17,18 @@ int handle_destroy(struct core_object *co, struct dispatch *dispatch, char **bod
 {
     PRINT_STACK_TRACE(co->tracer);
     
-    return 0;
-}
-
-int handle_destroy_user(struct core_object *co, struct dispatch *dispatch, char **body_tokens)
-{
-    PRINT_STACK_TRACE(co->tracer);
-    return 0;
-}
-
-int handle_destroy_channel(struct core_object *co, struct dispatch *dispatch, char **body_tokens)
-{
-    PRINT_STACK_TRACE(co->tracer);
-    return 0;
-}
-
-int handle_destroy_message(struct core_object *co, struct dispatch *dispatch, char **body_tokens)
-{
-    PRINT_STACK_TRACE(co->tracer);
+    if (dispatch->object == AUTH)
+    {
+        if (handle_destroy_auth(co, dispatch, body_tokens) == -1)
+        {
+            return -1;
+        }
+    } else
+    {
+        dispatch->body      = mm_strdup("501\x03Not implemented\x03", co->mm);
+        dispatch->body_size = strlen(dispatch->body);
+    }
+    
     return 0;
 }
 
@@ -42,7 +36,21 @@ int handle_destroy_auth(struct core_object *co, struct dispatch *dispatch, char 
 {
     PRINT_STACK_TRACE(co->tracer);
     
+    char **body_tokens_cpy;
+    size_t count;
     
+    body_tokens_cpy = body_tokens;
+    count = 0;
+    
+    COUNT_TOKENS(count, body_tokens_cpy);
+    if (count > 1 || !VALIDATE_NAME(*body_tokens))
+    {
+        dispatch->body      = mm_strdup("400\x03Invalid fields.\x03", co->mm);
+        dispatch->body_size = strlen(dispatch->body);
+        return -1;
+    }
+   
+    determine_request_sender
     
     return 0;
 }

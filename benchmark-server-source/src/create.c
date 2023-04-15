@@ -38,17 +38,6 @@ static int generate_user_id(TRACER_FUNCTION_AS(tracer));
  */
 static int generate_channel_id(TRACER_FUNCTION_AS(tracer));
 
-/**
- * determine_request_sender
- * <p>
- * Given a socket address on which a dispatch was sent, find the User that sent the dispatch.
- * </p>
- * @param co the core object
- * @param so the server object
- * @param request_sender the User object into which to store the request sender
- * @return 0 on success, -1 and set err on failure
- */
-static int determine_request_sender(struct core_object *co, struct server_object *so, User *request_sender);
 
 /**
  * create_name_list
@@ -355,62 +344,6 @@ static int generate_channel_id(TRACER_FUNCTION_AS(tracer))
     PRINT_STACK_TRACE(tracer);
     static int channel_id = 1;
     return channel_id++;
-}
-
-static int determine_request_sender(struct core_object *co, struct server_object *so, User *request_sender)
-{
-    PRINT_STACK_TRACE(co->tracer);
-    
-    // The Server must determine the Request Sender Name.
-    // The Request Sender Name is determinable by the Server retrieving the
-    // Name of the User associated with the Socket Address from which the Request was sent.
-    
-    AddrIdPair         *addr_id_pair;
-    struct sockaddr_in client_addr;
-    uint8_t            *addr_buffer;
-    uint8_t            *addr_id_buffer;
-    uint8_t            *user_buffer;
-    datum              addr_id_key;
-    datum              user_key;
-    
-    addr_buffer = mm_malloc(SOCKET_ADDR_SIZE, co->mm);
-    if (!addr_buffer)
-    {
-        SET_ERROR(co->err);
-        return -1;
-    }
-    
-    // Create the addr_id_key, which is [in_addr_t, in_port_t]
-    client_addr = so->child->client_addr;
-    memcpy(addr_buffer, &client_addr.sin_addr.s_addr, sizeof(client_addr.sin_addr.s_addr));
-    memcpy(addr_buffer + sizeof(client_addr.sin_addr.s_addr), &client_addr.sin_port, sizeof(client_addr.sin_port));
-    
-    addr_id_key.dptr  = addr_buffer;
-    addr_id_key.dsize = SOCKET_ADDR_SIZE;
-    
-    if (safe_dbm_fetch(co, ADDR_ID_DB_NAME, so->addr_id_db_sem, &addr_id_key, &addr_id_buffer) == -1)
-    {
-        return -1;
-    }
-    
-    addr_id_pair = mm_malloc(sizeof(AddrIdPair), co->mm);
-    deserialize_addr_id_pair(co, &addr_id_pair, addr_id_buffer);
-    mm_free(co->mm, addr_buffer);
-    mm_free(co->mm, addr_id_buffer);
-    
-    // Find the user associated with the addr in the addr_id_buffer
-    user_key.dptr  = &addr_id_pair->id;
-    user_key.dsize = sizeof(int);
-    
-    if (safe_dbm_fetch(co, USER_DB_NAME, so->user_db_sem, &user_key, &user_buffer) == -1)
-    {
-        return -1;
-    }
-    deserialize_user(co, &request_sender, user_buffer);
-    mm_free(co->mm, addr_id_pair);
-    mm_free(co->mm, user_buffer);
-    
-    return 0;
 }
 
 static int create_name_list(struct core_object *co, const char ***dst_list, char **src_list,

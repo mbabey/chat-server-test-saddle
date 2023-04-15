@@ -138,6 +138,18 @@ int find_addr_id_pair_by_id(struct core_object *co, struct server_object *so, Ad
 int copy_dptr_to_buffer(struct core_object *co, uint8_t **buffer, datum *value);
 
 /**
+ * determine_request_sender
+ * <p>
+ * Given a socket address on which a dispatch was sent, find the User that sent the dispatch.
+ * </p>
+ * @param co the core object
+ * @param so the server object
+ * @param request_sender the User object into which to store the request sender
+ * @return 0 on success, -1 and set err on failure
+ */
+int determine_request_sender(struct core_object *co, struct server_object *so, User *request_sender);
+
+/**
  * print_db_error
  * <p>
  * Print an error message based on the error code of passed.
