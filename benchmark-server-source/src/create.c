@@ -460,8 +460,10 @@ int handle_create_message(struct core_object *co, struct server_object *so, stru
     }
     
     new_message.id         = generate_message_id(co->tracer);
+    // NOLINTBEGIN(clang-diagnostic-cast-align): Intentional cast.
     new_message.user_id    = *(int *) serial_user_buffer;
     new_message.channel_id = *(int *) serial_channel_buffer;
+    // NOLINTEND(clang-diagnostic-cast-align): Intentional cast.
     
     if (db_create(co, so, MESSAGE, &new_message) == -1)
     {
@@ -540,7 +542,8 @@ int handle_create_auth(struct core_object *co, struct server_object *so, struct 
     datum   user_key;
     
     // get user_id, get user with id
-    user_key.dptr  = &auth->user_id;
+    user_key.dptr  = (void *) &auth->user_id;
+    // NOLINTNEXTLINE(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions): never large enough
     user_key.dsize = sizeof(auth->user_id);
     
     ret_val = safe_dbm_fetch(co, USER_DB_NAME, so->user_db_sem, &user_key, &serial_user);

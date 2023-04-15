@@ -461,6 +461,7 @@ static int p_send_to_child(struct core_object *co, struct server_object *so, str
     cmsghdr->cmsg_level = SOL_SOCKET;
     cmsghdr->cmsg_type  = SCM_RIGHTS; // Indicates it is a file description being sent.
     cmsghdr->cmsg_len   = CMSG_LEN(sizeof(int));
+    // NOLINTNEXTLINE(clang-diagnostic-cast-align): Intentional cast.
     *((int *) CMSG_DATA(cmsghdr)) = active_pollfd->fd; // The file description to send.
     
     if (sem_wait(so->domain_sems[WRITE_END]) == -1)

@@ -1,7 +1,8 @@
-#include <arpa/inet.h>
 #include "../../include/global-objects.h"
 #include "../include/db.h"
 #include "../include/object-util.h"
+
+#include <fcntl.h>
 
 /**
  * insert_user
@@ -277,7 +278,6 @@ static int insert_user(struct core_object *co, struct server_object *so, User *u
     int           status;
     datum         key;
     datum         value;
-    s
     
     // Determine if a user with the username already exists in the database.
     status = find_by_name(co, USER_DB_NAME, so->user_db_sem, NULL, user->display_name);
@@ -300,9 +300,11 @@ static int insert_user(struct core_object *co, struct server_object *so, User *u
     
     printf("serial user size: %lu\n", serial_user_size);
     
-    key.dptr    = serial_user;
+    key.dptr    = (void *) serial_user;
+    // NOLINTNEXTLINE(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions): never large enough
     key.dsize   = sizeof(user->id);
-    value.dptr  = serial_user;
+    value.dptr  = (void *) serial_user;
+    // NOLINTNEXTLINE(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions): never large enough
     value.dsize = serial_user_size;
     
     status = safe_dbm_store(co, USER_DB_NAME, so->user_db_sem, &key, &value, DBM_INSERT);
@@ -310,7 +312,7 @@ static int insert_user(struct core_object *co, struct server_object *so, User *u
     if (status == 1)
     {
         (void) fprintf(stdout, "Database error occurred: User with ID \"%d\" already exists in User database.\n",
-                       *(int *) key.dptr);
+                       *(int *) key.dptr); // NOLINT(clang-diagnostic-cast-align): Intentional cast.
         return 1;
     }
     if (status == -1)
@@ -352,9 +354,11 @@ static int insert_channel(struct core_object *co, struct server_object *so, Chan
         return -1;
     }
     
-    key.dptr    = serial_channel;
+    key.dptr    = (void *) serial_channel;
+    // NOLINTNEXTLINE(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions): never large enough
     key.dsize   = sizeof(channel->id);
-    value.dptr  = serial_channel;
+    value.dptr  = (void *) serial_channel;
+    // NOLINTNEXTLINE(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions): never large enough
     value.dsize = serial_channel_size;
     
     status = safe_dbm_store(co, CHANNEL_DB_NAME, so->channel_db_sem, &key, &value, DBM_INSERT);
@@ -362,7 +366,7 @@ static int insert_channel(struct core_object *co, struct server_object *so, Chan
     if (status == 1)
     {
         (void) fprintf(stdout, "Database error occurred: Channel with ID \"%d\" already exists in Channel database.\n",
-                       *(int *) key.dptr);
+                       *(int *) key.dptr); // NOLINT(clang-diagnostic-cast-align): Intentional cast.
     } else if (status == -1)
     {
         SET_ERROR(co->err);
@@ -388,9 +392,11 @@ static int insert_message(struct core_object *co, struct server_object *so, Mess
         return -1;
     }
     
-    key.dptr    = serial_message;
+    key.dptr    = (void *) serial_message;
+    // NOLINTNEXTLINE(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions): never large enough
     key.dsize   = sizeof(message->id);
-    value.dptr  = serial_message;
+    value.dptr  = (void *) serial_message;
+    // NOLINTNEXTLINE(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions): never large enough
     value.dsize = serial_message_size;
     
     status = safe_dbm_store(co, MESSAGE_DB_NAME, so->message_db_sem, &key, &value, DBM_INSERT);
@@ -398,7 +404,7 @@ static int insert_message(struct core_object *co, struct server_object *so, Mess
     if (status == 1)
     {
         (void) fprintf(stdout, "Database error occurred: Message with ID \"%d\" already exists in Message database.\n",
-                       *(int *) key.dptr);
+                       *(int *) key.dptr);  // NOLINT(clang-diagnostic-cast-align): Intentional cast.
     } else if (status == -1)
     {
         SET_ERROR(co->err);
@@ -439,9 +445,11 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
     
     printf("serial auth size: %lu\n", serial_auth_size);
     
-    key.dptr    = serial_auth;
+    key.dptr    = (void *) serial_auth;
+    // NOLINTNEXTLINE(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions): never large enough
     key.dsize   = sizeof(auth->user_id);
-    value.dptr  = serial_auth;
+    value.dptr  = (void *) serial_auth;
+    // NOLINTNEXTLINE(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions): never large enough
     value.dsize = serial_auth_size;
     
     status = safe_dbm_store(co, AUTH_DB_NAME, so->auth_db_sem, &key, &value, DBM_INSERT);
@@ -449,7 +457,7 @@ static int insert_auth(struct core_object *co, struct server_object *so, Auth *a
     if (status == 1)
     {
         (void) fprintf(stdout, "Database error occurred: Auth with ID \"%d\" already exists in Auth database.\n",
-                       *(int *) key.dptr);
+                       *(int *) key.dptr);  // NOLINT(clang-diagnostic-cast-align): Intentional cast.
         return 1;
     }
     if (status == -1)
@@ -686,9 +694,11 @@ static int update_user(struct core_object *co, struct server_object *so, User *u
         return -1;
     }
     
-    key.dptr    = serial_user;
+    key.dptr    = (void *) serial_user;
+    // NOLINTNEXTLINE(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions): never large enough
     key.dsize   = sizeof(int);
-    value.dptr  = serial_user;
+    value.dptr  = (void *) serial_user;
+    // NOLINTNEXTLINE(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions): never large enough
     value.dsize = serial_user_size;
     
     status = safe_dbm_store(co, USER_DB_NAME, so->user_db_sem, &key, &value, DBM_REPLACE);
@@ -721,7 +731,7 @@ int db_destroy(struct core_object *co, struct server_object *so, int type, void 
 {
     PRINT_STACK_TRACE(co->tracer);
     
-    int ret_val;d
+    int ret_val;
     
     switch (type)
     {
@@ -760,7 +770,8 @@ static int delete_user(struct core_object *co, struct server_object *so, User *u
     
     datum key;
     
-    key.dptr  = &user->id;
+    key.dptr  = (void *) &user->id;
+    // NOLINTNEXTLINE(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions): never large enough
     key.dsize = sizeof(user->id);
     
     if (safe_dbm_delete(co, USER_DB_NAME, so->user_db_sem, &key) == -1)
@@ -777,7 +788,8 @@ static int delete_channel(struct core_object *co, struct server_object *so, Chan
     
     datum key;
     
-    key.dptr  = &channel->id;
+    key.dptr  = (void *) &channel->id;
+    // NOLINTNEXTLINE(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions): never large enough
     key.dsize = sizeof(channel->id);
     
     if (safe_dbm_delete(co, CHANNEL_DB_NAME, so->channel_db_sem, &key) == -1)
@@ -794,7 +806,8 @@ static int delete_message(struct core_object *co, struct server_object *so, Mess
     
     datum key;
     
-    key.dptr  = &message->id;
+    key.dptr  = (void *) &message->id;
+    // NOLINTNEXTLINE(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions): never large enough
     key.dsize = sizeof(message->id);
     
     if (safe_dbm_delete(co, MESSAGE_DB_NAME, so->message_db_sem, &key) == -1)
@@ -810,7 +823,8 @@ static int delete_auth(struct core_object *co, struct server_object *so, Auth *a
     PRINT_STACK_TRACE(co->tracer);
     datum key;
     
-    key.dptr  = &auth->user_id;
+    key.dptr  = (void *) &auth->user_id;
+    // NOLINTNEXTLINE(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions): never large enough
     key.dsize = sizeof(auth->user_id);
     
     if (safe_dbm_delete(co, AUTH_DB_NAME, so->auth_db_sem, &key) == -1)
@@ -955,6 +969,7 @@ int find_by_name(struct core_object *co, const char *db_name, sem_t *db_sem,
     }
     
     // Compare the display name to the name in the db
+    // NOLINTNEXTLINE(clang-diagnostic-cast-align): Intentional cast.
     while (key.dptr && strcmp((char *) (((int *) value.dptr) + 1), name) != 0)
     {
         key   = dbm_nextkey(db);

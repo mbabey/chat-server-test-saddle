@@ -1,8 +1,8 @@
-#include <stdlib.h>
-#include <arpa/inet.h>
 #include "../include/db.h"
 #include "../include/destroy.h"
 #include "../include/object-util.h"
+
+#include <stdlib.h>
 
 /**
  * log_out_user
@@ -45,9 +45,9 @@ int handle_destroy_auth(struct core_object *co, struct server_object *so, struct
     
     body_tokens_cpy = body_tokens;
     count           = 0;
-    
+    // NOLINTNEXTLINE(clang-analyzer-unix.cstring.NullArg,clang-analyzer-core.NonNullParamChecker): Nope TODO delet this
     COUNT_TOKENS(count, body_tokens_cpy);
-    if (count > 1 || !VALIDATE_NAME(*body_tokens)) // NOLINT(clang-analyzer-unix.cstring.NullArg): Nope
+    if (count > 1 || !(*body_tokens && VALIDATE_NAME(*body_tokens)))
     {
         dispatch->body      = mm_strdup("400\x03Invalid fields.\x03", co->mm);
         dispatch->body_size = strlen(dispatch->body);
@@ -134,7 +134,7 @@ static int log_out_user(struct core_object *co, struct server_object *so, User *
     memcpy(addr_key, &addr_id_pair->socket_ip, sizeof(in_addr_t));
     memcpy(addr_key + sizeof(in_addr_t), &addr_id_pair->socket_port, sizeof(in_port_t));
     
-    key.dptr  = addr_key;
+    key.dptr  = (void *) addr_key;
     key.dsize = SOCKET_ADDR_SIZE;
 
     status = safe_dbm_delete(co, ADDR_ID_DB_NAME, so->addr_id_db_sem, &key);
