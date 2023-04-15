@@ -600,9 +600,11 @@ static int log_in_user(struct core_object *co, struct server_object *so, User *u
     datum key;
     datum value;
     
-    key.dptr    = addr_id;
+    key.dptr    = (void *) addr_id;
+    // NOLINTNEXTLINE(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions): never large enough
     key.dsize   = SOCKET_ADDR_SIZE; // The first thing in here is a socket address.
-    value.dptr  = addr_id;
+    value.dptr  = (void *) addr_id;
+    // NOLINTNEXTLINE(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions): never large enough
     value.dsize = addr_id_size;
     
     // If the user is not logged in, just log them in and add them to the name-addr database.

@@ -27,13 +27,13 @@
 #define CHANNEL_SEM_NAME "/ch_3fda69"      /** Channel db semaphore name. */
 #define MESSAGE_SEM_NAME "/m_3fda69"       /** Message db semaphore name. */
 #define AUTH_SEM_NAME "/au_3fda69"         /** Auth db semaphore name. */
-#define NAME_ADDR_SEM_NAME "/na_3fda69"    /** Auth db semaphore name. */
+#define NAME_ADDR_SEM_NAME "/ai_3fda69"    /** Auth db semaphore name. */
 
 #define USER_DB_NAME "dbu_3fda69"          /** User db name. */
 #define CHANNEL_DB_NAME "dbch_3fda69"      /** Channel db name. */
 #define MESSAGE_DB_NAME "dbm_3fda69"       /** Message db name. */
 #define AUTH_DB_NAME "dbau_3fda69"         /** Auth db name. */
-#define ADDR_ID_DB_NAME "dbna_3fda69"      /** Display name-Socket address database. */
+#define ADDR_ID_DB_NAME "dbai_3fda69"      /** Display name-Socket address database. */
 
 #define DB_FLAGS O_RDWR | O_CREAT          /** Flags for opening db. */
 #define DB_FILE_MODE S_IRUSR | S_IWUSR     /** File mode for opening db. */

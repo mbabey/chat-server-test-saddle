@@ -848,6 +848,7 @@ int safe_dbm_store(struct core_object *co, const char *db_name, sem_t *sem, datu
         return -1;
     }
     // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
+    // NOLINTNEXTLINE(clang-diagnostic-incompatible-pointer-types-discards-qualifiers): implementation
     db = dbm_open(db_name, DB_FLAGS, DB_FILE_MODE);
     if (db == (DBM *) 0)
     {
@@ -881,6 +882,7 @@ int safe_dbm_fetch(struct core_object *co, const char *db_name, sem_t *sem, datu
         return -1;
     }
     // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
+    // NOLINTNEXTLINE(clang-diagnostic-incompatible-pointer-types-discards-qualifiers): implementation
     db = dbm_open(db_name, DB_FLAGS, DB_FILE_MODE);
     if (db == (DBM *) 0)
     {
@@ -913,6 +915,7 @@ int safe_dbm_delete(struct core_object *co, const char *db_name, sem_t *sem, dat
         return -1;
     }
     // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
+    // NOLINTNEXTLINE(clang-diagnostic-incompatible-pointer-types-discards-qualifiers): implementation
     db = dbm_open(db_name, DB_FLAGS, DB_FILE_MODE);
     if (db == (DBM *) 0)
     {
@@ -955,6 +958,7 @@ int find_by_name(struct core_object *co, const char *db_name, sem_t *db_sem,
         return -1;
     }
     // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
+    // NOLINTNEXTLINE(clang-diagnostic-incompatible-pointer-types-discards-qualifiers): implementation
     db = dbm_open(db_name, DB_FLAGS, DB_FILE_MODE);
     if (db == (DBM *) 0)
     {
@@ -1005,6 +1009,7 @@ int find_addr_id_pair_by_id(struct core_object *co, struct server_object *so, Ad
         return -1;
     }
     // NOLINTBEGIN(concurrency-mt-unsafe) : Protected
+    // NOLINTNEXTLINE(clang-diagnostic-incompatible-pointer-types-discards-qualifiers): implementation
     db = dbm_open(ADDR_ID_DB_NAME, DB_FLAGS, DB_FILE_MODE);
     if (db == (DBM *) 0)
     {
@@ -1019,6 +1024,7 @@ int find_addr_id_pair_by_id(struct core_object *co, struct server_object *so, Ad
     }
     
     // Compare the ID to the name in the db
+    // NOLINTNEXTLINE(clang-diagnostic-cast-align): Intentional
     while (key.dptr && *(int *) ((uint8_t *) value.dptr + SOCKET_ADDR_SIZE) != id)
     {
         key   = dbm_nextkey(db);
@@ -1126,7 +1132,8 @@ int determine_request_sender(struct core_object *co, struct server_object *so, U
     memcpy(addr_buffer, &client_addr.sin_addr.s_addr, sizeof(client_addr.sin_addr.s_addr));
     memcpy(addr_buffer + sizeof(client_addr.sin_addr.s_addr), &client_addr.sin_port, sizeof(client_addr.sin_port));
     
-    addr_id_key.dptr  = addr_buffer;
+    addr_id_key.dptr  = (void *) addr_buffer;
+    // NOLINTNEXTLINE(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions): never large enough
     addr_id_key.dsize = SOCKET_ADDR_SIZE;
     
     // Get the user id associated with the socket addr
@@ -1142,7 +1149,8 @@ int determine_request_sender(struct core_object *co, struct server_object *so, U
     mm_free(co->mm, addr_id_buffer);
     
     // Find the user associated with the id in the addr_id_buffer
-    user_key.dptr  = &addr_id_pair->id;
+    user_key.dptr  = (void *) &addr_id_pair->id;
+    // NOLINTNEXTLINE(bugprone-narrowing-conversions,cppcoreguidelines-narrowing-conversions): never large enough
     user_key.dsize = sizeof(int);
     
     ret_val = safe_dbm_fetch(co, USER_DB_NAME, so->user_db_sem, &user_key, &user_buffer);
