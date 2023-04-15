@@ -7,7 +7,8 @@
  * <p>
  * Run tests for CREATE type dispatches on all objects.
  * </p>
- * @param state
+ * @param state the state object
+ * @return 0 on success, -1 and set err on failure
  */
 static int run_create_test(struct client_state *state);
 
@@ -16,6 +17,8 @@ static int run_create_test(struct client_state *state);
  * <p>
  * Run tests for READ type dispatches on all objects.
  * </p>
+ * @param state the state object
+ * @return 0 on success, -1 and set err on failure
  */
 static int run_read_test(struct client_state *state);
 
@@ -24,6 +27,8 @@ static int run_read_test(struct client_state *state);
  * <p>
  * Run tests for UPDATE type dispatches on all objects.
  * </p>
+ * @param state the state object
+ * @return 0 on success, -1 and set err on failure
  */
 static int run_update_test(struct client_state *state);
 
@@ -32,6 +37,8 @@ static int run_update_test(struct client_state *state);
  * <p>
  * Run tests for DESTROY type dispatches on all objects.
  * </p>
+ * @param state the state object
+ * @return 0 on success, -1 and set err on failure
  */
 static int run_destroy_test(struct client_state *state);
 

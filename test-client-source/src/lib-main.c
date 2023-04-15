@@ -9,7 +9,6 @@
  * Create a socket and connect to an address on that socket.
  * </p>
  * @param state the state object
- * @param client the client object
  * @return 0 on success, -1 and set err on failure
  */
 static int open_socket_connect(struct client_state *state);
@@ -20,7 +19,6 @@ static int open_socket_connect(struct client_state *state);
  * Close the connection and the socket.
  * </p>
  * @param state the state object
- * @param client the client object
  * @return 0 on success, -1 and set err on failure
  */
 static int disconnect_close_socket(struct client_state *state);
