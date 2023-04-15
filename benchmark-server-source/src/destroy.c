@@ -1,5 +1,6 @@
-#include "../include/destroy.h"
 #include "../include/db.h"
+#include "../include/destroy.h"
+#include "../include/object-util.h"
 
 /**
  * log_out_user
@@ -51,8 +52,44 @@ int handle_destroy_auth(struct core_object *co, struct server_object *so, struct
         return -1;
     }
    
-    determine_request_sender(co, so, &request_sender);
+    if (determine_request_sender(co, so, &request_sender) == -1)
+    {
+        return -1;
+    }
     
+    int read_status;
+    User *user_to_log_out;
+    
+    user_to_log_out = mm_malloc(sizeof(User), co->mm);
+    if (!user_to_log_out)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
+    
+    read_status = db_read(co, so, USER, &user_to_log_out, *body_tokens);
+    if (read_status == -1)
+    {
+        free_user(co, user_to_log_out);
+        return -1;
+    }
+    
+    if (request_sender.privilege_level == GLOBAL_ADMIN)
+    {
+        if (read_status == 0)
+        {
+            dispatch->body      = mm_strdup("404\x03User not found.\x03", co->mm);
+            dispatch->body_size = strlen(dispatch->body);
+        }
+    }
+    
+    if (log_out_user(co, so, user_to_log_out) == -1)
+    {
+        free_user(co, user_to_log_out);
+        return -1;
+    }
+    
+    free_user(co, user_to_log_out);
     return 0;
 }
 
