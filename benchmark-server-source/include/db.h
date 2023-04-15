@@ -103,7 +103,7 @@ int safe_dbm_delete(struct core_object *co, const char *db_name, sem_t *sem, dat
  * Find an entry in the database by a string name. The name must be the second parameter of the object following an int.
  * </p>
  * @param co the core object
- * @param db the database in which to search
+ * @param db_name the database in which to search
  * @param db_sem the semaphore for the database
  * @param serial_object the object to store the result, or NULL if no resuilt is needed
  * @param name the
@@ -154,7 +154,7 @@ int determine_request_sender(struct core_object *co, struct server_object *so, U
  * <p>
  * Print an error message based on the error code of passed.
  * </p>
- * @param err_code the error code
+ * @param db the db in which to print an error
  */
 void print_db_error(DBM *db);
 

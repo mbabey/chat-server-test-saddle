@@ -45,7 +45,7 @@ int handle_destroy_auth(struct core_object *co, struct server_object *so, struct
     count = 0;
     
     COUNT_TOKENS(count, body_tokens_cpy);
-    if (count > 1 || !VALIDATE_NAME(*body_tokens))
+    if (count > 1 || !VALIDATE_NAME(*body_tokens)) // NOLINT(clang-analyzer-unix.cstring.NullArg): Nope
     {
         dispatch->body      = mm_strdup("400\x03Invalid fields.\x03", co->mm);
         dispatch->body_size = strlen(dispatch->body);
@@ -88,6 +88,9 @@ int handle_destroy_auth(struct core_object *co, struct server_object *so, struct
         free_user(co, user_to_log_out);
         return -1;
     }
+    
+    dispatch->body      = mm_strdup("200\x03Logged out.\x03", co->mm);
+    dispatch->body_size = strlen(dispatch->body);
     
     free_user(co, user_to_log_out);
     return 0;

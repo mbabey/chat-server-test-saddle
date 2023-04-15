@@ -1,7 +1,7 @@
 #include "../include/chat.h"
 #include "../include/create.h"
-#include "../include/destroy.h"
 #include "../include/db.h"
+#include "../include/destroy.h"
 
 /**
  * handle_read

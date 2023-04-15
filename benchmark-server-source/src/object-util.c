@@ -152,7 +152,7 @@ unsigned long serialize_auth(struct core_object *co, uint8_t **serial_auth, cons
     byte_offset = sizeof(auth->user_id);
     memcpy((*serial_auth + byte_offset), auth->login_token, strlen(auth->login_token) + 1);
     byte_offset += strlen(auth->login_token) + 1;
-    memcpy((*serial_auth + byte_offset), auth->password, strlen(auth->password) + 1); // TODO: hash this lol
+    memcpy((*serial_auth + byte_offset), auth->password, strlen(auth->password) + 1);
     
     return serial_auth_size;
 }

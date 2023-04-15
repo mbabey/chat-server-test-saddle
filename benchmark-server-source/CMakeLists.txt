@@ -16,9 +16,6 @@ set(SOURCE_LIST
         ${SOURCE_DIR}/server-state.c
         ${SOURCE_DIR}/chat.c
         ${SOURCE_DIR}/create.c
-        ${SOURCE_DIR}/broadcast.c
-        ${SOURCE_DIR}/read.c
-        ${SOURCE_DIR}/update.c
         ${SOURCE_DIR}/destroy.c
         ${SOURCE_DIR}/db.c
         ${SOURCE_DIR}/object-util.c
@@ -35,9 +32,6 @@ set(HEADER_LIST
         ${INCLUDE_DIR}/server-state.h
         ${INCLUDE_DIR}/chat.h
         ${INCLUDE_DIR}/create.h
-        ${INCLUDE_DIR}/broadcast.h
-        ${INCLUDE_DIR}/read.h
-        ${INCLUDE_DIR}/update.h
         ${INCLUDE_DIR}/destroy.h
         ${INCLUDE_DIR}/db.h
         ${INCLUDE_DIR}/object-util.h
@@ -139,7 +133,7 @@ set(DOXYGEN_QUIET YES)
 
 doxygen_add_docs(doxygen
         ${HEADER_LIST}
-        WORKING_DIRECTORY /Users/mud/Projects/cProjects/projects/chat-server-test-saddle/server-test-saddle-source
+        WORKING_DIRECTORY /Users/mud/Projects/cProjects/projects/chat-server-test-saddle/benchmark-server-source
         COMMENT "Generating Doxygen documentation for test-server")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)

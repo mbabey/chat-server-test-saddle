@@ -1055,7 +1055,8 @@ int determine_request_sender(struct core_object *co, struct server_object *so, U
     addr_id_key.dptr  = addr_buffer;
     addr_id_key.dsize = SOCKET_ADDR_SIZE;
     
-    if (safe_dbm_fetch(co, ADDR_ID_DB_NAME, so->addr_id_db_sem, &addr_id_key, &addr_id_buffer) == -1)
+    int ret_val = safe_dbm_fetch(co, ADDR_ID_DB_NAME, so->addr_id_db_sem, &addr_id_key, &addr_id_buffer);
+    if (ret_val == -1 || ret_val == 1)
     {
         return -1;
     }
