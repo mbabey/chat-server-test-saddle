@@ -123,7 +123,7 @@ int find_by_name(struct core_object *co, const char *db_name, sem_t *db_sem,
  * @param id the id
  * @return 0 on success, -1 and set on failure
  */
-int find_addr_id_pair_by_id(struct core_object *co, struct server_object *so, AddrIdPair *addr_id_pair, int id);
+int find_addr_id_pair_by_id(struct core_object *co, struct server_object *so, AddrIdPair **addr_id_pair, int id);
 
 /**
  * copy_dptr_to_buffer

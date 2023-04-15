@@ -409,10 +409,11 @@ int handle_create_message(struct core_object *co, struct server_object *so, stru
     
     uint8_t *serial_channel_buffer;
     uint8_t *serial_user_buffer;
-    int channel_read_status;
-    int user_read_status;
-
-    channel_read_status = find_by_name(co, CHANNEL_DB_NAME, so->channel_db_sem, &serial_channel_buffer, channel_name_in_dispatch);
+    int     channel_read_status;
+    int     user_read_status;
+    
+    channel_read_status = find_by_name(co, CHANNEL_DB_NAME, so->channel_db_sem, &serial_channel_buffer,
+                                       channel_name_in_dispatch);
     if (channel_read_status == -1)
     {
         return -1;
@@ -458,8 +459,8 @@ int handle_create_message(struct core_object *co, struct server_object *so, stru
         }
     }
     
-    new_message.id = generate_message_id(co->tracer);
-    new_message.user_id = *(int *) serial_user_buffer;
+    new_message.id         = generate_message_id(co->tracer);
+    new_message.user_id    = *(int *) serial_user_buffer;
     new_message.channel_id = *(int *) serial_channel_buffer;
     
     if (db_create(co, so, MESSAGE, &new_message) == -1)
@@ -585,10 +586,10 @@ static int log_in_user(struct core_object *co, struct server_object *so, User *u
     
     int     status;
     uint8_t *addr_id;
-    size_t  name_addr_size;
+    size_t  addr_id_size;
     
-    name_addr_size = serialize_addr_id_pair(co, &addr_id, &so->child->client_addr, &user->id);
-    if (name_addr_size == 0)
+    addr_id_size = serialize_addr_id_pair(co, &addr_id, &so->child->client_addr, &user->id);
+    if (addr_id_size == 0)
     {
         return -1;
     }
@@ -599,7 +600,7 @@ static int log_in_user(struct core_object *co, struct server_object *so, User *u
     key.dptr    = addr_id;
     key.dsize   = SOCKET_ADDR_SIZE; // The first thing in here is a socket address.
     value.dptr  = addr_id;
-    value.dsize = name_addr_size;
+    value.dsize = addr_id_size;
     
     // If the user is not logged in, just log them in and add them to the name-addr database.
     if (user->online_status == 0)

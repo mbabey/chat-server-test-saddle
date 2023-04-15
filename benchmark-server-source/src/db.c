@@ -1,3 +1,4 @@
+#include <arpa/inet.h>
 #include "../../include/global-objects.h"
 #include "../include/db.h"
 #include "../include/object-util.h"
@@ -845,6 +846,7 @@ int safe_dbm_delete(struct core_object *co, const char *db_name, sem_t *sem, dat
     if (dbm_delete(db, *key) == -1)
     {
         SET_ERROR(co->err);
+        print_db_error(db);
         dbm_close(db);
         sem_post(sem);
         return -1;
@@ -910,7 +912,7 @@ int find_by_name(struct core_object *co, const char *db_name, sem_t *db_sem,
     return ret_val;
 }
 
-int find_addr_id_pair_by_id(struct core_object *co, struct server_object *so, AddrIdPair *addr_id_pair, int id)
+int find_addr_id_pair_by_id(struct core_object *co, struct server_object *so, AddrIdPair **addr_id_pair, int id)
 {
     PRINT_STACK_TRACE(co->tracer);
     
@@ -939,7 +941,7 @@ int find_addr_id_pair_by_id(struct core_object *co, struct server_object *so, Ad
     }
     
     // Compare the ID to the name in the db
-    while (key.dptr && *(int *) ((uint8_t *) key.dptr + SOCKET_ADDR_SIZE) == id)
+    while (key.dptr && *(int *) ((uint8_t *) value.dptr + SOCKET_ADDR_SIZE) != id)
     {
         key   = dbm_nextkey(db);
         value = dbm_fetch(db, key);
@@ -956,9 +958,9 @@ int find_addr_id_pair_by_id(struct core_object *co, struct server_object *so, Ad
     dbm_close(db);
     // NOLINTEND(concurrency-mt-unsafe) : Protected
     sem_post(so->addr_id_db_sem);
-    if (ret_val == 0)
+    if (ret_val == 1)
     {
-        deserialize_addr_id_pair(co, &addr_id_pair, serial_object);
+        deserialize_addr_id_pair(co, addr_id_pair, serial_object);
         mm_free(co->mm, serial_object);
     }
     

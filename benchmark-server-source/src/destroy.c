@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <arpa/inet.h>
 #include "../include/db.h"
 #include "../include/destroy.h"
 #include "../include/object-util.h"
@@ -102,7 +103,7 @@ static int log_out_user(struct core_object *co, struct server_object *so, User *
     PRINT_STACK_TRACE(co->tracer);
     
     datum      key;
-    AddrIdPair addr_id_pair;
+    AddrIdPair *addr_id_pair;
     uint8_t    *addr_key;
     int        status;
     
@@ -112,6 +113,12 @@ static int log_out_user(struct core_object *co, struct server_object *so, User *
         return -1;
     }
     
+    addr_id_pair = mm_calloc(1, sizeof(AddrIdPair), co->mm);
+    if (!addr_id_pair)
+    {
+        SET_ERROR(co->err);
+        return -1;
+    }
     if (find_addr_id_pair_by_id(co, so, &addr_id_pair, user->id) == -1)
     {
         return -1;
@@ -124,12 +131,12 @@ static int log_out_user(struct core_object *co, struct server_object *so, User *
         return -1;
     }
     
-    memcpy(addr_key, &addr_id_pair.socket_ip, sizeof(in_addr_t));
-    memcpy(addr_key + sizeof(in_addr_t), &addr_id_pair.socket_port, sizeof(in_port_t));
+    memcpy(addr_key, &addr_id_pair->socket_ip, sizeof(in_addr_t));
+    memcpy(addr_key + sizeof(in_addr_t), &addr_id_pair->socket_port, sizeof(in_port_t));
     
     key.dptr  = addr_key;
     key.dsize = SOCKET_ADDR_SIZE;
-    
+
     status = safe_dbm_delete(co, ADDR_ID_DB_NAME, so->addr_id_db_sem, &key);
     
     return status;
