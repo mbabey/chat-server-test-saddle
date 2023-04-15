@@ -710,5 +710,7 @@ void destroy_process_state(struct core_object *co, struct server_object *so)
     } else if (so->child)
     {
         c_destroy_child_state(co, so, so->child);
+        mm_free_all(co->mm);
+        exit(EXIT_SUCCESS);
     }
 }
