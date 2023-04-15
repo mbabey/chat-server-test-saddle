@@ -419,7 +419,7 @@ static int p_handle_socket_action(struct core_object *co, struct server_object *
             pollfd->fd *= -1; // Disable the pollfd until it is signaled by the child to be re-enabled.
             
             // NOLINTNEXTLINE(hicpp-signed-bitwise): never negative
-        } else if ((pollfd->revents & POLLHUP) || (pollfd->revents & POLLERR)) // Client has closed other end of socket.
+        } else if ((pollfd->revents & POLLHUP) || (pollfd->revents & POLLERR) || (pollfd->revents & POLLNVAL)) // Client has closed other end of socket.
             // On macOS, POLLHUP will be set; on Linux, POLLERR will be set.
         {
             (p_remove_connection(co, so->parent, pollfd, p - 2, pollfds));
