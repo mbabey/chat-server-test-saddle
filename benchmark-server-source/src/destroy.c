@@ -45,7 +45,7 @@ int handle_destroy_auth(struct core_object *co, struct server_object *so, struct
     
     body_tokens_cpy = body_tokens;
     count           = 0;
-    // NOLINTNEXTLINE(clang-analyzer-unix.cstring.NullArg,clang-analyzer-core.NonNullParamChecker): Nope TODO delet this
+    // NOLINTNEXTLINE(clang-analyzer-unix.cstring.NullArg,clang-analyzer-core.NonNullParamChecker): Nope
     COUNT_TOKENS(count, body_tokens_cpy);
     if (count > 1 || !(*body_tokens && VALIDATE_NAME(*body_tokens)))
     {
@@ -138,6 +138,8 @@ static int log_out_user(struct core_object *co, struct server_object *so, User *
     key.dsize = SOCKET_ADDR_SIZE;
 
     status = safe_dbm_delete(co, ADDR_ID_DB_NAME, so->addr_id_db_sem, &key);
+    
+    free(addr_key);
     
     return status;
 }
