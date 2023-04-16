@@ -16,12 +16,23 @@
  */
 static int test_dispatch(struct client_state *state, struct dispatch *dispatch);
 
+/**
+ * create_message_reply
+ * <p>
+ * Wait for the server to send the create-message dispatch back, then send a 200 response.
+ * </p>
+ * @param state the state object
+ * @param dispatch the dispatch
+ * @return 0 on success, -1 and set err on failure.
+ */
+static int create_message_reply(struct client_state *state, struct dispatch *dispatch);
+
 int create_user_test(struct client_state *state)
 {
     printf("\nCreating user \"thedog\"\n");
     
     struct dispatch dispatch;
-
+    
     dispatch.version   = (unsigned int) 1;
     dispatch.type      = (unsigned int) CREATE;
     dispatch.object    = (unsigned int) USER;
@@ -60,6 +71,7 @@ static int test_dispatch(struct client_state *state, struct dispatch *dispatch)
     if (status == 0)
     {
         print_dispatch((struct state *) state, dispatch, "Response");
+        mm_free(state->mm, dispatch->body);
     }
     
     return 0;
@@ -90,7 +102,7 @@ int create_message_test(struct client_state *state)
     printf("\nCreating message in channel \"the doghouse\".\n");
     
     struct dispatch dispatch;
-
+    
     dispatch.version   = (unsigned int) 1;
     dispatch.type      = (unsigned int) CREATE;
     dispatch.object    = (unsigned int) MESSAGE;
@@ -102,6 +114,60 @@ int create_message_test(struct client_state *state)
         return -1;
     }
     
+    if (create_message_reply(state, &dispatch) == -1)
+    {
+        return -1;
+    }
+    
+    return 0;
+}
+
+static int create_message_reply(struct client_state *state, struct dispatch *dispatch)
+{
+    int             recv_status;
+    int             send_status;
+    char            **body_tokens;
+    
+    memset(dispatch, 0, sizeof(struct dispatch));
+    
+    recv_status = recv_parse_message((struct state *) state, state->socket_fd, dispatch, &body_tokens);
+    
+    switch (recv_status)
+    {
+        case 0: // All good.
+        {
+            print_dispatch((struct state *) state, dispatch, "Server Forward Request");
+            mm_free(state->mm, (*dispatch).body);
+            
+            (*dispatch).body      = strdup("200\x03");
+            (*dispatch).body_size = strlen((*dispatch).body);
+            break;
+        }
+        case 1: // Server disconnected.
+        {
+            return 0;
+        }
+        case -1: // Error reading.
+        {
+            (*dispatch).body      = strdup("500\x03Client error\x03");
+            (*dispatch).body_size = strlen((*dispatch).body);
+            break;
+        }
+        default:;
+    }
+    
+    (*dispatch).version = (unsigned int) 1;
+    (*dispatch).type    = (unsigned int) CREATE;
+    (*dispatch).object  = (unsigned int) MESSAGE;
+    
+    print_dispatch((struct state *) state, dispatch, "Server Forward Request");
+    send_status = assemble_message_send((struct state *) state, state->socket_fd, dispatch);
+    free((*dispatch).body);
+    if (send_status == -1)
+    {
+        return -1;
+    }
+
     return 0;
 }
 
@@ -111,10 +177,10 @@ int create_auth_test(struct client_state *state)
     
     struct dispatch dispatch;
     
-    dispatch.version = (unsigned int) 1;
-    dispatch.type = (unsigned int) CREATE;
-    dispatch.object = (unsigned int) AUTH;
-    dispatch.body = strdup("bigdog69\x03password1234@!\x03");
+    dispatch.version   = (unsigned int) 1;
+    dispatch.type      = (unsigned int) CREATE;
+    dispatch.object    = (unsigned int) AUTH;
+    dispatch.body      = strdup("bigdog69\x03password1234@!\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -131,10 +197,10 @@ int read_user_test(struct client_state *state)
     
     struct dispatch dispatch;
     
-    dispatch.version = (unsigned int) 1;
-    dispatch.type = (unsigned int) READ;
-    dispatch.object = (unsigned int) USER;
-    dispatch.body = strdup("thedog\x03");
+    dispatch.version   = (unsigned int) 1;
+    dispatch.type      = (unsigned int) READ;
+    dispatch.object    = (unsigned int) USER;
+    dispatch.body      = strdup("thedog\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -151,10 +217,10 @@ int read_user_all_test(struct client_state *state)
     
     struct dispatch dispatch;
     
-    dispatch.version = (unsigned int) 1;
-    dispatch.type = (unsigned int) READ;
-    dispatch.object = (unsigned int) USER;
-    dispatch.body = strdup("");
+    dispatch.version   = (unsigned int) 1;
+    dispatch.type      = (unsigned int) READ;
+    dispatch.object    = (unsigned int) USER;
+    dispatch.body      = strdup("");
     dispatch.body_size = 0;
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -171,10 +237,10 @@ int read_channel_test(struct client_state *state)
     
     struct dispatch dispatch;
     
-    dispatch.version = (unsigned int) 1;
-    dispatch.type = (unsigned int) READ;
-    dispatch.object = (unsigned int) CHANNEL;
-    dispatch.body = strdup("the doghouse\x03""0\x03""0\x03""0\x03");
+    dispatch.version   = (unsigned int) 1;
+    dispatch.type      = (unsigned int) READ;
+    dispatch.object    = (unsigned int) CHANNEL;
+    dispatch.body      = strdup("the doghouse\x03""0\x03""0\x03""0\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -191,10 +257,10 @@ int read_channel_users_test(struct client_state *state)
     
     struct dispatch dispatch;
     
-    dispatch.version = (unsigned int) 1;
-    dispatch.type = (unsigned int) READ;
-    dispatch.object = (unsigned int) CHANNEL;
-    dispatch.body = strdup("the doghouse\x03""1\x03""0\x03""0\x03");
+    dispatch.version   = (unsigned int) 1;
+    dispatch.type      = (unsigned int) READ;
+    dispatch.object    = (unsigned int) CHANNEL;
+    dispatch.body      = strdup("the doghouse\x03""1\x03""0\x03""0\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -211,10 +277,10 @@ int read_channel_admins_test(struct client_state *state)
     
     struct dispatch dispatch;
     
-    dispatch.version = (unsigned int) 1;
-    dispatch.type = (unsigned int) READ;
-    dispatch.object = (unsigned int) CHANNEL;
-    dispatch.body = strdup("the doghouse\x03""0\x03""1\x03""0\x03");
+    dispatch.version   = (unsigned int) 1;
+    dispatch.type      = (unsigned int) READ;
+    dispatch.object    = (unsigned int) CHANNEL;
+    dispatch.body      = strdup("the doghouse\x03""0\x03""1\x03""0\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -231,10 +297,10 @@ int read_channel_banned_users_test(struct client_state *state)
     
     struct dispatch dispatch;
     
-    dispatch.version = (unsigned int) 1;
-    dispatch.type = (unsigned int) READ;
-    dispatch.object = (unsigned int) CHANNEL;
-    dispatch.body = strdup("the doghouse\x03""0\x03""0\x03""1\x03");
+    dispatch.version   = (unsigned int) 1;
+    dispatch.type      = (unsigned int) READ;
+    dispatch.object    = (unsigned int) CHANNEL;
+    dispatch.body      = strdup("the doghouse\x03""0\x03""0\x03""1\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -251,10 +317,10 @@ int read_channel_all_test(struct client_state *state)
     
     struct dispatch dispatch;
     
-    dispatch.version = (unsigned int) 1;
-    dispatch.type = (unsigned int) READ;
-    dispatch.object = (unsigned int) CHANNEL;
-    dispatch.body = strdup("the doghouse\x03""1\x03""1\x03""1\x03");
+    dispatch.version   = (unsigned int) 1;
+    dispatch.type      = (unsigned int) READ;
+    dispatch.object    = (unsigned int) CHANNEL;
+    dispatch.body      = strdup("the doghouse\x03""1\x03""1\x03""1\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -271,10 +337,10 @@ int read_message_test(struct client_state *state)
     
     struct dispatch dispatch;
     
-    dispatch.version = (unsigned int) 1;
-    dispatch.type = (unsigned int) READ;
-    dispatch.object = (unsigned int) MESSAGE;
-    dispatch.body = strdup("the doghouse\x03""10\x03");
+    dispatch.version   = (unsigned int) 1;
+    dispatch.type      = (unsigned int) READ;
+    dispatch.object    = (unsigned int) MESSAGE;
+    dispatch.body      = strdup("the doghouse\x03""10\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -291,10 +357,10 @@ int update_user_display_name_test(struct client_state *state)
     
     struct dispatch dispatch;
     
-    dispatch.version = (unsigned int) 1;
-    dispatch.type = (unsigned int) UPDATE;
-    dispatch.object = (unsigned int) USER;
-    dispatch.body = strdup("thedog\x03""1\x03thecat\x03""0\x03""0\x03");
+    dispatch.version   = (unsigned int) 1;
+    dispatch.type      = (unsigned int) UPDATE;
+    dispatch.object    = (unsigned int) USER;
+    dispatch.body      = strdup("thedog\x03""1\x03thecat\x03""0\x03""0\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -311,10 +377,10 @@ int update_user_display_name_test_reset(struct client_state *state)
     
     struct dispatch dispatch;
     
-    dispatch.version = (unsigned int) 1;
-    dispatch.type = (unsigned int) UPDATE;
-    dispatch.object = (unsigned int) USER;
-    dispatch.body = strdup("thecat\x03""1\x03thedog\x03""0\x03""0\x03");
+    dispatch.version   = (unsigned int) 1;
+    dispatch.type      = (unsigned int) UPDATE;
+    dispatch.object    = (unsigned int) USER;
+    dispatch.body      = strdup("thecat\x03""1\x03thedog\x03""0\x03""0\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -331,10 +397,10 @@ int update_user_privilege_level_test(struct client_state *state)
     
     struct dispatch dispatch;
     
-    dispatch.version = (unsigned int) 1;
-    dispatch.type = (unsigned int) UPDATE;
-    dispatch.object = (unsigned int) USER;
-    dispatch.body = strdup("thedog\x03""0\x03""1\x03""1\x03""0\x03");
+    dispatch.version   = (unsigned int) 1;
+    dispatch.type      = (unsigned int) UPDATE;
+    dispatch.object    = (unsigned int) USER;
+    dispatch.body      = strdup("thedog\x03""0\x03""1\x03""1\x03""0\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -351,10 +417,10 @@ int update_user_privilege_level_test_reset(struct client_state *state)
     
     struct dispatch dispatch;
     
-    dispatch.version = (unsigned int) 1;
-    dispatch.type = (unsigned int) UPDATE;
-    dispatch.object = (unsigned int) USER;
-    dispatch.body = strdup("thedog\x03""0\x03""1\x03""0\x03""0\x03");
+    dispatch.version   = (unsigned int) 1;
+    dispatch.type      = (unsigned int) UPDATE;
+    dispatch.object    = (unsigned int) USER;
+    dispatch.body      = strdup("thedog\x03""0\x03""1\x03""0\x03""0\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -371,10 +437,10 @@ int update_user_online_status_test(struct client_state *state)
     
     struct dispatch dispatch;
     
-    dispatch.version = (unsigned int) 1;
-    dispatch.type = (unsigned int) UPDATE;
-    dispatch.object = (unsigned int) USER;
-    dispatch.body = strdup("thedog\x03""0\x03""0\x03""1\x03""1\x03");
+    dispatch.version   = (unsigned int) 1;
+    dispatch.type      = (unsigned int) UPDATE;
+    dispatch.object    = (unsigned int) USER;
+    dispatch.body      = strdup("thedog\x03""0\x03""0\x03""1\x03""1\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -391,10 +457,10 @@ int update_user_online_status_test_reset(struct client_state *state)
     
     struct dispatch dispatch;
     
-    dispatch.version = (unsigned int) 1;
-    dispatch.type = (unsigned int) UPDATE;
-    dispatch.object = (unsigned int) USER;
-    dispatch.body = strdup("thedog\x03""0\x03""0\x03""1\x03""1\x03");
+    dispatch.version   = (unsigned int) 1;
+    dispatch.type      = (unsigned int) UPDATE;
+    dispatch.object    = (unsigned int) USER;
+    dispatch.body      = strdup("thedog\x03""0\x03""0\x03""1\x03""1\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -411,10 +477,10 @@ int update_user_all_test(struct client_state *state)
     
     struct dispatch dispatch;
     
-    dispatch.version = (unsigned int) 1;
-    dispatch.type = (unsigned int) UPDATE;
-    dispatch.object = (unsigned int) USER;
-    dispatch.body = strdup("thedog\x03""1\x03thecat\x03""1\x03""1\x03""1\x03""0\x03");
+    dispatch.version   = (unsigned int) 1;
+    dispatch.type      = (unsigned int) UPDATE;
+    dispatch.object    = (unsigned int) USER;
+    dispatch.body      = strdup("thedog\x03""1\x03thecat\x03""1\x03""1\x03""1\x03""0\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -431,10 +497,10 @@ int update_user_all_test_reset(struct client_state *state)
     
     struct dispatch dispatch;
     
-    dispatch.version = (unsigned int) 1;
-    dispatch.type = (unsigned int) UPDATE;
-    dispatch.object = (unsigned int) USER;
-    dispatch.body = strdup("thecat\x03""1\x03thedog\x03""1\x03""0\x03""1\x03""1\x03");
+    dispatch.version   = (unsigned int) 1;
+    dispatch.type      = (unsigned int) UPDATE;
+    dispatch.object    = (unsigned int) USER;
+    dispatch.body      = strdup("thecat\x03""1\x03thedog\x03""1\x03""0\x03""1\x03""1\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -451,12 +517,12 @@ int update_channel_name_test(struct client_state *state)
     
     struct dispatch dispatch;
     
-    dispatch.version = (unsigned int) 1;
-    dispatch.type = (unsigned int) UPDATE;
-    dispatch.object = (unsigned int) CHANNEL;
-    dispatch.body = strdup("the doghouse\x03""1\x03the catpad\x03""0\x03""0\x03""0\x03");
+    dispatch.version   = (unsigned int) 1;
+    dispatch.type      = (unsigned int) UPDATE;
+    dispatch.object    = (unsigned int) CHANNEL;
+    dispatch.body      = strdup("the doghouse\x03""1\x03the catpad\x03""0\x03""0\x03""0\x03");
     dispatch.body_size = strlen(dispatch.body);
-
+    
     if (test_dispatch(state, &dispatch) == -1)
     {
         return -1;
@@ -471,10 +537,10 @@ int update_channel_name_test_reset(struct client_state *state)
     
     struct dispatch dispatch;
     
-    dispatch.version = (unsigned int) 1;
-    dispatch.type = (unsigned int) UPDATE;
-    dispatch.object = (unsigned int) CHANNEL;
-    dispatch.body = strdup("the catpad\x03""1\x03the doghouse\x03""0\x03""0\x03""0\x03");
+    dispatch.version   = (unsigned int) 1;
+    dispatch.type      = (unsigned int) UPDATE;
+    dispatch.object    = (unsigned int) CHANNEL;
+    dispatch.body      = strdup("the catpad\x03""1\x03the doghouse\x03""0\x03""0\x03""0\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -488,15 +554,15 @@ int update_channel_name_test_reset(struct client_state *state)
 int update_message_test(struct client_state *state)
 {
     printf("\nUpdating message by user \"thedog\" in channel \"the doghouse\" with timestamp \"0000000064228f8a\".\n");
-
+    
     struct dispatch dispatch;
-
-    dispatch.version = (unsigned int) 1;
-    dispatch.type = (unsigned int) UPDATE;
-    dispatch.object = (unsigned int) MESSAGE;
-    dispatch.body = strdup("thedog\x03the doghouse\x03""0000000064228f8a\x03wtf haha this is a message\x03");
+    
+    dispatch.version   = (unsigned int) 1;
+    dispatch.type      = (unsigned int) UPDATE;
+    dispatch.object    = (unsigned int) MESSAGE;
+    dispatch.body      = strdup("thedog\x03the doghouse\x03""0000000064228f8a\x03wtf haha this is a message\x03");
     dispatch.body_size = strlen(dispatch.body);
-
+    
     if (test_dispatch(state, &dispatch) == -1)
     {
         return -1;
@@ -511,10 +577,10 @@ int update_auth_test(struct client_state *state)
     
     struct dispatch dispatch;
     
-    dispatch.version = (unsigned int) 1;
-    dispatch.type = (unsigned int) UPDATE;
-    dispatch.object = (unsigned int) AUTH;
-    dispatch.body = strdup("thedog\x03password1234@!\x03!@4321drowssap\x03");
+    dispatch.version   = (unsigned int) 1;
+    dispatch.type      = (unsigned int) UPDATE;
+    dispatch.object    = (unsigned int) AUTH;
+    dispatch.body      = strdup("thedog\x03password1234@!\x03!@4321drowssap\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -531,10 +597,10 @@ int update_auth_no_password_test_reset(struct client_state *state)
     
     struct dispatch dispatch;
     
-    dispatch.version = (unsigned int) 1;
-    dispatch.type = (unsigned int) UPDATE;
-    dispatch.object = (unsigned int) AUTH;
-    dispatch.body = strdup("thedog\x03password1234@!\x03");
+    dispatch.version   = (unsigned int) 1;
+    dispatch.type      = (unsigned int) UPDATE;
+    dispatch.object    = (unsigned int) AUTH;
+    dispatch.body      = strdup("thedog\x03password1234@!\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -551,10 +617,10 @@ int destroy_user_test(struct client_state *state)
     
     struct dispatch dispatch;
     
-    dispatch.version = (unsigned int) 1;
-    dispatch.type = (unsigned int) DESTROY;
-    dispatch.object = (unsigned int) USER;
-    dispatch.body = strdup("thedog\x03bigdog69\x03password1234@!\x03");
+    dispatch.version   = (unsigned int) 1;
+    dispatch.type      = (unsigned int) DESTROY;
+    dispatch.object    = (unsigned int) USER;
+    dispatch.body      = strdup("thedog\x03bigdog69\x03password1234@!\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -571,10 +637,10 @@ int destroy_user_no_password_test(struct client_state *state)
     
     struct dispatch dispatch;
     
-    dispatch.version = (unsigned int) 1;
-    dispatch.type = (unsigned int) DESTROY;
-    dispatch.object = (unsigned int) USER;
-    dispatch.body = strdup("thedog\x03bigdog69\x03");
+    dispatch.version   = (unsigned int) 1;
+    dispatch.type      = (unsigned int) DESTROY;
+    dispatch.object    = (unsigned int) USER;
+    dispatch.body      = strdup("thedog\x03bigdog69\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -591,10 +657,10 @@ int destroy_channel_test(struct client_state *state)
     
     struct dispatch dispatch;
     
-    dispatch.version = (unsigned int) 1;
-    dispatch.type = (unsigned int) DESTROY;
-    dispatch.object = (unsigned int) CHANNEL;
-    dispatch.body = strdup("the doghouse\x03");
+    dispatch.version   = (unsigned int) 1;
+    dispatch.type      = (unsigned int) DESTROY;
+    dispatch.object    = (unsigned int) CHANNEL;
+    dispatch.body      = strdup("the doghouse\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
@@ -610,13 +676,13 @@ int destroy_message_test(struct client_state *state)
     printf("\nDestroying message by user \"thedog\" in channel \"the doghouse\" with timestamp \"0000000064228f8a\".\n");
     
     struct dispatch dispatch;
-
-    dispatch.version = (unsigned int) 1;
-    dispatch.type = (unsigned int) DESTROY;
-    dispatch.object = (unsigned int) MESSAGE;
-    dispatch.body = strdup("thedog\x03the doghouse\x03""0000000064228f8a\x03");
+    
+    dispatch.version   = (unsigned int) 1;
+    dispatch.type      = (unsigned int) DESTROY;
+    dispatch.object    = (unsigned int) MESSAGE;
+    dispatch.body      = strdup("thedog\x03the doghouse\x03""0000000064228f8a\x03");
     dispatch.body_size = strlen(dispatch.body);
-
+    
     if (test_dispatch(state, &dispatch) == -1)
     {
         return -1;
@@ -631,10 +697,10 @@ int destroy_auth_test(struct client_state *state)
     
     struct dispatch dispatch;
     
-    dispatch.version = (unsigned int) 1;
-    dispatch.type = (unsigned int) DESTROY;
-    dispatch.object = (unsigned int) AUTH;
-    dispatch.body = strdup("thedog\x03");
+    dispatch.version   = (unsigned int) 1;
+    dispatch.type      = (unsigned int) DESTROY;
+    dispatch.object    = (unsigned int) AUTH;
+    dispatch.body      = strdup("thedog\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
