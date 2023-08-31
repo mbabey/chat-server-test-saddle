@@ -1,0 +1,2408 @@
+
+
+
+
+Internet Engineering Task Force                            M. Babey, Ed.
+Internet-Draft                  British Columbia Institute of Technology
+Intended status: Informational                             16 April 2023
+Expires: 18 October 2023
+
+
+                             Chat Protocol
+                             Chat Protocol
+
+Abstract
+
+   This document describes Chat Protocol (CHAT) version 1, a TCP/IP-
+   based application layer chat service protocol.  CHAT uses a
+   combination of binary headers and a text-based body of information in
+   its messages.  The simplicity of CHAT is it breaks down messages into
+   combinations of Actions and Objects.  Actions are CRUD (Create, Read,
+   Update, Destroy) operations.  Objects are one of Users, Channels,
+   Messages, or Authorizations.  With some exception, any Action can be
+   joined to any Object to make a valid message type.  CHAT also defines
+   methods to grant or remove privileges from Users.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on 18 October 2023.
+
+Copyright Notice
+
+   Copyright (c) 2023 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.  Code Components
+
+
+
+Babey                    Expires 18 October 2023                [Page 1]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+   extracted from this document must include Revised BSD License text as
+   described in Section 4.e of the Trust Legal Provisions and are
+   provided without warranty as described in the Revised BSD License.
+
+Table of Contents
+
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   3
+     1.1.  Requirements Language . . . . . . . . . . . . . . . . . .   3
+   2.  Request-Response Pattern  . . . . . . . . . . . . . . . . . .   3
+   3.  Establishing a Connection . . . . . . . . . . . . . . . . . .   4
+   4.  Network Dispatches  . . . . . . . . . . . . . . . . . . . . .   4
+     4.1.  Binary Header Fields  . . . . . . . . . . . . . . . . . .   5
+     4.2.  Text Data Body  . . . . . . . . . . . . . . . . . . . . .   6
+     4.3.  Complete Network Dispatch . . . . . . . . . . . . . . . .   7
+     4.4.  Pings . . . . . . . . . . . . . . . . . . . . . . . . . .   8
+   5.  Data Storage  . . . . . . . . . . . . . . . . . . . . . . . .   9
+   6.  Error Handling  . . . . . . . . . . . . . . . . . . . . . . .  11
+   7.  Dispatch Operations . . . . . . . . . . . . . . . . . . . . .  11
+     7.1.  Create: Object Creation . . . . . . . . . . . . . . . . .  11
+       7.1.1.  Create-User: Creating an Account  . . . . . . . . . .  11
+       7.1.2.  Create-Channel: Creating a Channel  . . . . . . . . .  13
+       7.1.3.  Create-Message: Sending a Message . . . . . . . . . .  14
+       7.1.4.  Create-Auth . . . . . . . . . . . . . . . . . . . . .  16
+     7.2.  Read: Retrieving Information About an Object  . . . . . .  17
+       7.2.1.  Read-User: Retrieving User Status . . . . . . . . . .  17
+       7.2.2.  Read-Channel: Retrieving Channel Status . . . . . . .  19
+       7.2.3.  Read-Message: Message History . . . . . . . . . . . .  20
+     7.3.  Update: Changing the State of an Object, or
+           Administration  . . . . . . . . . . . . . . . . . . . . .  21
+       7.3.1.  Update–User: Name Updates and Global Bans . . . . . .  22
+       7.3.2.  Update–Channel: Channel Joining, Channel Leaving, and
+               Channel Privileges including Channel Bans and
+               Kicking . . . . . . . . . . . . . . . . . . . . . . .  24
+       7.3.3.  Update–Message: Modifying a Message After it is
+               Created . . . . . . . . . . . . . . . . . . . . . . .  28
+       7.3.4.  Update–Auth: Changing a Password  . . . . . . . . . .  30
+     7.4.  Destroy: Deleting an Object . . . . . . . . . . . . . . .  31
+       7.4.1.  Destroy–User: Deleting a User Account . . . . . . . .  31
+       7.4.2.  Destroy–Channel: Deleting a Channel . . . . . . . . .  32
+       7.4.3.  Destroy–Message: Deleting a Message . . . . . . . . .  33
+       7.4.4.  Destroy–Auth: Logging Out . . . . . . . . . . . . . .  35
+     7.5.  Ping: Notifying about a State Change  . . . . . . . . . .  36
+   8.  References  . . . . . . . . . . . . . . . . . . . . . . . . .  36
+   Appendix A.  Binary Headers . . . . . . . . . . . . . . . . . . .  37
+   Appendix B.  Network Dispatch Tokens/Bodies . . . . . . . . . . .  38
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  43
+
+
+
+
+
+Babey                    Expires 18 October 2023                [Page 2]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+1.  Introduction
+
+   The protocol is an application layer protocol designed for Channel-
+   based communication over TCP/IP connections.  By implementing well-
+   known CRUD (Create, Read, Update, Delete) operations, it is designed
+   to be intuitively human-understandable.  Additionally, the protocol
+   makes use of a binary rigidly defined binary header followed by more
+   loosely defined text data to allow for the easy parsing of its data.
+
+   This protocol is based on the Client-Server paradigm.  The Client in
+   this sense refers to the User-facing Client Application; the
+   Application from which the User may send and receive messages and
+   utilize all other User-facing facets of the Client Application.  The
+   Server in this sense refers to the System Administrator-facing Server
+   Application; the Application from which the System Administrator may
+   manage connected Clients, existing Channels, and utilize all other
+   System Administrator-facing facets of the Server Application.
+
+   Moreover, because it is a Client-Server-based protocol, the protocol
+   is connection-based.  As such, all connections described by this
+   document refer to connections using TCP/IP sockets.
+
+   The protocol provides persistent data across sessions by requiring
+   the storage of certain information.  This information is also
+   necessary for managing the state of the Server.
+
+1.1.  Requirements Language
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in BCP
+   14 [RFC2119] [RFC8174] when, and only when, they appear in all
+   capitals, as shown here.
+
+2.  Request-Response Pattern
+
+   All communication under the protocol follows a Request-Response
+   pattern, regardless of whether the initial sender is a Client or a
+   Server.  For each Request there MUST be one and only on Response; a
+   Response is never to be sent without a Request first being received.
+
+                      Action  |           |
+                      Request |---------->|
+                              |           | Action
+                              |<----------| Response
+                      Action  |           |
+
+                     Figure 1: Request-Response Pattern
+
+
+
+Babey                    Expires 18 October 2023                [Page 3]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+   Action is any action taken preceding or upon receipt of a Request or
+   Response.  Examples include waiting for user input, parsing and
+   storing data, or managing implementation state.
+
+   The one exception to the Request-Response pattern is the notification
+   of object state change.  An object state change ping does not require
+   a response.
+
+                       Action  |           |
+                       Ping    |---------->|
+                               |           | Action
+
+                           Figure 2: Ping Pattern
+
+3.  Establishing a Connection
+
+   The Client initiates the connection with the Server.  The Client and
+   the Server MUST use a TCP/IP connection-based socket.  Once
+   established, all communication between a Client and a Server will
+   take place on this TCP/IP connection.  The connection between the
+   Client and the Server MUST not be broken until the Server receives a
+   Destroy–Auth Dispatch (see Section 4.  Network Dispatches,
+   Section 7.4.4 Destroy–Auth).
+
+4.  Network Dispatches
+
+   In this document, the term “Message” is used to refer to chat
+   messages sent between Users.  If also used to refer to messages sent
+   over the network, confusion would arise.  To help prevent confusion,
+   network messages in this protocol are referred to as “Network
+   Dispatches,” or simply “Dispatches” (singular: “Network Dispatch,”
+   “Dispatch”).
+
+   Each Dispatch MUST consist of a Binary Header followed by a Text Data
+   Body section.  The Binary Header and the Text Data Body MUST be sent
+   together The binary header fields are defined using ASN.1 notation,
+   and the text data Body section is defined using ABNF notation.
+
+   As will be detailed below, there is a subset of Dispatches referred
+   to as “Pings” that differ in definition from all other Dispatches.
+   For the purposes of this documentation, Pings are not Dispatches.
+   Pings are defined in section 4.4 Pings.
+
+
+
+
+
+
+
+
+
+Babey                    Expires 18 October 2023                [Page 4]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+4.1.  Binary Header Fields
+
+   The binary header of any Dispatch MUST have four fields each of a
+   specified number of bits.  The order in which the fields are
+   specified MUST be the order in which the fields be included in the
+   header.
+
+   The first field of the binary header of any Dispatch MUST be the
+   version number of the protocol and MUST be stored on 4 bits.
+
+                     Version ::= INTEGER(SIZE(4))
+
+   This document is the first and only definition of the protocol.
+   Consequently, the only valid version number is 1.
+
+             Version ::= INTEGER(SIZE(4)) WITH COMPONENT(1)
+
+   The second field of the binary header of any Dispatch MUST be the
+   Type field and MUST be stored on 4 bits.  The Type field specifies
+   what type of operation is being performed.
+
+                       Type ::= INTEGER(0x0 .. 0xf)
+
+   There are five valid values for the Type field.  The valid Types that
+   MUST be implemented are Create, Read, Update, Destroy, and Ping.
+   Collectively, the first four Types are known as CRUD operations.  The
+   Ping type, mentioned here, is defined in section 4.4 Pings.
+
+                   Type ::= INTEGER(0x0 .. 0xf) {
+                     CREATE (0x1),
+                     READ (0x2),
+                     UPDATE (0x3),
+                     DESTROY (0x4),
+                     PING PINGSubtype ::= INTEGER (0x8..0xf)
+                   }
+
+   The operations indicated by each non-Ping Type are as follows:
+
+   *  Create indicates the creation of an Object (see below),
+   *  Read indicates the retrieval of information about an Object,
+   *  Update indicates changing the state of an Object, and
+   *  Destroy indicates the destruction of an Object.
+
+   The third field of the binary header of any Dispatch MUST be the
+   Object field and MUST be stored on 8 bits.  The Object field
+   specifies on what Object a Type of operation is being performed.
+
+                    Object ::= INTEGER(0x00 .. 0xff)
+
+
+
+Babey                    Expires 18 October 2023                [Page 5]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+   There are four valid values for the Object field.  The four valid
+   Object values that MUST be implemented are User, Channel, Message,
+   and Auth (Authorization).
+
+                    Object ::= INTEGER(0x00 .. 0xff) {
+                      USER (0x01),
+                      CHANNEL (0x02),
+                      MESSAGE (0x03),
+                      AUTH (0x04)
+                    }
+
+   The Objects indicated by each value of Object are as follows:
+
+   *  User indicates a User Account,
+   *  Channel indicates a Chat Channel,
+   *  Message indicates a Message send over a Chat Channel, and
+   *  Auth indicates an Authorization granted to a Client when a User
+      logs in.
+
+   Types and Objects are combined to form complete Dispatch Operations,
+   defined in section 7.0 Dispatch Operations.
+
+   For both the Type field and the Object field, as long as it
+   implements the required Types and Objects, an implementation may
+   choose to implement additional types as it deems necessary.
+
+   The fourth field of the binary header of any Dispatch MUST be the
+   Size field and MUST be stored on 16 bits.  The Size field specifies
+   the size in octets (bytes) of the text data sent in the Body section
+   of the same Dispatch.
+
+                 Size ::= INTEGER(0x0000 .. 0xffff)
+
+4.2.  Text Data Body
+
+   The text data Body section contains the information in the Dispatch
+   necessary to perform the Dispatch Operation specified by the
+   Type–Object combination; in turn the Dispatch Operation defines the
+   content of the Body section.  The Body MUST be of a size in octets
+   (bytes) specified by the binary header Size.
+
+   The Body is built of tokens of information, each containing some
+   relevant information for the Dispatch Operation.  Any field that is
+   one or more characters (including spaces) in length is a token.
+
+                      VCHAR-and-SP = VCHAR | SP
+
+                        token = 1*VCHAR-and-SP
+
+
+
+Babey                    Expires 18 October 2023                [Page 6]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+   Tokens of data MUST be delimited by the ASCII End of Text character,
+   also known and herein represented as ETX (ASCII character 3, and
+   typed ‘\0x03’ or ‘\3’).  A token cannot contain the ETX character.
+
+                                ETX = %x03
+
+   A line is any token followed by an ETX character.
+
+                             line = token ETX
+
+   There are three types of Bodies: Request Bodies, Response Bodies, and
+   Ping Bodies
+
+                   body = req-body | res-body | ping-body
+
+   Response Bodies MUST be prefixed with a Response Status Code as
+   defined by RFC7231, Section 6 (https://www.rfc-editor.org/rfc/
+   rfc7231#section-6).  The Response Status Code, as specified in
+   RFC7231, “[gives] the result of the attempt to understand and satisfy
+   the request.”
+
+     code = Response Status Code, as defined by RFC7231, Section 6
+               ; (https://www.rfc-editor.org/rfc/rfc7231#section-6)
+               ; code is NOT a token
+
+   Because the Request Body and Response Body content depends on the
+   Dispatch Operation being performed, each Dispatch Operation
+   independently defines its own Request Body and Response Body content.
+
+                       req-body = line *(line)
+
+                       res-body = code ETX *(line)
+
+                           ping-body = line
+
+   Where the definition of a field matches the pattern of a token, a
+   line, and/or a req-body or res-body, that definition is a type of
+   token, line, and/or req-body or res-body; it may therefore take the
+   place of token, line, and/or req-body or res-body in the above
+   definitions.
+
+4.3.  Complete Network Dispatch
+
+   Combining the binary headers and the body together creates a
+   Dispatch.  The order of fields in a Dispatch MUST be the following:
+   Version, Type, Object, Body Size, then Body.
+
+
+
+
+
+Babey                    Expires 18 October 2023                [Page 7]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+   *  Read-only (0): the Client SHALL be able only to read messages in
+      the channel,
+   *  Read-write (1): the Client SHALL be able to read and write
+      messages in the channel, or
+   *  Channel Administrator (2): the Client SHALL be able to read and
+      write messages in the channel and SHALL be able to add and remove
+      other Clients from the channel.
+
+   The Channel Administrator MAY assign new Channel Privileges to
+   Clients in the channel of which they are the Channel Administrator.
+
+   A Client who creates a channel SHALL be assigned the Privilege Level
+   of Channel Administrator in that channel.
+
+   To add a new Client to their Private Channel, a Channel Administrator
+   MUST send the Server an ADD/CON message.  An ADD/CON message must
+   contain the following information:
+
+                   NetworkDispatch ::= SEQUENCE {
+                     version Version
+                     type Type
+                     object Object
+                     bodySize INTEGER(0x0000 .. 0xffff)
+                   body PrintableString (SIZE(bodySize))
+                   }
+
+4.4.  Pings
+
+   Pings are used to notify Clients when an Object’s state has been
+   changed on the Server.  Because of the likely frequency of their
+   dispersal, maintaining the smallest size possible is of utmost
+   importance.
+
+   Pings are differentiated from Dispatches by the Ping Type.  A Ping
+   MUST be indicated by a 1 in the highest-order bit of the Type field.
+   The next three bits indicate the Ping Subtype.  There are two Ping
+   Subtypes: User and Channel.  User Pings indicate that a User has been
+   updated; Channel Pings indicate that a Channel has been updated.
+
+                   NetworkDispatch ::= SEQUENCE {
+                     version Version
+                     type Type
+                     object Object
+                     bodySize INTEGER(0x0000 .. 0xffff)
+                   body PrintableString (SIZE(bodySize))
+                   }
+
+
+
+
+
+Babey                    Expires 18 October 2023                [Page 8]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+   A Ping contains only the Version, the Ping Subtype, and the Ping
+   Body.
+
+                   NetworkDispatch ::= SEQUENCE {
+                     version Version
+                     type Type
+                     object Object
+                     bodySize INTEGER(0x0000 .. 0xffff)
+                   body PrintableString (SIZE(bodySize))
+                   }
+
+   The Ping does not contain a body size, so its Body contents must be
+   parsed one byte at a time.  Fortunately, the Body is terminated with
+   an ETX character.
+
+   The Ping Body of a User Ping must include the Display Name of the
+   User that has been updated.  The Ping Body of the Channel Ping must
+   include the Channel Name of the Channel that has been updated.
+
+5.  Data Storage
+
+   In order to be persistent for Users, the Server MUST store User
+   Account Information, User Login Information, Channel Information, and
+   Message Information in a database.  User Login Information MUST be
+   stored separately from User Account Information.
+
+   Tables are indexed using unique IDs.
+
+   Table 1: Necessary Fields, Values, and Restrictions for storing User
+   Account Information
+
+   +=================+==========================+=====================+
+   | Field           | Value                    | Restrictions        |
+   +=================+==========================+=====================+
+   | UserID          | UUID/Integer             | Primary Key, Unique |
+   +-----------------+--------------------------+---------------------+
+   | Display Name    | String                   | Unique              |
+   +-----------------+--------------------------+---------------------+
+   | Socket Address  | IPv4 Address:Port Number | --                  |
+   +-----------------+--------------------------+---------------------+
+   | Online Status   | Boolean                  | --                  |
+   +-----------------+--------------------------+---------------------+
+   | Privilege Level | -1, 0, or 1              | --                  |
+   +-----------------+--------------------------+---------------------+
+
+                                 Table 1
+
+
+
+
+
+Babey                    Expires 18 October 2023                [Page 9]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+   Table 2: Necessary Fields, Values, and Restrictions for storing
+   Channel Information
+
+      +====================+=================+=====================+
+      | Field              | Value           | Restrictions        |
+      +====================+=================+=====================+
+      | UserID             | UUID/Integer    | Primary Key, Unique |
+      +--------------------+-----------------+---------------------+
+      | Channel Name       | String          | Unique              |
+      +--------------------+-----------------+---------------------+
+      | Creator            | String          | Foreign Key         |
+      +--------------------+-----------------+---------------------+
+      | User List          | List of Strings | --                  |
+      +--------------------+-----------------+---------------------+
+      | Administrator List | List of Strings | --                  |
+      +--------------------+-----------------+---------------------+
+      | Banned User List   | List of Strings | --                  |
+      +--------------------+-----------------+---------------------+
+      | Publicity          | Boolean         | --                  |
+      +--------------------+-----------------+---------------------+
+
+                                 Table 2
+
+   Table 3: Necessary Fields, Values, and Restrictions for storing
+   Message Information
+
+         +=================+==============+=====================+
+         | Field           | Value        | Restrictions        |
+         +=================+==============+=====================+
+         | MessageID       | UUID/Integer | Primary Key, Unique |
+         +-----------------+--------------+---------------------+
+         | UserID          | UUID/Integer | Foreign Key         |
+         +-----------------+--------------+---------------------+
+         | ChannelID       | UUID/Integer | Foreign Key         |
+         +-----------------+--------------+---------------------+
+         | Message Content | String       | --                  |
+         +-----------------+--------------+---------------------+
+         | Timestamp       | Integer      | --                  |
+         +-----------------+--------------+---------------------+
+
+                                 Table 3
+
+   Table 4: Necessary Fields, Values, and Restrictions for storing User
+   Login Information
+
+
+
+
+
+
+
+Babey                    Expires 18 October 2023               [Page 10]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+         +=============+==============+==========================+
+         | Field       | Value        | Restrictions             |
+         +=============+==============+==========================+
+         | UserID      | UUID/Integer | Primary Key, Foreign Key |
+         +-------------+--------------+--------------------------+
+         | Login Token | String       | Unique                   |
+         +-------------+--------------+--------------------------+
+         | Password    | String       | --                       |
+         +-------------+--------------+--------------------------+
+
+                                  Table 4
+
+6.  Error Handling
+
+   Error handling SHOULD, unless otherwise specified, be done by sending
+   a Response with the code “400” or “500”. A code “400” means the
+   Request was invalid; a code “500” means the Request was valid, but
+   something went wrong during Action.  An implementation MAY send an
+   error message in the Error Response to provide more information about
+   the error.
+
+                          error-message = token
+
+             error-res-body = code ETX [error-message ETX]
+
+7.  Dispatch Operations
+
+   Dispatch Operations are operations performed by the Client and the
+   Server upon receipt of a Dispatch containing a given Type–Object
+   pairing.  One Type–Object pairing corresponds with one Dispatch
+   Operation.
+
+7.1.  Create: Object Creation
+
+   The Create Type indicates the creation of an Object.  All Dispatches
+   defined in this section have the Type binary header field set to
+   Type(CREATE).
+
+7.1.1.  Create-User: Creating an Account
+
+   Create–User indicates the creation of a User Account.  A Create–User
+   Dispatch has the Object binary header field set to Object(USER).
+
+   A User will create their Account by selecting a Login Token, a
+   Display Name, and a Password.  Each User’s Login Token MUST be unique
+   and each User’s Display Name MUST be unique.  A User’s Login Token
+   and Display Name must consist of 1 to 20 characters; the specific
+   characters are implementation defined.
+
+
+
+Babey                    Expires 18 October 2023               [Page 11]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+                       name = 1*20VCHAR-and-SP
+
+                         login-token = name
+
+                         display-name = name
+
+   The Password must be at least 6 characters and at most 30 characters;
+   the specific characters are implementation defined.
+
+                     password = 6*30VCHAR-and-SP
+
+   To form the Create–User Request Body, the Login Token, Display Name,
+   and Password are delimited by an ETX character and added in sequence.
+
+   create-user-req-body = login-token ETX display-name ETX password ETX
+
+   Upon receipt of the Create–User Request, a Server MUST take Action to
+   validate the Login Token and Display Name values sent by the Client
+   to ensure their conformity to the restrictions laid out above.
+
+   If any of the fields in the Request are invalid, the Server must send
+   a standard “400” Error Response (see Section 6.  Error Handling).
+
+   If the Login Token and/or the Display Name are not unique, the Server
+   must send a Create–User Error Response.  A Create–User Error Response
+   sent due to non-unique Login Token or Display Name must contain code
+   “409” and specify which field(s) were not unique.  The field
+   specifier will contain:
+
+   *  A digit 1 if the Login Token was not unique,
+   *  A digit 2 if the Display Name was not unique, or
+   *  A digit 3 if the Login Token and Display name both were not
+      unique.
+
+   An implementation may choose to also send an error message after the
+   code and field specifier.
+
+   create-user-non-unique-error-res-body = “409” ETX field-specifier ETX
+                                           [error-message ETX]
+
+   If the Create–User Request is valid, the Server must generate a UUID
+   as the UserID.  The Server should create a User Account under this
+   UserID and store the Login Token and Display Name with all other
+   fields initialized to 0.  The Server should also store the Login
+   Token and Password associated with the same UserID in a User Login
+   table.
+
+
+
+
+
+Babey                    Expires 18 October 2023               [Page 12]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+   Once the Server successfully completes its Action, it MUST send a
+   Create–User Response Dispatch with a res-body holding a “201” code to
+   the Client.
+
+   An implementation of a Client MAY choose to send a Create–Auth
+   Request (see Section 7.1.4 Create–Auth) immediately following the
+   receipt of a Create–User Response.  In this way, the Client would
+   have the behaviour of logging in a User that has just created an
+   account.
+
+7.1.2.  Create-Channel: Creating a Channel
+
+   Create–Channel indicates the creation of a Channel.  A Create–Channel
+   Dispatch has the Object binary header field set to Object(CHANNEL).
+
+   A User may create a Channel by selecting a Channel Name and whether
+   the Channel is to be Public or not.  If the Channel is to be Private,
+   a Password must be specified as well.  A Channel Name MUST be between
+   1 and 20 characters and MUST be unique.
+
+                          channel-name = name
+                             ; name defined 7.1.1 Create–User
+
+   The Publicity of a Channel is represented as a “1” for Public, or “0”
+   for Private.  Public Channels are joinable by all, while Private
+   Channels are joinable only by invite.
+
+                           BOOLEAN = “1” | “0”
+
+                           publicity = BOOLEAN
+
+   The Create–Channel Request Body sent by the Client must include the
+   Channel Name, the User’s Display Name, and the Publicity of the
+   Channel.
+
+   create-channel-req-body = channel-name ETX display-name ETX publicity ETX
+                               ; display-name defined 7.1.1 Create–User
+
+   Upon receipt of the Create–Channel Dispatch, a Server MUST take
+   Action to validate the fields.
+
+   If any of the fields in the Request are invalid for any other reason,
+   the Server should send a standard “400” Error Response (see
+   Section 6.  Error Handling).
+
+
+
+
+
+
+
+Babey                    Expires 18 October 2023               [Page 13]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+   The Server must determine the Request Sender Name.  The Request
+   Sender Name is determinable by the Server retrieving the Name of the
+   User associated with the Socket Address from which the Request was
+   sent.
+
+   If the Request Sender is a Global Admin the Server must check if the
+   User referenced by Display Name exists.  If the User does exist, the
+   Server may proceed to creation.  If the User does not exist, the
+   Server must send an Error Response with the code “404” (see
+   Section 6.  Error Handling).
+
+   If the Request Sender is not a Global Admin, the Server must check if
+   the Request Sender Name matches the Display Name.  If the names match
+   the Server may proceed to create the Channel.  If the names do not
+   match the Server must send an Error Response with the code “403” (see
+   Section 6.  Error Handling).
+
+   The Server MUST ensure the Channel Name is unique.  If the Channel
+   Name is not found to be unique, the Server MUST send a Create-Channel
+   Error Response with the code set to “409” (see Section 6.  Error
+   Handling).
+
+   If the Create–Channel Request is valid, the Server must generate a
+   UUID as the ChannelID.  The Server should create a Channel under this
+   ChannelID.  The Channel Name should be saved as the Channel’s Name.
+   The Display name should be saved as the Channel Creator Name.  The
+   Display Name should be added to the list of Channel Users and Channel
+   Administrators.  All other fields should be initialized to 0.
+
+   Once the Server successfully completes its Action, it MUST send a
+   Create–Channel Response Dispatch with a res-body holding a “201” code
+   to the Client.
+
+7.1.3.  Create-Message: Sending a Message
+
+   Create–Message indicates the creation of a Message.  In other words,
+   Create–Message indicates a User has sent a new Message in a Channel.
+   Messages must be attached to a specific Channel; Messages sent from a
+   Client to a Server and must be distributed to the Clients of all
+   Users in the User List of that Channel.  A Create–Message Dispatch
+   has the Object binary header field set to Object(MESSAGE).
+
+   A User may create a Message by generating Message Content.
+
+                     message-content = *VCHAR-and-SP
+
+
+
+
+
+
+Babey                    Expires 18 October 2023               [Page 14]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+   At the time of sending the Create–Message Request, the Message will
+   be associated with a Timestamp, which is a 16 character hexadecimal
+   string.
+
+                         timestamp = 16HEXDIG
+
+   The Display Name of the User sending the Message, the Channel Name in
+   which the Message is being sent, the Message Content, and the
+   Timestamp shall be combined to form the Create–Message Request Body.
+
+     create-message-req-body = display-name ETX channel-name ETX
+                               message-content ETX timestamp ETX
+                           ; display-name defined 7.1.1 Create–User
+                           ; channel-name defined 7.1.2 Create–Channel
+
+   The Client will send the Create–Message Request to the Server.  If
+   any of the fields in the Request are invalid, the Server should send
+   a standard “400” Error Response (see Section 6.  Error Handling).
+
+   The Server must determine whether the Channel referenced by Channel
+   Name exists.  If the Channel does not exist, the Server must send an
+   Error Response with the code “404” (see Section 6.  Error Handling).
+
+   The Server must determine the Request Sender Name.  The Request
+   Sender Name is determinable by the Server retrieving the Name of the
+   User associated with the Socket Address from which the Request was
+   sent.
+
+   If the Request Sender is a Global Admin the Server must check if the
+   User referenced by Display Name exists.  If the User does exist, the
+   Server may proceed to creation.  If the User does not exist, the
+   Server must send an Error Response with the code “404” (see
+   Section 6.  Error Handling).
+
+   If the Request Sender is not a Global Admin, the Server must check if
+   the Request Sender Name matches the Display Name.  If the names match
+   the Server may proceed to create the Message.  If the names do not
+   match the Server must send an Error Response with the code “403” (see
+   Section 6.  Error Handling).
+
+   If the Create–Message Request is valid, the Server must generate a
+   UUID as the MessageID.  The Server should create a Message under this
+   MessageID.  The Display Name should be used to retrieve the UserID.
+   The Channel Name should be used to retrieve the ChannelID.  The
+   MessageID, UserID, and ChannelID should be stored with the Message
+   Content and Timestamp.
+
+
+
+
+
+Babey                    Expires 18 October 2023               [Page 15]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+   Once the Server successfully completes its Action, it MUST send a
+   Create–Message Response Dispatch with a res-body holding a “201” code
+   to the Client.  Then, it MUST forward the Create–Message Request
+   Dispatch to the Clients of all Users associated with the Channel in
+   which the Message was sent.
+
+   A Client, upon receipt of a Create–Message Request Dispatch, shall
+   display the information contained therein to the User.  Then, it
+   shall send the Server a Create–Message Response Dispatch with a res-
+   body holding a “200” code.
+
+       (Client1)   |           |  (Server)  |           | (Client2)
+           Request |---------->|            |           |
+                   |<----------|  Response  |           |
+                   |           |   Request  |---------->|
+                   |           |            |<----------| Response
+
+          Figure 3: Messaging: Direct Messaging Connection Success
+
+7.1.4.  Create-Auth
+
+   Create–Auth indicates that a User is attempting to log in to a User
+   Account.  A Create–Auth Dispatch has the Object binary header field
+   set to Object(AUTH).
+
+   To send a Create–Auth Request a User must enter a Login Token and a
+   Password.  The Login Token and Password shall be combined to form the
+   Create–Auth Request Body.
+
+     create-auth-req-body = login-token ETX password ETX
+                           ; login-token, password defined 7.1.1 Create–User
+
+   The Client will send the Create–Auth Request to the Server.  If any
+   of the fields in the Request are invalid, the Server should send a
+   standard “400” Error Response (see Section 6.  Error Handling).
+
+   The Server will take Action by comparing the Login Token–Password
+   combination in the Request with the Login Token–Password combinations
+   it stores.  If it does not find a match, the Server should send a
+   “403” Error Response (see Section 6.  Error Handling).
+
+   If the Server finds a matching Login Token–Password combination, it
+   must find the User associated with that Login Token.
+
+
+
+
+
+
+
+
+Babey                    Expires 18 October 2023               [Page 16]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+   If the Socket Address associated with the User is not zeroed or the
+   Online Status is not “0”, it is assumed that the User Account is
+   logged in on another Client.  The Server MUST log out the currently
+   connected User by taking the Log Out Action described in
+   Section 7.4.4: Destroy–Auth before logging in the newly connecting
+   User.
+
+   The Server must update that User’s Account information with the
+   Socket Address from which the Create–Auth Request was sent and set
+   the User’s Online Status to “1”.
+
+   Once finished its Action, the Server should send the Client a
+   Create–Auth Response, containing the User’s Display Name, their
+   Privilege Level, and a list of Channel Names of Channels to which
+   they are connected, and the code “200”. The Privilege Level MUST be
+   set to “1” if the User is a Global Admin, “0” if the User is a
+   regular User, and “-1” if the User is Globally Banned.
+
+                   privilege-level = “-1” | “0” | “1”
+
+                    channel-name-list-size = *DIGIT
+
+       channel-name-list = channel-name-list-size ETX
+                           <channel-name-list-size>(channel-name ETX)
+                             ; channel-name defined 7.1.2 Create–Channel
+
+   create-auth-res-body = “200” ETX display-name ETX privilege-level
+                           ETX channel-name-list
+                               ; display-name defined 7.1.1 Create–User
+
+   It is RECOMMENDED that the Server keeps a cached copy of active Users
+   in addition to the database copy of Users, to be added to when the
+   Server receives a Create–Auth Request.  This will help reduce
+   response time by reducing the number of database queries.
+
+7.2.  Read: Retrieving Information About an Object
+
+   Read indicates the retrieval of information about an Object.  All
+   Dispatches defined in this section have the Type binary header field
+   set to Type(READ).
+
+7.2.1.  Read-User: Retrieving User Status
+
+   Read–User indicates a request to retrieve a User’s information.  A
+   Read–User Dispatch has the Object binary header field set to
+   Object(USER).
+
+
+
+
+
+Babey                    Expires 18 October 2023               [Page 17]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+   To send a Read–User Request a User may enter a Display Name.  The
+   Display Name may form the Read–User Request Body.  If the User does
+   not provide a Display Name, the intent is to retrieve all online
+   Users.
+
+               read-user-req-body = [display-name ETX]
+                             ; display-name defined 7.1.1 Create–User
+
+   The Client will send the Read–User Request to the Server.  If any of
+   the fields in the Request are invalid, the Server should send a
+   standard “400” Error Response (see Section 6.  Error Handling).
+
+   If the Read–User Request Body is empty, the Server will take action
+   by creating a Read–User Response with code “200” containing a list of
+   all Users with Online Status “1”.
+
+                       name-list-size = *DIGIT
+
+       display-name-list = name-list-size ETX
+                           <user-list-size>(display-name ETX)
+                             ; A list of display-names
+
+                 online-user-list = display-name-list
+
+       read-user-all-users-res-body = “200” ETX online-user-list
+
+   If the Read–User Request Body is not empty, the Server will take
+   Action by finding the User associated with the Display Name.  If the
+   User cannot be found, the Server will send an Error Response with
+   code “404” (see Section 6.  Error Handling).
+
+   If the User is found, the Server will retrieve the User’s Privilege
+   Level and Online Status, which is an indicator of whether the User is
+   currently active.
+
+                       online-status = BOOLEAN
+                             ; BOOLEAN defined 7.1.2 Create–Channel
+
+   user-info = display-name ETX privilege-level ETX online-status ETX
+                             ; display-name defined 7.1.1 Create–User
+                             ; privilege-level defined 7.1.2 Create–Channel
+
+   The Server will create a Read-User Response with code “200” and Body
+   containing the User Information.
+
+               read-user-res-body = “200” ETX user-info
+
+
+
+
+
+Babey                    Expires 18 October 2023               [Page 18]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+   To complete its Action, the Server will send the Read-User Response
+   to the Client.
+
+7.2.2.  Read-Channel: Retrieving Channel Status
+
+   Read–Channel indicates a request to retrieve a Channel’s information.
+   A Read–Channel Dispatch has the Object binary header field set to
+   Object(CHANNEL).
+
+   To send a Read–Channel Request a User must specify a Channel Name and
+   whether to retrieve the list of Users in and/or Administrators of
+   and/or Banned Users from the Channel.  The Channel Name and the three
+   Get Flags will form the Read–Channel Request Body.  The Get Flags
+   MUST be in the order User, Admin, Banned.
+
+                       get-user-list = BOOLEAN
+                             ; BOOLEAN defined 7.1.2 Create–Channel
+
+                       get-admin-list = BOOLEAN
+
+                       get-banned-list = BOOLEAN
+
+   read-channel-req-body = channel-name ETX
+                         get-user-list ETX get-admin-list ETX get-banned-list ETX
+                             ; channel-name defined 7.1.2 Create–Channel
+
+   The Client will send the Read–Channel Request to the Server.  If any
+   of the fields in the Request are invalid, the Server should send a
+   standard “400” Error Response (see Section 6.  Error Handling).
+
+   The Server will take Action by finding the Channel associated with
+   the Channel Name.  If the Channel cannot be found, the Server will
+   send an Error Response with code “404” (see Section 6.  Error
+   Handling).
+
+   If the Channel is found, the Server will retrieve at least the
+   Channel Creator Name and the Publicity of the Channel.  If the
+   Read–Channel Request contains a request to get the list of Users in
+   the Channel, the Server shall retrieve the List of Users.  If the
+   Read–Channel Request contains a request to get the list of
+   Administrators of the Channel, the Server shall retrieve the List of
+   Administrators.  If the Read–Channel Request contains a request to
+   get the list of Banned Users from the Channel, the Server shall
+   retrieve the List of Banned Users.
+
+
+
+
+
+
+
+Babey                    Expires 18 October 2023               [Page 19]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+                       creator = display-name
+                           ; display-name defined 7.1.1 Create–User
+
+                     user-list = display-name-list
+                           ; display-name-list defined 7.2.1 Read–User
+
+                     admin-list = display-name-list
+
+                     banned-list = display-name-list
+
+   The Server will create a Read-Channel Response with code “200”. The
+   Body of the Response will contain at least the Channel Name, the
+   Channel Creator Name, and the Publicity of the Channel.  The Body
+   will also contain, as specified in the Read-Channel Request, List of
+   Users, List of Administrators, and List of Banned Users.  The Lists
+   MUST be in the same order as the Get Flags.
+
+     channel-info = channel-name ETX creator ETX publicity ETX
+                               [user-list]
+                               [admin-list]
+                               [banned-list]
+                 ; channel-name, publicity defined 7.1.2 Create–Channel
+
+   To complete its Action, the Server shall send the Read-Channel
+   Response to the Client.
+
+             read-channel-res-body = “200” ETX channel-info
+
+7.2.3.  Read-Message: Message History
+
+   Read–Message indicates a request to retrieve Message History in a
+   specified Channel.  A Read–Message Dispatch has the Object binary
+   header field set to Object(MESSAGE).
+
+   To send a Read–Message Request a User must specify a Channel Name and
+   a Number of Messages.  The Channel Name and Number of Messages will
+   be combined to form the Read–Message Request Body.
+
+                         num-messages = *DIGIT
+
+       read-message-req-body = channel-name ETX num-messages ETX
+                             ; channel-name defined 7.1.2 Create–Channel
+
+   The Client will send the Read–Message Request to the Server.  If any
+   of the fields in the Request are invalid, the Server should send a
+   standard “400” Error Response (see Section 6.  Error Handling).
+
+
+
+
+
+Babey                    Expires 18 October 2023               [Page 20]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+   The Server will take Action by finding the Channel associated with
+   the Channel Name.  If the Channel cannot be found, the Server will
+   send an Error Response with code “404” (see Section 6.  Error
+   Handling).
+
+   The Server will retrieve Messages associated with the Channel Name up
+   to the Number of Messages.  It will store the Display Name, Message
+   Content, and Timestamp of each Message.
+
+             message-list-size = %d0-<num-messages>
+
+   message-info = display-name ETX message-content ETX timestamp ETX
+               ; display-name defined 7.1.1 Create–User
+               ; message-content, timestamp defined 7.1.3 Create–Message
+
+       message-list = channel-name ETX message-list-size ETX
+                     <message-list-size>(message-info)
+
+   If the size of the Message List is less than the Number of Messages
+   in the Read-Message Request, the Server will create a Read-Message
+   Response with code “206”. Otherwise, the Server will create a Read-
+   Message Response with code “200”. The Body of the Response will
+   contain the Message List.
+
+         read-message-partial-res-body = “206” ETX message-list
+
+             read-message-res-body = “200” ETX message-list
+
+   To complete its Action, the Server will send the Response to the
+   Client.
+
+   A Client MUST send a Read–Message Request when it joins a Channel.
+   If an implementation does not remove Users with an Online Status of
+   “0” from a Channel’s List of Users, the implementation MUST provide a
+   way for the Client to send a Read–Message Request when a User’s
+   Online Status changes to “1”.
+
+7.3.  Update: Changing the State of an Object, or Administration
+
+   Update indicates changing the state of an Object.  All Dispatches
+   defined in this section have the Type binary header field set to
+   Type(UPDATE).
+
+
+
+
+
+
+
+
+
+Babey                    Expires 18 October 2023               [Page 21]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+7.3.1.  Update–User: Name Updates and Global Bans
+
+   Update–User indicates change of state of a User.  Change of State of
+   a User can be changing the User’s Display Name, changing the User’s
+   Privilege Level, or changing the User’s Online Status.  An
+   Update–User Dispatch has the Object binary header field set to
+   Object(USER).
+
+   To send an Update–User Request a User must specify the Display Name
+   of the User to Update.  The User must also specify the Update Signal
+   Fields; independently whether to update the stored Display Name, the
+   Privilege Level, and the Online Status.
+
+   If the Display Name Update Signal Field is “1”, the User must specify
+   the New Display Name.
+
+                         change-name = BOOLEAN
+                             ; BOOLEAN defined 7.1.2 Create–Channel
+
+                   new-display-name = display-name
+                             ; display-name defined 7.1.1 Create–User
+
+   If the Privilege Level Update Signal Field is “1”, the User must
+   specify the New Privilege Level.
+
+                   change-privilege-level = BOOLEAN
+
+                 new-privilege-level = privilege-level
+                           ; privilege-level defined 7.1.2 Create–Channel
+
+   If the Online Status Update Signal Field is “1”, the User must
+   specify the New Online Status.
+
+                   change-online-status = BOOLEAN
+
+                   new-online-status = online-status
+                             ; online-status defined 7.2.1 Read–User
+
+   The above fields will be combined to form the Update–User Request
+   Body.
+
+   update-user-req-body = display-name ETX
+                           change-name ETX [new-display-name ETX]
+                           change-privilege-level ETX [new-privilege-level ETX]
+                           change-online-status ETX [new-online-status ETX]
+
+   The Client will send the Update–User Request to the Server.  Upon
+   receipt of the Update–User Request, the Server will take Action.
+
+
+
+Babey                    Expires 18 October 2023               [Page 22]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+   If any of the fields in the Request are invalid, the Server should
+   send a standard “400” Error Response (see Section 6.  Error
+   Handling).
+
+   The Server must determine the Request Sender Name.  The Request
+   Sender Name is determinable by the Server retrieving the Name of the
+   User associated with the Socket Address from which the Request was
+   sent.
+
+   If the Request Sender is a Global Admin, the Server must take note of
+   this fact.  Then, the Server must check if the User referenced by
+   Display Name exists.  If the User does exist, the Server may proceed
+   to deletion.  If the User does not exist, the Server must send an
+   Error Response with the code “404” (see Section 6.  Error Handling).
+
+   If the Request Sender is not a Global Admin, the Server must check if
+   the Request Sender Name matches the Display Name.  If the names match
+   the Server may proceed to update the User.  If the names do not match
+   the Server must send an Error Response with the code “403” (see
+   Section 6.  Error Handling).
+
+   Next, the Server must act according to the set in the Update Signal
+   Fields in the Update–User Request.
+
+   If the Display Name Update Signal Field is “1”, the Server must check
+   if the New Display Name is unique.  If the New Display Name is
+   unique, the Server must replace the Display Name of the User
+   referenced by Display Name with the New Display Name.
+
+   If the Privilege Level Update Signal Field is “1”, the Server MUST
+   check that the User is a Global Admin.  If the User is a Global
+   Admin, the Server must replace the Privilege Level of the User
+   referenced by Display Name with the New Privilege Level.
+
+   If the Online Status Update Signal Field is “1”, the Server must
+   replace the Online Status of the User referenced by Display Name with
+   the New Online Status.
+
+   The Server MUST update all fields that have been indicated in the
+   Update Signal Fields before sending a response to the Client.  Once
+   the Server has updated the User referenced by Display Name
+   successfully, it must send the updated User Display Name, Privilege
+   Level, and Online Status to the Client with the code “200”.
+
+             update-user-res-body = “200” ETX user-info
+                             ; user-info defined 7.2.1 Read–User
+
+
+
+
+
+Babey                    Expires 18 October 2023               [Page 23]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+   A Client may compare the fields in the Update–User Response with the
+   state of its own knowledge of the User to determine to what degree
+   the update was successful.
+
+7.3.2.  Update–Channel: Channel Joining, Channel Leaving, and Channel
+        Privileges including Channel Bans and Kicking
+
+   An Update–Channel Dispatch has the Object binary header field set to
+   Object(CHANNEL).
+
+   To send an Update–Channel Request a User must specify the Channel
+   Name of the Channel to Update.  The User must also specify the Update
+   Signal Fields; independently whether to update the stored Channel
+   Name, the Publicity Status, and whether to add or remove Channel
+   Users, Channel Administrators, or Banned Users.
+
+   If the Channel Name Update Signal Field is “1”, the User must specify
+   the New Channel Name.
+
+                   new-channel-name = channel-name
+                           ; channel-name defined 7.1.2 Create–Channel
+
+   If the Publicity Update Signal Field is “1”, the User must specify
+   the New Publicity.
+
+                     change-publicity = BOOLEAN
+                             ; BOOLEAN defined 7.1.2 Create–Channel
+
+                     new-publicity = publicity
+                             ; publicity defined 7.1.2 Create–Channel
+
+   For each of updating the Channel Users, Channel Administrators, and
+   Banned Users, the User must specify an integer in the Update Signal
+   Field that is “0”, “1”, “2”, or “3”. “0” indicates that no change is
+   to be made. “1” indicates that Users are being added to a list. “2”
+   indicates that Users are being removed from a list. “3” indicates
+   that Users are both being added to and removed from a list.
+
+         alter-channel-list-signal = “0” | “1” | “2” | “3”
+
+   In this context, if an Update Signal Field is “3”, the User MUST
+   specify the Users to add before the Users to delete.
+
+   Each of the Channel Lists has its own Update Signal Field, specified
+   independently.
+
+
+
+
+
+
+Babey                    Expires 18 October 2023               [Page 24]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+               alter-users = alter-channel-list-signal
+
+               alter-admins = alter-channel-list-signal
+
+                 alter-bans = alter-channel-list-signal
+
+   The User must provide a list of Display Names to fill each field of
+   the Request Body it has indicated will be used by the List Update
+   Signal Fields.  For example, if a User specifies a “1” in the Channel
+   User List Update Field, the User must provide a list of Display Names
+   to populate that field.  Each list field must be filled
+   independently.
+
+                       users-to-add = user-list
+                             ; user-list defined 7.2.2 Read–Channel
+
+                     users-to-remove = user-list
+
+                       admins-to-add = user-list
+
+                     admins-to-remove = user-list
+
+                         bans-to-add = user-list
+
+                       bans-to-remove = user-list
+
+   The above fields will be combined to form the Update–Channel Request
+   Body.
+
+   update-channel-req-body = channel-name ETX
+                             change-name ETX [new-channel-name]
+                             change-publicity ETX [new-publicity]
+                             alter-users ETX [users-to-add] [users-to-remove]
+                             alter-admins ETX [admins-to-add] [admins-to-remove]
+                             alter-bans ETX [bans-to-add] [bans-to-remove]
+                               ; change-name defined 7.3.1 Update–User
+
+   The Client will send the Update–Channel Request to the Server.  Upon
+   receipt of the Update–Channel Request, the Server will take Action.
+
+   If any of the fields in the Request are invalid, the Server should
+   send a standard “400” Error Response (see Section 6.  Error
+   Handling).
+
+   The Server must determine whether the Channel referenced by Channel
+   Name exists.  If no Channel exists associated with the Channel Name,
+   then the Channel does not exist; the Server must send an Error
+   Response with code “404” (see Section 6.  Error Handling).
+
+
+
+Babey                    Expires 18 October 2023               [Page 25]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+   If the Channel exists, the Server must determine whether the User
+   referenced by the Request Sender Name has the privilege to update the
+   Channel.  The Request Sender Name is determinable by the Server
+   retrieving the Name of the User associated with the Socket Address
+   from which the Request was sent.
+
+   The User may update the Channel if they are a Global Admin, a Channel
+   Administrator of the Channel in which the Channel was sent.  A User
+   may also Update the Channel by adding themselves to or removing
+   themselves from the Channel’s List of Users.
+
+   If the Request Sender is a Global Administrator, then the Server must
+   check if the User referenced by Display Name exists.  If the User
+   does not exist the Server must send an Error Response with the code
+   “404” (see Section 6.  Error Handling).  Otherwise, the Server may
+   proceed to update the Channel.
+
+   If the Request Sender Name is in the List of Administrators of the
+   Channel, the User is a Channel Administrator, and the Server must
+   check if the User referenced by Display Name exists.  If the User
+   does not exist the Server must send an Error Response with the code
+   “404” (see Section 6.  Error Handling).  Otherwise, the Server may
+   proceed to update the Channel.
+
+   If there is only one Display Name in the Users to Add or Users to
+   Remove field, and the Request Sender Name matches this Display Name,
+   then the Server may proceed to update the Channel.  Otherwise, the
+   Server must send an Error Response with the code “403” (see
+   Section 6.  Error Handling).
+
+   The Server MUST take note of whether the User is a Global
+   Administrator or Channel Administrator.  If the User is neither and
+   they have passed the validation checks, they are the only User
+   referenced in the Users to Add or Users to Remove field.
+
+   Next, the Server must act according to the set in the Update Signal
+   Fields in the Update–Channel Request.
+
+   If the Channel Name Update Signal Field is “1” and the User is a type
+   of Administrator, the Server must replace the Channel Name of the
+   Channel referenced by Channel Name with the New Channel Name.
+
+   If the Publicity Update Signal Field is “1” and the User is a type of
+   Administrator, the Server must replace the Publicity of the Channel
+   referenced by Channel Name with the New Publicity.
+
+
+
+
+
+
+Babey                    Expires 18 October 2023               [Page 26]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+   If the Channel User Update Signal Field is a “1” or a “3” and the
+   User is a type of Administrator or the only User referenced in the
+   Users to Add or Users to Remove field, the Server must add to the
+   User List of the Channel referenced by Channel Name the Display Names
+   in the Users To Add List of the Request.  Then the Server MUST send a
+   Ping–Channel to all Users in the Users To Add List of the Request.
+
+   If the Channel User Update Signal Field is a “2” or a “3” and the
+   User is a type of Administrator or the only User referenced in the
+   Users to Add or Users to Remove field, the Server must remove from
+   the User List of the Channel referenced by Channel Name the Display
+   Names in the Users To Remove List of the Request.  Then the Server
+   MUST send a Ping–Channel to all Users in the Users To Remove List of
+   the Request.
+
+   If the Channel User Update Signal Field is a “1” or a “3” and the
+   User is a type of Administrator, the Server must add to the Channel
+   Administrator List of the Channel referenced by Channel Name the
+   Display Names in the Channel Administrators To Add List of the
+   Request.  Then the Server MUST send a Ping–Channel to all Users in
+   the Channel Administrators To Add List of the Request.
+
+   If the Channel User Update Signal Field is a “2” or a “3” and the
+   User is a type of Administrator, the Server must remove from the
+   Channel Administrator List of the Channel referenced by Channel Name
+   the Display Names in the Channel Administrators To Remove List of the
+   Request.  Then the Server MUST send a Ping–Channel to all Users in
+   the Channel Administrators To Remove List of the Request.
+
+   If the Channel User Update Signal Field is a “1” or a “3” and the
+   User is a type of Administrator, the Server must add to the Banned
+   User List of the Channel referenced by Channel Name the Display Names
+   in the Users To Ban List of the Request.  Then the Server MUST send a
+   Ping–Channel to all Users in the Banned Users To Add List of the
+   Request.
+
+   If the Channel User Update Signal Field is a “2” or a “3” and the
+   User is a type of Administrator, the Server must remove from the
+   Banned User List of the Channel referenced by Channel Name the
+   Display Names in the Users To Unban List of the Request.  Then the
+   Server MUST send a Ping–Channel to all Users in the Banned Users To
+   Add List of the Request.
+
+
+
+
+
+
+
+
+
+Babey                    Expires 18 October 2023               [Page 27]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+   The Server MUST update all fields that have been indicated in the
+   Update Signal Fields before sending a response to the Client.  Once
+   the Server has updated the Channel referenced by Channel Name
+   successfully, it must send an Update–Channel Response with at least
+   the updated Channel Name, Publicity, and the original Channel Creator
+   Name to the Client.  If the Channel User Lists were updated, the
+   updated lists must also be included in the Update–Channel Response.
+
+   The Update–Channel Response must be sent with the code “200”.
+
+           update-channel-res-body = “200” ETX channel-info
+                             ; channel-info defined 7.2.2 Read–Channel
+
+7.3.3.  Update–Message: Modifying a Message After it is Created
+
+   An Update–Message Dispatch has the Object binary header field set to
+   Object(MESSGE).
+
+   To send an Update–Message Request a User must specify the Display
+   Name of the User sending the Message, the Channel Name in which the
+   Message is being sent, the Timestamp of the Message, and the New
+   Message Content.
+
+                 new-message-content = message-content
+                         ; message-content defined 7.1.3 Create–Message
+
+   update-message-req-body = display-name ETX channel-name ETX
+                           timestamp ETX new-message-content ETX
+                             ; display-name defined 7.1.1 Create–User
+                             ; channel-name defined 7.1.2 Create–Channel
+                             ; timestamp defined 7.1.3 Create–Message
+
+   The Client will send the Update–Message Request to the Server.  Upon
+   receipt of the Update–Message Request, the Server will take Action.
+
+   If any of the fields in the Request are invalid, the Server should
+   send a standard “400” Error Response (see Section 6.  Error
+   Handling).
+
+   The Server must determine whether the Channel referenced by Channel
+   Name exists.  If no Channel exists associated with the Channel Name,
+   then the Channel does not exist; the Server must send an Error
+   Response with code “404” and the Field Specifier “1”.
+
+   update-message-no-channel-res-body = “404” ETX “1” ETX [error-message ETX]
+                               ; error-message defined 6. Error Handling
+
+
+
+
+
+Babey                    Expires 18 October 2023               [Page 28]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+   If the Channel exists, the Server must determine whether the User
+   referenced by the Request Sender Name has the privilege to update the
+   Message.  The Request Sender Name is determinable by the Server
+   retrieving the Name of the User associated with the Socket Address
+   from which the Request was sent.
+
+   The User may update the Message if they are a Global Admin, a Channel
+   Administrator of the Channel in which the Message was sent, or the
+   Message Creator.
+
+   If the Request Sender is a Global Administrator, then the Server must
+   check if the User referenced by Display Name exists.  If the User
+   does exist, the Server must check if the Message referenced by
+   Timestamp exists in the Channel referenced by Channel name.  If the
+   User does not exist the Server must send an Error Response with the
+   code “404” and the Field Specifier “2”; if the Message does not
+   exist, the Server must send an Error Response with the code “404” and
+   the field specifier “3”. Otherwise, the Server may proceed to update
+   the Message.
+
+   update-message-no-user-res-body = “404” ETX “2” ETX [error-message ETX]
+
+   update-message-no-message-res-body = “404” ETX “3” ETX [error-message ETX]
+
+   If the Request Sender Name is in the List of Administrators of the
+   Channel, the User is a Channel Administrator, the Server must check
+   if the User referenced by Display Name exists.  If the User does
+   exist, the Server must check if the Message referenced by Timestamp
+   exists in the Channel referenced by Channel name.  Similar to above,
+   if the User does not exist the Server must send an Error Response
+   with the code “404” and the Field Specifier “2”; if the Message does
+   not exist, the Server must send an Error Response with the code “404”
+   and the field specifier “3”. Otherwise, the Server may proceed to
+   update the Message.
+
+   If the Request Sender Name does not match the Display Name in the
+   Request, the Server must send an Error Response with the code “403”
+   (see Section 6.  Error Handling).  Otherwise, if the names match, the
+   Server must check if the Message referenced by Timestamp exists in
+   the Channel referenced by Channel name.  If the Message does not
+   exist, the Server must send an Error Response with the code “404”.
+   Otherwise, the Server may proceed to update the Message.
+
+   If the User is able and allowed to update the Message, the Server
+   must replace the Message Content in the Message in the Channel
+   referenced by Timestamp with the New Message Content in the Request.
+
+
+
+
+
+Babey                    Expires 18 October 2023               [Page 29]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+   Once successfully updated, the Server must send an Update–Message
+   Response containing the Display Name of the Message Creator, the
+   Channel Name in which the Message was created, the New Message
+   Content, and the Timestamp of the Message.  The Message
+   Update–Message Response must have the code “200”.
+
+         update-message-res-body = “200” ETX message-info
+                             ; message-info defined 7.2.3 Read–Message
+
+7.3.4.  Update–Auth: Changing a Password
+
+   An Update–Auth Dispatch has the Object binary header field set to
+   Object(AUTH).
+
+   To send an Update–Auth Request a User must specify the Display Name
+   of the User to update and the New Password.
+
+                       new-password = password
+                             ; password defined 7.1.1 Create–User
+
+   If the User is not a Global Administrator, the Request must be
+   rejected by the Server unless the Password of the User referenced by
+   Display Name is provided.
+
+    update-auth-req-body = display-name ETX [password ETX] new-password ETX
+                             ; display-name defined 7.1.1 Create–User
+
+   The Client will send the Update–Auth Request to the Server.  Upon
+   receipt of the Update–Auth Request, the Server will take Action.
+
+   If any of the fields in the Request are invalid, the Server should
+   send a standard “400” Error Response.
+
+   The Server must determine the Request Sender Name.  The Request
+   Sender Name is determinable by the Server retrieving the Name of the
+   User associated with the Socket Address from which the Request was
+   sent.
+
+   If the Request Sender is a Global Admin, the Server must take note of
+   this fact.  Then, the Server must check if the User referenced by
+   Display Name exists.  If the User does exist, the Server may proceed
+   to deletion.  If the User does not exist, the Server must send an
+   Error Response with the code “404” (see Section 6.  Error Handling).
+
+
+
+
+
+
+
+
+Babey                    Expires 18 October 2023               [Page 30]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+   If the Request Sender is not a Global Admin, the Server must check if
+   the Request Sender Name matches the Display Name.  If the names match
+   the Server may proceed to update the User.  If the names do not match
+   the Server must send an Error Response with the code “403” (see
+   Section 6.  Error Handling).
+
+   If the User has the ability to update the Password, then the Server
+   must replace the Password of the User referenced by Display Name with
+   the New Password in the Request.
+
+   Once successfully updated, the Server must send an Update–Auth
+   Response to the Client.  The Response must contain the User’s Display
+   Name, the Privilege Level, the Online Status, and the code “200”.
+
+             update-auth-res-body = “200” ETX user-info
+                             ; user-info defined 7.2.1 Read–User
+
+7.4.  Destroy: Deleting an Object
+
+   Destroy indicates the destruction of an Object.  All Dispatches
+   defined in this section have the Type binary header field set to
+   Type(DESTROY).
+
+7.4.1.  Destroy–User: Deleting a User Account
+
+   Destroy–User indicates a request to delete a User Account.  A
+   Destroy–User Dispatch has the Object binary header field set to
+   Object(USER).
+
+   User Accounts MUST only be deletable by the User that owns the User
+   Account or by a Global Administrator.
+
+   To send a Destroy–User Request a User must specify the Display Name
+   and the Login Token of the User that is being deleted.  If the Sender
+   is not a Global Administrator, the Password must also be provided.
+   These fields comprise the Destroy–User Request Body.
+
+    destroy-user-req-body = display-name ETX login-token ETX [password ETX]
+         ; display-name, login-token, password defined 7.1.1 Create–User
+
+   The Client will send the Destroy–User Request to the Server.  Upon
+   receipt of the Destroy–User Request, the Server will take Action.
+
+   If any of the fields in the Request are invalid, the Server should
+   send a standard “400” Error Response (see Section 6.  Error
+   Handling).
+
+
+
+
+
+Babey                    Expires 18 October 2023               [Page 31]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+   The Server must determine the Request Sender Name.  The Request
+   Sender Name is determinable by the Server retrieving the Name of the
+   User associated with the Socket Address from which the Request was
+   sent.
+
+   If the Request Sender is a Global Admin, the Server must check if the
+   User referenced by Display Name exists.  If the User does exist, the
+   Server may proceed to deletion without checking the Password.  If the
+   User does not exist, the Server must send an Error Response with the
+   code “404” (see Section 6.  Error Handling).
+
+   If the Request Sender is not a Global Admin, the Server must check if
+   the Request Sender Name matches the Display Name.  If the names
+   match, the Server must check the Password sent in the Request.  If
+   the Password is the same as the Password of the User being deleted,
+   the Server may proceed to deletion.  If the names do not match or the
+   Password is not the same as the Password of the User being deleted,
+   the Server should send an Error Response with the code “403” (see
+   Section 6.  Error Handling).
+
+   The Server should delete the User Account Information and send a
+   Delete–User Response with code “204”. If the Request Sender Name
+   matches the Display Name, the Server must also close the connection
+   with the Client from which the Request was sent.
+
+7.4.2.  Destroy–Channel: Deleting a Channel
+
+   Destroy–Channel indicates a request to delete a Channel.  A
+   Destroy–Channel Dispatch has the Object binary header field set to
+   Object(CHANNEL).
+
+   A Channel MUST only be deletable by the User that is the Channel
+   Creator or by a Global Administrator.
+
+   To send a Destroy–Channel Request a User must specify the Channel
+   Name of the Channel they wish deleted.  This field comprises the
+   Destroy–Channel Request Body.
+
+           destroy-channel-req-body = channel-name ETX
+                           ; channel-name defined 7.1.2 Create–Channel
+
+   The Client will send the Destroy–Channel Request to the Server.  Upon
+   receipt of the Destroy–Channel Request, the Server will take Action.
+
+   If any of the fields in the Request are invalid, the Server should
+   send a standard “400” Error Response (see Section 6.  Error
+   Handling).
+
+
+
+
+Babey                    Expires 18 October 2023               [Page 32]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+   First the Server must determine whether the Channel referenced by
+   Channel Name exists.  If no Channel exists associated with the
+   Channel Name, then the Channel does not exist; the Server must send
+   an Error Response with code “404” (see Section 6.  Error Handling).
+
+   If the Channel exists, the Server must determine whether the User
+   referenced by the Request Sender Name has the privilege to delete the
+   Channel.  The Request Sender Name is determinable by the Server
+   retrieving the Name of the User associated with the Socket Address
+   from which the Request was sent.  If the User is a Global
+   Administrator or a Channel Administrator then the User must be
+   allowed to delete the Channel.  If the Request Sender Name is in the
+   List of Administrators of the Channel, the User is a Channel
+   Administrator.
+
+   If the User referenced by Request Sender Name is not a Global
+   Administrator or a Channel Administrator in the relevant Channel the
+   Server must send an Error Response with the code “403” (see
+   Section 6.  Error Handling).
+
+   If successfully deleted, send a Delete–Channel Response with code
+   “204”.
+
+7.4.3.  Destroy–Message: Deleting a Message
+
+   Destroy–Message indicates a request to delete a Message.  A
+   Destroy–Message Dispatch has the Object binary header field set to
+   Object(MESSAGE).
+
+   A Message MUST at least be deletable by the User that created the
+   Message, the User that is an Administrator of the Channel in which
+   the Message exists, or by a Global Administrator.  An implementation
+   MAY allow for other entities to delete a Message.
+
+   To send a Destroy–Message Request a User must specify the Display
+   Name of the User that sent the Message, the Channel Name in which the
+   Message was sent, and the Timestamp of the Message.  These fields
+   comprise the Destroy–Message Request Body.
+
+   destroy-message-req-body = display-name ETX channel-name ETX timestamp ETX
+                             ; display-name defined 7.1.1 Create–User
+                             ; channel-name defined 7.1.2 Create–Channel
+                             ; timestamp defined 7.1.3 Create–Message
+
+   The Client will send the Destroy–Message Request to the Server.  Upon
+   receipt of the Destroy–Message Request, the Server will take Action.
+
+
+
+
+
+Babey                    Expires 18 October 2023               [Page 33]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+   If any of the fields in the Request are invalid, the Server should
+   send a standard “400” Error Response.
+
+   The Server must determine whether the Channel referenced by Channel
+   Name exists.  If no Channel exists associated with the Channel Name,
+   then the Channel does not exist; the Server must send an Error
+   Response with code “404”. The Error Response MUST also contain a
+   Field Specifier with the digit “1”. An implementation MAY send an
+   Error Message following the Field Specifier.
+
+   destroy-message-no-channel-res-body = “404” ETX “1” ETX [error-message ETX]
+                               ; error-message defined 6. Error Handling
+
+   If the Channel exists, the Server must determine whether the User
+   referenced by the Request Sender Name has the privilege to delete the
+   Message.  If the User is a Global Administrator, the Channel
+   Administrator, or the Message creator, then the User must be allowed
+   to delete the Message.
+
+   The Request Sender Name is determinable by the Server retrieving the
+   Name of the User associated with the Socket Address from which the
+   Request was sent.
+
+   If the Request Sender Name is in the List of Administrators of the
+   Channel, the User is a Channel Administrator.  If the Request Sender
+   Name matches the DIsplay Name, it can be assumed the User is the
+   Message creator.
+
+   If the User referenced by the Request Sender Name is not a Global
+   Administrator, a Channel Administrator in the relevant Channel, or
+   the Message creator, the Server must send an Error Response with the
+   code “403” (see Section 6.  Error Handling).
+
+   If the User referenced by Display Name does not exist, the Server
+   must send an Error Response with the code “404”. The Error Response
+   MUST also contain a Field Specifier with the digit “2”. An
+   implementation MAY send an Error Message following the Field
+   Specifier.
+
+   destroy-message-no-user-res-body = “404” ETX “2” ETX [error-message ETX]
+
+   If no Message exists within the Channel created by the User
+   referenced by Display Name with Timestamp, the Server must send an
+   Error Response with the code “404”. The Error Response MUST also
+   contain a Field Specifier with the digit “3”. An implementation MAY
+   send an Error Message following the Field Specifier.
+
+   destroy-message-no-message-res-body = “404” ETX “3” ETX [error-message ETX]
+
+
+
+Babey                    Expires 18 October 2023               [Page 34]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+   If the Server has made it this far, it must delete the Message.  If
+   successfully deleted, send a Delete–Message Response with code “204”.
+
+7.4.4.  Destroy–Auth: Logging Out
+
+   Destroy–Auth indicates that a User is logging out of their User
+   Account.  A Destroy–Auth Dispatch has the Object binary header field
+   set to Object(AUTH).
+
+   A Destroy-Auth Dispatch MUST NOT delete a User’s Login Information;
+   it must simply close the connection between the Client and the Server
+   and set the User’s Online Status to “0” (false, or offline).
+
+   A User MUST be able to be logged out only by themselves or by a
+   Global Administrator.
+
+   To send a Destroy–Auth Request a User must specify their Display
+   Name.  The Display Name comprises the Destroy–Auth Request Body.
+
+               destroy-auth-req-body = display-name ETX
+                             ; display-name defined 7.1.1 Create–User
+
+   The Client will send the Destroy–Auth Request to the Server.  Upon
+   receipt of the Destroy–Auth Request, the Server will take Action.
+
+   If any of the fields in the Request are invalid, the Server should
+   send a standard “400” Error Response (see Section 6.  Error
+   Handling).
+
+   First, the Server MUST determine if the User of the Client that sent
+   the Request is a Global Administrator.  If the User is not a Global
+   Administrator, the Server MUST check the Socket Address–Display Name
+   pair associated with the Request against the Socket Address–Display
+   Name pair it stores; if the Socket Addresses are the same in both
+   pairs, the Server can conclude that the User is requesting to log
+   themselves out.  If the User of the Client that sent the Request
+   fails both of these tests, the Server must send a standard “403”
+   Error Response (see Section 6.  Error Handling).
+
+   First, the Server MUST determine if the User of the Client that sent
+   the Request is a Global Administrator.  If the User is not a Global
+   Administrator, the Server MUST check the Socket Address–Display Name
+   pair associated with the Request against the Socket Address–Display
+   Name pair it stores; if the Socket Addresses are the same in both
+   pairs, the Server can conclude that the User is requesting to log
+   themselves out.  If the User of the Client that sent the Request
+   fails both of these tests, the Server must send a standard “403”
+   Error Response (see Section 6.  Error Handling).
+
+
+
+Babey                    Expires 18 October 2023               [Page 35]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+   To take the Log Out Action, the Server shall then set the User’s
+   Online Status to “0” then terminate the User’s connection.  The
+   Server MUST zero the Socket Address associated with the disconnecting
+   User.  If the Server is using an Active User Cache, the Server MUST
+   remove the disconnected User from the Active User Cache after
+   terminating the connection.
+
+   The Server MUST send a Destroy–Auth Response with code “200” before
+   it closes the connection.
+
+   An implementation MAY choose to remove a User from all Channels when
+   that User Logs Out; alternatively, it may choose to keep logged out
+   Users in Channels.
+
+7.5.  Ping: Notifying about a State Change
+
+   The Server, upon updating any Object, MUST send a Ping to notify
+   Clients that the Object has been updated.
+
+   A User has been updated if the Server receives an Update–User
+   Request, successfully updates the User, and sends an Update–User
+   Response.  After the Update–User Response has been sent, the Server
+   MUST broadcast a Ping with Subtype User to all Clients.  The body of
+   the ping must be the Display Name of the User that was updated.
+
+             user-changed-ping-body = display-name ETX
+                             ; display-name defined 7.1.1 Create–User
+
+   Similarly, a Channel has been updated if the Server receives an
+   Update–Channel Request, successfully updates the User, and sends an
+   Update–Channel Response.  After the Update–Channel Response has been
+   sent, the Server MUST broadcast a Ping with Subtype User to all
+   Clients.  The body of the ping must be the Channel Name of the
+   Channel that was updated.
+
+           channel-changed-ping-body = channel-name ETX
+                             ; channel-name defined 7.1.2 Create–Channel
+
+   When a Client receives a Ping, it does not need to reply to the Ping.
+   It MUST create an appropriate Read Request.  If the Client receives a
+   Ping with Subtype User, it must send a Read–User Request with the
+   body containing the Display Name contained in the Ping (see
+   Section 7.2.1 Read–User).  If the Client receives a Ping with Subtype
+   Channel, it must send a Read–Channel Request with the body containing
+   the Channel Name contained in the Ping (see Section 7.2.2
+   Read–Channel).
+
+8.  References
+
+
+
+Babey                    Expires 18 October 2023               [Page 36]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/info/rfc8174>.
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/info/rfc2119>.
+
+Appendix A.  Binary Headers
+
+   Version ::= INTEGER(SIZE(4)) (WITH COMPONENT 0) // Version number: 0
+
+   Type ::= INTEGER(0x0 .. 0xf) {
+           CREATE (0x1),
+           READ (0x2),
+           UPDATE (0x3),
+           DESTROY (0x4),
+           PING PINGSubtype ::= INTEGER (0x8..0xf)
+   }
+
+   Object ::= INTEGER(0x00 .. 0xff) {
+           USER (0x01),
+           CHANNEL (0x02),
+           MESSAGE (0x03),
+           AUTH (0x04)
+   }
+
+   NetworkDispatch ::= SEQUENCE {
+           version Version // 4 bits
+           type Type // 4 bits
+           object Object // 8 bits
+           bodySize INTEGER(0x0000 .. 0xffff) // 16 bits
+   body PrintableString (SIZE(bodySize)) // ‘body’ as defined by Network Dispatch Bodies
+   }
+
+   PINGSubtype ::= INTEGER (0x8..0xf) {
+           PINGUSER (0x9),
+           PINGCHANNEL (0xa)
+   }
+
+   Ping ::= SEQUENCE {
+           version Version,
+           type Type(PINGSubtype),
+           body PrintableString
+   }
+
+
+
+
+
+Babey                    Expires 18 October 2023               [Page 37]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+Appendix B.  Network Dispatch Tokens/Bodies
+
+                      VCHAR-and-SP = VCHAR | SP
+
+                        token = 1*VCHAR-and-SP
+
+                                ETX = %x03
+
+                             line = token ETX
+
+                   body = req-body | res-body | ping-body
+
+   code = Response Status Code, as defined by RFC7231, Section 6
+               ; (https://www.rfc-editor.org/rfc/rfc7231#section-6)
+               ; code is NOT a token
+
+                       req-body = line *(line)
+
+                       res-body = code ETX *(line)
+
+                           ping-body = line
+
+                          error-message = token
+
+             error-res-body = code ETX [error-message ETX]
+
+                       name = 1*20VCHAR-and-SP
+
+                         login-token = name
+
+                         display-name = name
+
+                     password = 6*30VCHAR-and-SP
+
+   create-user-req-body = login-token ETX display-name ETX password ETX
+
+   create-user-non-unique-error-res-body = “409” ETX field-specifier ETX
+                                           [error-message ETX]
+
+                          channel-name = name
+                             ; name defined 7.1.1 Create–User
+
+                           BOOLEAN = “1” | “0”
+
+                           publicity = BOOLEAN
+
+   create-channel-req-body = channel-name ETX display-name ETX publicity ETX
+                               ; display-name defined 7.1.1 Create–User
+
+
+
+Babey                    Expires 18 October 2023               [Page 38]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+                     message-content = *VCHAR-and-SP
+
+                         timestamp = 16HEXDIG
+
+     create-message-req-body = display-name ETX channel-name ETX
+                               message-content ETX timestamp ETX
+                           ; display-name defined 7.1.1 Create–User
+                           ; channel-name defined 7.1.2 Create–Channel
+
+     create-auth-req-body = login-token ETX password ETX
+                           ; login-token, password defined 7.1.1 Create–User
+
+
+                   privilege-level = “-1” | “0” | “1”
+
+                    channel-name-list-size = *DIGIT
+
+       channel-name-list = channel-name-list-size ETX
+                           <channel-name-list-size>(channel-name ETX)
+                             ; channel-name defined 7.1.2 Create–Channel
+
+   create-auth-res-body = “200” ETX display-name ETX privilege-level
+                           ETX channel-name-list
+                               ; display-name defined 7.1.1 Create–User
+
+               read-user-req-body = [display-name ETX]
+                             ; display-name defined 7.1.1 Create–User
+
+                       name-list-size = *DIGIT
+
+       display-name-list = name-list-size ETX
+                           <user-list-size>(display-name ETX)
+                             ; A list of display-names
+
+                 online-user-list = display-name-list
+
+       read-user-all-users-res-body = “200” ETX online-user-list
+
+                       online-status = BOOLEAN
+                             ; BOOLEAN defined 7.1.2 Create–Channel
+
+   user-info = display-name ETX privilege-level ETX online-status ETX
+                             ; display-name defined 7.1.1 Create–User
+                             ; privilege-level defined 7.1.2 Create–Channel
+
+               read-user-res-body = “200” ETX user-info
+
+                       get-user-list = BOOLEAN
+
+
+
+Babey                    Expires 18 October 2023               [Page 39]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+                             ; BOOLEAN defined 7.1.2 Create–Channel
+
+                       get-admin-list = BOOLEAN
+
+                       get-banned-list = BOOLEAN
+
+   read-channel-req-body = channel-name ETX
+                         get-user-list ETX get-admin-list ETX get-banned-list ETX
+                             ; channel-name defined 7.1.2 Create–Channel
+
+                       creator = display-name
+                           ; display-name defined 7.1.1 Create–User
+
+                     user-list = display-name-list
+                           ; display-name-list defined 7.2.1 Read–User
+
+                     admin-list = display-name-list
+
+                     banned-list = display-name-list
+
+     channel-info = channel-name ETX creator ETX publicity ETX
+                               [user-list]
+                               [admin-list]
+                               [banned-list]
+                             ; channel-name, publicity defined 7.1.2 Create–Channel
+
+             read-channel-res-body = “200” ETX channel-info
+
+                         num-messages = *DIGIT
+
+       read-message-req-body = channel-name ETX num-messages ETX
+                             ; channel-name defined 7.1.2 Create–Channel
+
+             message-list-size = %d0-<num-messages>
+
+   message-info = display-name ETX message-content ETX timestamp ETX
+                       ; display-name defined 7.1.1 Create–User
+                       ; message-content, timestamp defined 7.1.3 Create–Message
+
+       message-list = channel-name ETX message-list-size ETX
+                     <message-list-size>(message-info)
+
+         read-message-partial-res-body = “206” ETX message-list
+
+             read-message-res-body = “200” ETX message-list
+
+                         change-name = BOOLEAN
+                             ; BOOLEAN defined 7.1.2 Create–Channel
+
+
+
+Babey                    Expires 18 October 2023               [Page 40]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+                   new-display-name = display-name
+                             ; display-name defined 7.1.1 Create–User
+
+                   change-privilege-level = BOOLEAN
+
+                 new-privilege-level = privilege-level
+                             ; privilege-level defined 7.1.2 Create–Channel
+
+                   change-online-status = BOOLEAN
+
+                   new-online-status = online-status
+                             ; online-status defined 7.2.1 Read–User
+
+   update-user-req-body = display-name ETX
+                           change-name ETX [new-display-name ETX]
+                           change-privilege-level ETX [new-privilege-level ETX]
+                           change-online-status ETX [new-online-status ETX]
+
+             update-user-res-body = “200” ETX user-info
+                             ; user-info defined 7.2.1 Read–User
+
+                   new-channel-name = channel-name
+                           ; channel-name defined 7.1.2 Create–Channel
+
+                     change-publicity = BOOLEAN
+                             ; BOOLEAN defined 7.1.2 Create–Channel
+
+                     new-publicity = publicity
+                             ; publicity defined 7.1.2 Create–Channel
+
+         alter-channel-list-signal = “0” | “1” | “2” | “3”
+
+               alter-users = alter-channel-list-signal
+
+               alter-admins = alter-channel-list-signal
+
+                 alter-bans = alter-channel-list-signal
+
+                       users-to-add = user-list
+                             ; user-list defined 7.2.2 Read–Channel
+
+                     users-to-remove = user-list
+
+                       admins-to-add = user-list
+
+                     admins-to-remove = user-list
+
+                         bans-to-add = user-list
+
+
+
+Babey                    Expires 18 October 2023               [Page 41]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+                       bans-to-remove = user-list
+
+   update-channel-req-body = channel-name ETX
+                             change-name ETX [new-channel-name]
+                             change-publicity ETX [new-publicity]
+                             alter-users ETX [users-to-add] [users-to-remove]
+                             alter-admins ETX [admins-to-add] [admins-to-remove]
+                             alter-bans ETX [bans-to-add] [bans-to-remove]
+                               ; change-name defined 7.3.1 Update–User
+
+           update-channel-res-body = “200” ETX channel-info
+                             ; channel-info defined 7.2.2 Read–Channel
+
+                 new-message-content = message-content
+                             ; message-content defined 7.1.3 Create–Message
+
+   update-message-req-body = display-name ETX channel-name ETX
+                           timestamp ETX new-message-content ETX
+                             ; display-name defined 7.1.1 Create–User
+                             ; channel-name defined 7.1.2 Create–Channel
+                             ; timestamp defined 7.1.3 Create–Message
+
+   update-message-no-channel-res-body = “404” ETX “1” ETX [error-message ETX]
+                                ; error-message defined 6. Error Handling
+
+   update-message-no-user-res-body = “404” ETX “2” ETX [error-message ETX]
+
+   update-message-no-message-res-body = “404” ETX “3” ETX [error-message ETX]
+
+         update-message-res-body = “200” ETX message-info
+                             ; message-info defined 7.2.3 Read–Message
+
+                       new-password = password
+                             ; password defined 7.1.1 Create–User
+
+    update-auth-req-body = display-name ETX [password ETX] new-password ETX
+                                ; display-name defined 7.1.1 Create–User
+
+             update-auth-res-body = “200” ETX user-info
+                             ; user-info defined 7.2.1 Read–User
+
+    destroy-user-req-body = display-name ETX login-token ETX [password ETX]
+                                ; display-name, login-token, password defined 7.1.1 Create–User
+
+           destroy-channel-req-body = channel-name ETX
+                           ; channel-name defined 7.1.2 Create–Channel
+
+   destroy-message-req-body = display-name ETX channel-name ETX timestamp ETX
+
+
+
+Babey                    Expires 18 October 2023               [Page 42]
+
+Internet-Draft                    CHAT                        April 2023
+
+
+                                ; display-name defined 7.1.1 Create–User
+                                ; channel-name defined 7.1.2 Create–Channel
+                                ; timestamp defined 7.1.3 Create–Message
+
+   destroy-message-no-channel-res-body = “404” ETX “1” ETX [error-message ETX]
+                                ; error-message defined 6. Error Handling
+
+   destroy-message-no-user-res-body = “404” ETX “2” ETX [error-message ETX]
+
+   destroy-message-no-message-res-body = “404” ETX “3” ETX [error-message ETX]
+
+               destroy-auth-req-body = display-name ETX
+                             ; display-name defined 7.1.1 Create–User
+
+             user-changed-ping-body = display-name ETX
+                             ; display-name defined 7.1.1 Create–User
+
+           channel-changed-ping-body = channel-name ETX
+                             ; channel-name defined 7.1.2 Create–Channel
+
+Author's Address
+
+   Maxwell Babey (editor)
+   British Columbia Institute of Technology
+   3700 Willingdon Ave.
+   Burnaby British Columbia V5G 3H2
+   Canada
+   Email: mbabey3@my.bcit.ca
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Babey                    Expires 18 October 2023               [Page 43]

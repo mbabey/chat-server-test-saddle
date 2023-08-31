@@ -540,7 +540,7 @@ int update_channel_name_test_reset(struct client_state *state)
     dispatch.version   = (unsigned int) 1;
     dispatch.type      = (unsigned int) UPDATE;
     dispatch.object    = (unsigned int) CHANNEL;
-    dispatch.body      = strdup("the catpad\x03""1\x03the doghouse\x03""0\x03""0\x03""0\x03");
+    dispatch.body      = strdup("the catpad\x03""1\x03the doghouse\x03""0\x03""0\x03""0\x03""0\x03");
     dispatch.body_size = strlen(dispatch.body);
     
     if (test_dispatch(state, &dispatch) == -1)
